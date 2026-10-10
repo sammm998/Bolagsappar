@@ -1,0 +1,8 @@
+**/node_modules
+**/dist
+**/.astro
+**/.expo
+.git
+*.log
+.env
+.env.local

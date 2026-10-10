@@ -58,6 +58,12 @@ CI (`.github/workflows/ci.yml`) kör allt detta, med Postgres som tjänst, och k
    - `ANTHROPIC_API_KEY` för Skadeflödets utkast. Utan nyckel visar appen utkast utan AI. `AI_MODEL` och `AI_PER_TIMME` är valfria.
 4. Miljövariabler: `apps/platform/.env.example`, `apps/web/.env.example`, `apps/mobile/.env.example`.
 
+## Driftsättning (Railway eller annan Docker-värd)
+
+- **Plattformen:** `Dockerfile` i roten. Railway hittar den själv. Bygger bara plattformen och de paket den behöver, och serverar den med Caddy på porten i `PORT`. Sätt `VITE_SUPABASE_URL` och `VITE_SUPABASE_ANON_KEY` som variabler på tjänsten (de används när appen byggs). Utan dem körs demoläget.
+- **Hemsidan:** en egen tjänst från samma repo med variabeln `RAILWAY_DOCKERFILE_PATH=deploy/web.Dockerfile`, och `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`, `PUBLIC_APP_URL`.
+- Railpack (Railways automatiska byggare) räcker inte för ett pnpm-monorepo utan startkommando, därför Dockerfile.
+
 ## Beslut
 
 - **Ingen BankID.** Inloggning sker med en länk till e-posten. Avtal och aktivering av appar signeras med pennan: man ritar sin underskrift (med musen eller fingret). Avtalstexten låses med en SHA-256-kontrollsumma, och signaturen sparas som PNG med namn och tid. I mobilen blir dragen en PNG i `packages/core/signatur.js` eftersom det inte finns någon canvas. Kolumnen `users.bankid_subject` finns kvar men används inte.
