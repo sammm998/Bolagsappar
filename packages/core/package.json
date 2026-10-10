@@ -9,7 +9,7 @@
     ".": "./src/index.js",
     "./avrakning": "./src/avrakning/index.js",
     "./kassan": "./src/kassan/index.js",
-    "./verkstad": "./src/verkstad/engine.js",
+    "./verkstad": "./src/verkstad/index.js",
     "./filetypes": "./src/filetypes/index.js",
     "./config": "./src/config/skatter.js",
     "./format": "./src/format.js",

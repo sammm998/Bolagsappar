@@ -148,6 +148,25 @@ export function createLocalBackend(opts = {}) {
         .map(x => ({ path: x.path, id: x.path.slice(pre.length), data: clone(x.data), updated_at: x.updated_at })).sort((a, b) => a.id.localeCompare(b.id));
     },
 
+    /** Signera avtal med pennan (sign_agreement i databasen). Föraren kan bara signera sitt eget. */
+    async signAgreement(t, path, sign) {
+      const m = db.memberships.find(x => x.user_id === uid() && x.tenant_id === t); need(!!m);
+      let role;
+      if (m.role === 'forare') { if (![`avtal-${m.forare_id}`, `avtal-tp:${m.forare_id}`].includes(path)) throw new AccessError('Du kan bara signera ditt eget avtal'); role = 'anst'; }
+      else if (['agare', 'admin'].includes(m.role)) role = 'arbg';
+      else throw new AccessError('Du har inte behörighet att signera');
+      const d = db.documents.find(x => x.tenant_id === t && x.module_key === 'kassan' && x.path === path);
+      if (!d) throw new Error('Avtalet finns inte');
+      const v = d.data.versioner[d.data.versioner.length - 1];
+      if (v.sign?.[role]) throw new Error('Avtalet är redan signerat');
+      if (role === 'arbg' && !v.sign?.anst) throw new Error('Arbetstagaren signerar först');
+      if (!String(sign.namn || '').trim() || !sign.png) throw new Error('Underskrift och namn krävs');
+      v.sign = { ...(v.sign || {}), [role]: { namn: String(sign.namn).trim(), ort: sign.ort || '', tid: now().toISOString(), png: sign.png, ua: String(sign.ua || '').slice(0, 120) } };
+      d.version++; d.updated_by = uid(); d.updated_at = now().toISOString();
+      audit(t, 'signera avtal', path + ':' + role); save(); emit({ table: 'documents', tenant_id: t, module_key: 'kassan', path });
+      return clone(v);
+    },
+
     // ------------------------------------------------ perioder och publicering
     async getPeriod(t, m, p) { need(canRead(t)); return clone(db.periods.find(x => x.tenant_id === t && x.module_key === m && x.period === p) || null); },
     async listPeriods(t, m) { need(canRead(t)); return db.periods.filter(x => x.tenant_id === t && x.module_key === m).map(clone).sort((a, b) => b.period.localeCompare(a.period)); },

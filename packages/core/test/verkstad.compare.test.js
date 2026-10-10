@@ -77,3 +77,21 @@ describe('Verkstad ger samma resultat som foliering', () => {
     expect(t[0].h).toBe('Faktura 1002 är förfallen, påminnelse behövs');
   });
 });
+
+import { verkstadActions } from '../src/verkstad/actions.js';
+describe('händelser på ärenden (samma regler som i prototypen)', () => {
+  it('offert, faktura, betald och momsfaktura i rätt ordning', () => {
+    const S = verkstadState();
+    const V = createVerkstad({ S, today: () => TODAY }); const X = verkstadActions(V);
+    let a = S.arenden.get('a4');
+    a = X.godkand(a, 'Handläggare').a; expect(a.status).toBe('godkand');
+    const f = X.skapaFaktura(a); a = f.a; S.arenden.set(a.id, a);
+    expect(a.faktura.nr).toBe(1004); expect(a.faktura.forfall).toBe('2026-10-20'); expect(f.serie).toEqual({ nasta: 1005 });
+    S.fordon.set('QDE78J', { agare: 'Bilägare Fyra AB' });
+    const b = X.betald(a, '2026-10-15'); a = b.a;
+    expect(a.status).toBe('betald'); expect(a.moms.nr).toBe('M-1004'); expect(a.moms.till).toBe('Bilägare Fyra AB');
+    expect(b.msg).toContain('Momsfaktura M-1004');
+    a = X.momsSkickad(a).a; expect(a.moms.skickad).toBe(TODAY);
+    expect(a.logg.map(l => l.t)).toContain('Faktura 1004 betald 2026-10-15');
+  });
+});

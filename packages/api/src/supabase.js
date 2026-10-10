@@ -68,6 +68,7 @@ export function createSupabaseBackend(cfg) {
       return L.filter(x => !x.path.slice(pre.length).includes('/')).map(x => ({ path: x.path, id: x.path.slice(pre.length), data: x.data, updated_at: x.updated_at })).sort((a, b) => a.id.localeCompare(b.id));
     },
 
+    async signAgreement(t, path, sign) { const r = one(await sb.rpc('sign_agreement', { tenant: t, path, sign })); emit({ table: 'documents', tenant_id: t, module_key: 'kassan', path }); return r; },
     async getPeriod(t, m, p) { return one(await sb.from('periods').select('*').eq('tenant_id', t).eq('module_key', m).eq('period', p).maybeSingle()); },
     async listPeriods(t, m) { return one(await sb.from('periods').select('*').eq('tenant_id', t).eq('module_key', m).order('period', { ascending: false })); },
     async approvePeriod(t, m, p) { one(await sb.rpc('approve_period', { tenant: t, module_key: m, period: p })); emit({ table: 'periods', tenant_id: t, module_key: m }); return api.getPeriod(t, m, p); },

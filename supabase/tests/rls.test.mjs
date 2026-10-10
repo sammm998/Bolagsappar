@@ -121,3 +121,18 @@ test('hemsidans formulär: alla kan boka, ingen utom plattformen kan läsa', asy
   assert.equal((await as(U.sara, `select * from bookings`)).length, 0);
   assert.equal((await as(U.admin, `select * from bookings`)).length, 1);
 });
+
+test('signering med pennan: föraren signerar bara sitt eget avtal', async () => {
+  const v = { skapad: '2026-10-01', text: [{ h: 'Parter', p: ['x'] }], hash: 'abc', sign: {} };
+  await db.query(`insert into documents(tenant_id, module_key, path, data) values ($1, 'kassan', 'avtal-100001', $2), ($1, 'kassan', 'avtal-100002', $2)`, [T.norra, JSON.stringify({ versioner: [v] })]);
+  const sign = JSON.stringify({ namn: 'Förare A1', ort: 'Malmö', png: 'data:image/png;base64,AAA' });
+  await assert.rejects(as(U.forare, `select sign_agreement($1, 'avtal-100002', $2::jsonb)`, [T.norra, sign]), /ditt eget avtal/);
+  await assert.rejects(as(U.ahmed, `select sign_agreement($1, 'avtal-100001', $2::jsonb)`, [T.norra, sign]), /signerar först/);
+  await as(U.forare, `select sign_agreement($1, 'avtal-100001', $2::jsonb)`, [T.norra, sign]);
+  await assert.rejects(as(U.forare, `select sign_agreement($1, 'avtal-100001', $2::jsonb)`, [T.norra, sign]), /redan signerat/);
+  await as(U.ahmed, `select sign_agreement($1, 'avtal-100001', $2::jsonb)`, [T.norra, JSON.stringify({ namn: 'Ahmed Exempel', ort: 'Malmö', png: 'data:x' })]);
+  const d = await as(U.ahmed, `select data from documents where tenant_id = $1 and path = 'avtal-100001'`, [T.norra]);
+  const s = d[0].data.versioner[0].sign;
+  assert.equal(s.anst.namn, 'Förare A1'); assert.equal(s.arbg.namn, 'Ahmed Exempel');
+  await assert.rejects(as(U.lina, `select sign_agreement($1, 'avtal-100002', $2::jsonb)`, [T.norra, sign]), /behörighet/);
+});
