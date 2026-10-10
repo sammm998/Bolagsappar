@@ -149,6 +149,8 @@ export function createLocalBackend(opts = {}) {
     },
 
     /** Signera avtal med pennan (sign_agreement i databasen). Föraren kan bara signera sitt eget. */
+    /** AI körs bara på servern (edge function "ai"). Lokalt finns ingen nyckel, skärmen visar då ett utkast utan AI. */
+    async ai(t) { need(canRead(t)); const e = new Error('AI är inte påslaget lokalt'); e.code = 'ai_off'; throw e; },
     async signAgreement(t, path, sign) {
       const m = db.memberships.find(x => x.user_id === uid() && x.tenant_id === t); need(!!m);
       let role;

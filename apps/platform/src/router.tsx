@@ -62,6 +62,7 @@ const tenantRoutes = [
   r('verkstad/$tab', L(() => import('./routes/verkstad/Verkstad'), 'Verkstad'), tenant),
   r('verkstad/arende/$id', L(() => import('./routes/verkstad/Verkstad'), 'Arende'), tenant),
   r('skadeflode', L(() => import('./routes/skadeflode/Skadeflode'), 'Skadeflode'), tenant),
+  r('skadeflode/$tab', L(() => import('./routes/skadeflode/Skadeflode'), 'Skadeflode'), tenant),
   r('korjournal', L(() => import('./routes/konto/Appbutik'), 'Kommer'), tenant),
   r('lonespec', L(() => import('./routes/forare/Forare'), 'Lonespecar'), tenant),
   r('avtal', L(() => import('./routes/forare/Forare'), 'Avtal'), tenant)

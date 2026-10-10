@@ -3,7 +3,7 @@
 import * as A from '@bolagsappar/core/avrakning';
 import { ENG, packP, lonespec, computeInput, godkannLon, avUpprata, avSignera, fromShare } from '@bolagsappar/core/kassan';
 import { readText } from '@bolagsappar/core/filetypes';
-import { taxiMalmoSettings, genMonth, taxiCallerCsv, appCsv, oresundPages, sturupPages, ldlText, skattetabellText, forarlistaDemo, verkstadDemo, bankRows } from '@bolagsappar/core/testdata';
+import { taxiMalmoSettings, genMonth, taxiCallerCsv, appCsv, oresundPages, sturupPages, ldlText, skattetabellText, forarlistaDemo, verkstadDemo, skadeflodeDemo, bankRows } from '@bolagsappar/core/testdata';
 import { T, U, subId } from './seed.js';
 
 const MANADER = ['2026-04', '2026-05', '2026-06', '2026-07', '2026-08', '2026-09'];
@@ -173,8 +173,10 @@ export async function seedDemo(backend) {
     for (const f of V.forsakring) put(T.folie, 'verkstad', 'forsakring/' + f.id, f);
     for (const k of V.kostnader) put(T.folie, 'verkstad', 'kostnader/' + k.id, k);
     for (const [k, v] of Object.entries(V.inst)) put(T.folie, 'verkstad', 'installningar/' + k, v);
-    put(T.folie, 'skadeflode', 'arenden/S-201', { id: 'S-201', reg: 'QAB 12D', skadenr: 'SK-104200', forsakring: 'Försäkring Exempel A', status: 'nytt', mejl: [{ fran: 'handlaggare@forsakring-a.example', datum: '2026-10-09', amne: 'Skada SK-104200, kalkyl', text: 'Hej, vi har fått er kalkyl. Kan ni bekräfta att stötfångaren byts och inte lagas? Mvh Handläggare A' }], kalkyl: [['Stötfångare fram, byte', 4000], ['Motorhuv, foliering', 2500]], arbetsorder: [['Stötfångare fram, lagning', 3200], ['Motorhuv, foliering', 2500]], bilder: 3 });
-    put(T.folie, 'skadeflode', 'arenden/S-198', { id: 'S-198', reg: 'QDE 78J', skadenr: 'SK-103700', forsakring: 'Försäkring Exempel A', status: 'vantar', mejl: [], kalkyl: [['Helfoliering', 25000]], arbetsorder: [['Helfoliering', 25000], ['Extra folie tak', 9000]], bilder: 6 });
+    const SF = skadeflodeDemo();
+    for (const a of SF.arenden) put(T.folie, 'skadeflode', 'arenden/' + a.id, a);
+    for (const m of SF.mejl) put(T.folie, 'skadeflode', 'mejl/' + m.id, m);
+    put(T.folie, 'skadeflode', 'installningar', { foretag: SF.foretag, signatur: 'Folieringsfirman', epost: 'skador@folieringsfirman.example' });
   }
 
   // Guidestatistik för adminportalen
