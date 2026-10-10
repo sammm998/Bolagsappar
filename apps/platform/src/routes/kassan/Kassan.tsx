@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { Avatar, Banner, Button, Card, Checkbox, DropZone, EmptyState, FileRow, Icon, Kpi, Modal, Pill, Segmented, Select, SignaturePad, TextField, useToast, type SignatureHandle } from '@bolagsappar/ui';
-import { ingestLdl, recognizeKassan, importPlatt, godkannLon, packP, avText, avSaknas, avStatus, avUpprata, avSignera, avDatum, TP } from '@bolagsappar/core/kassan';
+import { ingestLdl, ldlTillManad, recognizeKassan, importPlatt, godkannLon, packP, avText, avSaknas, avStatus, avUpprata, avSignera, avDatum, TP } from '@bolagsappar/core/kassan';
 import { rawLines, writeXlsx, HJALPTEXT } from '@bolagsappar/core/filetypes';
 import { skattetabellText } from '@bolagsappar/core/testdata';
 import { kr0, kr2, krs, manad, manadAr, Manad, ymAdd, pct, initialer, dagText } from '@bolagsappar/core/format';
@@ -117,9 +117,9 @@ function Oversikt({ k, go, onHelp }: { k: Kassa; go: (t: string) => void; onHelp
   const confirm = async () => {
     const p = pending; setPending(null);
     if (p.kind === 'ldl') {
-      const nyaBilar = { ...(k.settings.bilar || {}), ...p.r.nyaBilar };
-      await save('settings', { ...k.settings, bilar: nyaBilar, ...(p.r.foretag && !k.settings.foretagLast ? { foretag: p.r.foretag } : {}) });
-      if (await save('m-' + k.period, { ...k.month, ldl: p.text, forare: k.month.forare || {}, overrides: k.month.overrides || {}, files: { ...(k.month.files || {}), ldl: `${p.name}, ${p.r.shifts.length} pass` } }, `Löneunderlaget är inläst${p.r.utanfor ? `, ${p.r.utanfor} pass från annan månad togs bort` : ''}. Lönen är uträknad.`)) go('lon');
+      const x = ldlTillManad({ text: p.text, name: p.name, r: p.r, settings: k.settings, month: k.month });
+      await save('settings', x.settings);
+      if (await save('m-' + k.period, x.month, x.msg)) go('lon');
     } else if (p.kind === 'skatt') {
       const packed = Object.fromEntries(Object.entries(p.tabeller).map(([n, v]: any) => [n, k.E.packTabell(v)]));
       await save('skatt', { ar: +k.period.slice(0, 4), tabeller: packed }, `Skattetabellerna är inlästa (${Object.keys(packed).length} tabeller).`);

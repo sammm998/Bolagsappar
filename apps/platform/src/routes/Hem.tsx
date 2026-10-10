@@ -12,7 +12,7 @@ import { usePage } from '../shell/Help';
 import { createVerkstad } from '@bolagsappar/core/verkstad';
 
 const halsning = () => { const h = new Date().getHours(); return h < 10 ? 'God morgon' : h < 17 ? 'Hej' : 'God kväll'; };
-const fornamn = (n?: string) => String(n || '').split(' ')[0];
+import { fornamn } from '@bolagsappar/core/format';
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export function Hem() {

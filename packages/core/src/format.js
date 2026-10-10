@@ -25,3 +25,4 @@ export const relativDag = (iso, nu = new Date()) => {
   const d = Math.floor((new Date(nu.toISOString().slice(0, 10)) - new Date(String(iso).slice(0, 10))) / 864e5);
   return d <= 0 ? 'i dag' : d === 1 ? 'i går' : d + ' dagar';
 };
+export const fornamn = n => String(n || '').trim().split(/\s+/)[0] || '';

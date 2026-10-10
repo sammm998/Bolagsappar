@@ -3,6 +3,7 @@
 import * as A from '@bolagsappar/core/avrakning';
 import { ENG, packP, lonespec, computeInput, godkannLon, avUpprata, avSignera, fromShare } from '@bolagsappar/core/kassan';
 import { readText } from '@bolagsappar/core/filetypes';
+import { strokesToPng } from '@bolagsappar/core/signatur';
 import { taxiMalmoSettings, genMonth, taxiCallerCsv, appCsv, oresundPages, sturupPages, ldlText, skattetabellText, forarlistaDemo, verkstadDemo, skadeflodeDemo, bankRows } from '@bolagsappar/core/testdata';
 import { T, U, subId } from './seed.js';
 
@@ -148,18 +149,18 @@ export async function seedDemo(backend) {
     put(t, 'kassan', 'm-2026-08', monthAug);
     put(t, 'kassan', 'm-2026-09', { forare: {}, overrides: {}, files: {} });
     put(t, 'kassan', 'settings', settings);
-    // Avtal: A1 och A2 signerade, A3 väntar på förarens signatur, A4 saknar avtal
+    // Avtal: A2 och A3 signerade, A1 väntar på förarens signatur (demoinloggningen Förare), A4 saknar avtal
     const ctx = { settings, cfg: ENG.DEF, central: 'Taxi Malmö AB' };
-    const pngSig = 'data:image/svg+xml;base64,' + (typeof btoa !== 'undefined' ? btoa('<svg xmlns="http://www.w3.org/2000/svg" width="450" height="140"><path d="M20 100 C 80 20, 120 140, 180 60 S 300 120, 420 50" stroke="#0E1E35" stroke-width="4" fill="none"/></svg>') : '');
+    const pngSig = strokesToPng([[[10, 50], [40, 15], [70, 60], [100, 25], [140, 55], [190, 20]]], 220, 70).png;
     const avtal = async () => {
-      for (const id of ['100001', '100002']) {
+      for (const id of ['100002', '100003']) {
         let v = await avUpprata(id, ctx); v.skapad = '2026-08-01T10:00:00Z';
         v = await avSignera(v, 'anst', { namn: settings.forare[id].namn, ort: 'Malmö', png: pngSig });
         v = await avSignera(v, 'arbg', { namn: 'Ahmed Exempel', ort: 'Malmö', png: pngSig });
         put(t, 'kassan', 'avtal-' + id, { versioner: [v] });
       }
-      const v3 = await avUpprata('100003', ctx);
-      put(t, 'kassan', 'avtal-100003', { versioner: [v3] });
+      const v1 = await avUpprata('100001', ctx); v1.skapad = '2026-10-08T09:00:00Z';
+      put(t, 'kassan', 'avtal-100001', { versioner: [v1] });
       backend._save();
     };
     avtalFn = avtal;

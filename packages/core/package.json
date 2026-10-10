@@ -15,7 +15,8 @@
     "./format": "./src/format.js",
     "./testdata": "./testdata/index.js",
     "./skadeflode": "./src/skadeflode/index.js",
-    "./admin": "./src/admin.js"
+    "./admin": "./src/admin.js",
+    "./signatur": "./src/signatur.js"
   },
   "scripts": {
     "test": "vitest run"

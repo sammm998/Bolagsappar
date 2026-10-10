@@ -104,10 +104,13 @@ describe('doc/collection som claude-shim', () => {
 });
 
 describe('demodata', () => {
-  it('Åkeri Norra har signerade avtal och en godkänd lön i augusti', async () => {
+  it('Åkeri Norra har signerade avtal, ett som väntar på föraren och en godkänd lön i augusti', async () => {
     await b.signInAsDemo(U.ahmed);
+    const a2 = await b.getDoc(subId(0), 'kassan', 'avtal-100002');
+    expect(a2.versioner[0].sign.anst.namn).toBe('Förare A2');
+    expect(a2.versioner[0].sign.anst.png).toMatch(/^data:image\/png;base64,/);
     const a1 = await b.getDoc(subId(0), 'kassan', 'avtal-100001');
-    expect(a1.versioner[0].sign.anst.namn).toBe('Förare A1');
+    expect(a1.versioner[0].sign || {}).toEqual({});
     const m = await b.getDoc(subId(0), 'kassan', 'm-2026-08');
     expect(Object.keys(m.lonekorning.rader).length).toBeGreaterThan(0);
   });

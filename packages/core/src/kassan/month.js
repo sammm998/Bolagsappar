@@ -31,6 +31,13 @@ export function ingestLdl(text, settings, ENG = DEFAULT_ENG) {
 }
 
 /** Återskapa passen från sparad LDL-text (hydrate). */
+/** Sparar ett inläst löneunderlag (resultatet av ingestLdl) i inställningar och månad. Används av webben och mobilen. */
+export function ldlTillManad({ text, name, r, settings, month }) {
+  const nySettings = { ...settings, bilar: { ...(settings.bilar || {}), ...r.nyaBilar }, ...(r.foretag && !settings.foretagLast ? { foretag: r.foretag } : {}) };
+  const nyManad = { ...month, ldl: text, forare: month.forare || {}, overrides: month.overrides || {}, files: { ...(month.files || {}), ldl: `${name}, ${r.shifts.length} pass` } };
+  return { settings: nySettings, month: nyManad, msg: `Löneunderlaget är inläst${r.utanfor ? `, ${r.utanfor} pass från annan månad togs bort` : ''}. Lönen är uträknad.` };
+}
+
 export function hydrateShifts(ldl, period, settings, ENG = DEFAULT_ENG) {
   const r = ENG.parseLDL(ldl || '');
   return applyAlias(r.shifts.filter(s => monthOf(s.a) === period), settings);
