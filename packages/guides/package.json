@@ -1,0 +1,11 @@
+{
+  "name": "@bolagsappar/guides",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Guidetexter per modul och variant. Ägaren kan skriva om texterna utan att röra koden.",
+  "main": "./src/index.js",
+  "exports": { ".": "./src/index.js", "./*": "./src/*.js" },
+  "scripts": { "test": "vitest run" },
+  "devDependencies": { "vitest": "^3.2.4" }
+}

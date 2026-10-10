@@ -188,7 +188,7 @@ export function bankRows(S, period, seed = 5) {
 
 // ---------- Åkarkassan ----------
 /** LDL från Megtax för ett åkeri. Belopp i öre. Samma format som demoData() i prototypen. */
-export function ldlText({ period = '2026-10', bilar, forare, foretag = 'EXEMPEL AB', seed = 7, dagar = null }) {
+export function ldlText({ period = '2026-10', bilar, forare, foretag = 'EXEMPEL AB', seed = 7, dagar = null, skippa = 0.12 }) {
   const R = rng(seed); const lines = [];
   const N = dagar || daysIn(period);
   const toDate = s => { const m = s.match(/(\d{4})-(\d\d)-(\d\d) (\d\d):(\d\d)/); return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]); };
@@ -197,7 +197,7 @@ export function ldlText({ period = '2026-10', bilar, forare, foretag = 'EXEMPEL 
   let rap = 5000;
   for (let d = 1; d <= N; d++) bilar.forEach(([id, reg], bi) => {
     [['05:', 11], ['16:', 11]].forEach(([h, len], pi) => {
-      if (R.next() < 0.12) return;
+      if (R.next() < skippa) return;
       const st = `${period}-${pad(d)} ${h}${pad(Math.floor(R.next() * 50))}`;
       const a = toDate(st), b = new Date(a.getTime() + (len - R.next() * 2) * 36e5);
       const kont = Math.round(R.next() * (pi ? 900 : 300)) * 100, kred = Math.round(1000 + R.next() * 2200) * 100;
@@ -232,3 +232,4 @@ export function akeriKassa(seed = 3) {
   const namn = { '100001': 'Förare A1', '100002': 'Förare A2', '100003': 'Förare A3', '100004': 'Förare A4', '100005': 'Förare A5', '100006': 'Förare A6', '100007': 'Förare A7', '100008': 'Förare A8' };
   return { bilar, forare, namn, seed };
 }
+export * from './demo.js';

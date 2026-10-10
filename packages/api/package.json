@@ -1,0 +1,21 @@
+{
+  "name": "@bolagsappar/api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Typad klient mot Supabase, och en lokal backend med samma regler för utveckling och demo. Gränssnittet doc/collection är samma som i claude-shim.js.",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": { "types": "./src/index.d.ts", "default": "./src/index.js" },
+    "./seed": "./src/seed.js",
+    "./demo": "./src/demo.js"
+  },
+  "scripts": { "test": "vitest run" },
+  "dependencies": {
+    "@bolagsappar/core": "workspace:*",
+    "@bolagsappar/modules": "workspace:*",
+    "@supabase/supabase-js": "^2.117.3"
+  },
+  "devDependencies": { "vitest": "^3.2.4" }
+}

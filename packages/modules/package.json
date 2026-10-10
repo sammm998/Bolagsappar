@@ -1,0 +1,12 @@
+{
+  "name": "@bolagsappar/modules",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Modulmanifest. Plattformen bygger menyn, appbutiken, uppladdningsstegen och guiden härifrån.",
+  "main": "./src/index.js",
+  "exports": { ".": "./src/index.js" },
+  "scripts": { "test": "vitest run" },
+  "dependencies": { "@bolagsappar/guides": "workspace:*", "@bolagsappar/core": "workspace:*" },
+  "devDependencies": { "vitest": "^3.2.4" }
+}
