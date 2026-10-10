@@ -157,6 +157,10 @@ export function createSupabaseBackend(cfg) {
 
 async function fetchFn(sb, name, body) {
   const { data, error } = await sb.functions.invoke(name, { body });
-  if (error) throw toErr(error);
+  if (error) {
+    // Funktionerna svarar { error, code } vid fel. code används av skärmarna (ai_off, rate_limited, not_granted).
+    let info = null; try { info = await error.context?.json?.(); } catch (e) { info = null; }
+    const x = new Error(info?.error || error.message); x.code = info?.code || error.code; throw x;
+  }
   return data;
 }

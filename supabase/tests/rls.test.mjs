@@ -136,3 +136,19 @@ test('signering med pennan: föraren signerar bara sitt eget avtal', async () =>
   assert.equal(s.anst.namn, 'Förare A1'); assert.equal(s.arbg.namn, 'Ahmed Exempel');
   await assert.rejects(as(U.lina, `select sign_agreement($1, 'avtal-100002', $2::jsonb)`, [T.norra, sign]), /behörighet/);
 });
+
+test('e-postlänk: första inloggningen skapar användaren, inloggning uppdateras', async () => {
+  const id = '00000000-0000-4000-8000-b00000000099';
+  await db.query(`insert into auth.users(id, email, raw_user_meta_data) values ($1, 'Ny@Exempel.example', '{"name":"Ny Exempel"}')`, [id]);
+  assert.deepEqual((await db.query('select email, name from users where id = $1', [id])).rows, [{ email: 'ny@exempel.example', name: 'Ny Exempel' }]);
+  await db.query(`update auth.users set last_sign_in_at = '2026-10-10T08:00:00Z' where id = $1`, [id]);
+  assert.ok((await db.query('select last_login_at from users where id = $1', [id])).rows[0].last_login_at);
+  assert.equal((await as(id, 'select * from tenants')).length, 0);
+});
+
+test('arbetsdagar: bara plattformen ändrar en bokning', async () => {
+  await as(U.sara, `update bookings set status = 'bokad'`);
+  assert.equal((await db.query(`select count(*)::int n from bookings where status = 'bokad'`)).rows[0].n, 0);
+  await as(U.admin, `update bookings set status = 'bokad', dag = '2026-11-14'`);
+  assert.equal((await db.query(`select count(*)::int n from bookings where status = 'bokad'`)).rows[0].n, 1);
+});
