@@ -14,7 +14,11 @@ export async function createBackend(env = {}) {
   }
   const { createLocalBackend } = await import('./local.js');
   const { seedDemo } = await import('./demo.js');
-  const b = createLocalBackend();
+  const { openIdb } = await import('./idb.js');
+  const store = await openIdb();
+  const KEY = 'lokal:v1';
+  const initial = store ? await store.get(KEY) : null;
+  const b = createLocalBackend(store ? { initial, persist: db => store.set(KEY, db) } : {});
   await seedDemo(b);
   return b;
 }

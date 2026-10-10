@@ -10,7 +10,8 @@ const uuid = () => (globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID
 export class AccessError extends Error { constructor(msg = 'Du har inte behörighet') { super(msg); this.code = 'not_granted'; } }
 
 /**
- * @param {{ storage?: Storage|null, now?: () => Date, seed?: object, persist?: boolean }} opts
+ * @param {{ storage?: Storage|null, initial?: object|null, persist?: (db: object) => void, now?: () => Date, seed?: object }} opts
+ * storage: synkron lagring (localStorage). initial + persist: asynkron lagring (IndexedDB), se createBackend.
  */
 export function createLocalBackend(opts = {}) {
   const storage = opts.storage === undefined ? (typeof localStorage !== 'undefined' ? localStorage : null) : opts.storage;
@@ -25,14 +26,18 @@ export function createLocalBackend(opts = {}) {
     return { ...s, documents: [], periods: [], shares: [], file_runs: [], guide_progress: [], audit_log: [], notifications: [], support_access: [], bookings: [], session: null, seededDemo: false };
   }
   function load() {
-    if (storage) { try { const s = storage.getItem(KEY); if (s) return JSON.parse(s); } catch (e) {} }
+    if (opts.initial) return opts.initial;
+    if (storage && !opts.persist) { try { const s = storage.getItem(KEY); if (s) return JSON.parse(s); } catch (e) {} }
     return fresh();
   }
   let saveT = null;
   function save() {
-    if (!storage) return;
+    if (!opts.persist && !storage) return;
     clearTimeout(saveT);
-    saveT = setTimeout(() => { try { storage.setItem(KEY, JSON.stringify({ ...db, session })); } catch (e) { console.warn('[lokal] kunde inte spara', e); } }, 50);
+    saveT = setTimeout(() => {
+      if (opts.persist) { opts.persist(clone({ ...db, session })); return; }
+      try { storage.setItem(KEY, JSON.stringify({ ...db, session })); } catch (e) { console.warn('[lokal] kunde inte spara', e); }
+    }, 80);
   }
   function emit(evt) { for (const l of listeners) { try { l(evt); } catch (e) { console.error(e); } } }
 
@@ -159,6 +164,15 @@ export function createLocalBackend(opts = {}) {
       need(hasRole(t, ['agare', 'admin', 'ekonomi']));
       const x = db.periods.find(y => y.tenant_id === t && y.module_key === m && y.period === p);
       if (x && x.status === 'godkand') { x.status = 'oppen'; audit(t, 'öppna igen', m + ':' + p); save(); emit({ table: 'periods', tenant_id: t, module_key: m }); }
+      return clone(x);
+    },
+    /** Rättelse: öppna en publicerad månad som en ny version. Den publicerade versionen ligger kvar hos åkarna. */
+    async reopenForCorrection(t, m, p) {
+      need(hasRole(t, ['agare', 'admin', 'ekonomi']));
+      const x = db.periods.find(y => y.tenant_id === t && y.module_key === m && y.period === p);
+      if (!x || x.status !== 'publicerad') throw new Error('Bara en publicerad månad kan rättas');
+      x.status = 'oppen'; x.version = (x.version || 1) + 1;
+      audit(t, 'rättelse påbörjad', m + ':' + p, { version: x.version }); save(); emit({ table: 'periods', tenant_id: t, module_key: m });
       return clone(x);
     },
     /** items: [{ to, kind, payload, title, body, link }] */

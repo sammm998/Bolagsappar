@@ -1,0 +1,148 @@
+/* Plattformens skal (sidan 27): meny till vänster, toppfält, innehåll. Fungerar ned till 375 punkter. */
+.pf { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); min-height: 100vh; min-height: 100dvh; }
+.pf-side { position: sticky; top: 0; height: 100vh; height: 100dvh; border-right: 1px solid var(--line); background: var(--white); display: flex; flex-direction: column; padding: 12px; gap: 4px; overflow-y: auto; }
+.pf-main { min-width: 0; display: flex; flex-direction: column; }
+.pf-top { position: sticky; top: 0; z-index: 20; height: 56px; display: flex; align-items: center; gap: 12px; padding: 0 20px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.94); backdrop-filter: blur(8px); }
+.pf-crumbs { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); min-width: 0; overflow: hidden; white-space: nowrap; }
+.pf-crumbs a { color: var(--muted); text-decoration: none; }
+.pf-crumbs a:hover { color: var(--navy); }
+.pf-crumbs b { color: var(--navy); font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+.pf-search { display: flex; align-items: center; gap: 8px; height: 34px; width: 220px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); font-size: 12.5px; background: var(--white); cursor: text; }
+.pf-search input { border: 0; outline: 0; flex: 1; min-width: 0; background: none; font-size: 12.5px; }
+.pf-content { padding: 28px 24px 64px; max-width: 1240px; width: 100%; }
+.pf-content--wide { max-width: none; }
+.pf-with-panel { display: grid; grid-template-columns: minmax(0, 1fr) 320px; min-height: calc(100vh - 56px); }
+.pf-with-panel > .pf-content { max-width: none; }
+
+/* Kontoväljaren */
+.pf-acct { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--white); cursor: pointer; text-align: left; width: 100%; }
+.pf-acct:hover { background: var(--subtle); }
+.pf-acct b { display: block; font-size: 13px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pf-acct small { display: block; font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pf-acct-menu { position: absolute; left: 12px; right: 12px; top: 64px; z-index: 30; background: var(--white); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-lg); padding: 6px; display: grid; gap: 2px; }
+.pf-acct-menu a, .pf-acct-menu button { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 8px; text-decoration: none; border: 0; background: none; width: 100%; text-align: left; cursor: pointer; font-size: 13px; }
+.pf-acct-menu a:hover, .pf-acct-menu button:hover { background: var(--subtle); }
+
+.pf-nav-sec { font-size: 11px; color: var(--muted); padding: 14px 10px 4px; font-weight: 500; }
+.pf-nav a { display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; border-radius: 8px; text-decoration: none; color: var(--navy); font-size: 13px; font-weight: 500; }
+.pf-nav a:hover { background: var(--subtle); }
+.pf-nav a[aria-current="page"], .pf-nav a.active { background: var(--green-soft); font-weight: 600; }
+.pf-nav a .cnt { margin-left: auto; font-size: 11px; color: var(--muted); font-family: var(--font-num); }
+.pf-nav a .cnt--new { font-family: var(--font); }
+.pf-side-foot { margin-top: auto; display: grid; gap: 6px; padding-top: 12px; }
+.pf-powered { display: flex; align-items: center; gap: 6px; font-size: 10.5px; color: var(--muted); padding: 4px 10px; }
+
+/* Rubriker i innehållet */
+.pf-h1 { font-size: 24px; font-weight: 600; letter-spacing: -.02em; }
+.pf-h1--period { font-size: 24px; }
+.pf-eyebrow { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+.pf-lead { color: var(--text-2); margin: 4px 0 0; font-size: 13.5px; }
+.pf-head { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.pf-head .ba-grow { min-width: 1px; }
+.pf-section { margin-top: 20px; }
+.pf-section-h { display: flex; align-items: center; gap: 12px; margin: 0 0 10px; }
+.pf-section-h h2 { font-size: 15px; }
+
+/* Nästa steg (det viktigaste just nu) */
+.pf-next { display: flex; align-items: center; gap: 16px; padding: 18px 20px; border-radius: var(--radius); background: var(--navy); color: #fff; }
+.pf-next--green { background: var(--green); }
+.pf-next__icon { width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,.1); display: grid; place-items: center; flex: none; }
+.pf-next small { display: block; font-size: 11.5px; opacity: .8; }
+.pf-next strong { display: block; font-size: 16.5px; font-weight: 600; letter-spacing: -.01em; margin: 2px 0; }
+.pf-next .ba-btn { background: #fff; color: var(--navy); border-color: #fff; }
+@media (max-width: 700px) { .pf-next { flex-wrap: wrap; } .pf-next strong { font-size: 15px; } }
+
+/* Mina appar */
+.pf-apps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.pf-app { display: grid; gap: 4px; padding: 14px; border-radius: 10px; background: var(--subtle); text-decoration: none; border: 1px solid transparent; min-height: 100px; align-content: start; }
+.pf-app:hover { border-color: var(--line); background: #F2F4F6; }
+.pf-app--ghost { background: var(--white); border: 1px solid var(--line); }
+.pf-app b { font-size: 13px; margin-top: 8px; }
+.pf-app small { font-size: 11.5px; color: var(--muted); }
+
+/* Hjälppanel (guide till höger) */
+.pf-panel { border-left: 1px solid var(--line); background: var(--white); position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; }
+.pf-panel__head { background: var(--navy); color: #fff; padding: 18px 18px 20px; }
+.pf-panel__head h2 { font-size: 17px; margin-top: 6px; }
+.pf-panel__head p { margin: 6px 0 0; font-size: 12.5px; opacity: .85; }
+.pf-panel__body { padding: 16px 18px; display: grid; gap: 14px; }
+.pf-panel ol.pf-help-steps { list-style: none; padding: 0; margin: 0; }
+.pf-help-steps li { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.pf-help-steps .n { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; flex: none; border: 1px solid var(--line); }
+.pf-help-steps .n.ok { background: var(--green); color: #fff; border-color: var(--green); }
+.pf-help-steps b { display: block; font-size: 12.5px; }
+.pf-help-steps small { display: block; font-size: 11.5px; color: var(--muted); }
+.pf-where { background: var(--subtle); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+.pf-where h3 { font-size: 13.5px; margin-bottom: 6px; }
+.pf-where ol { margin: 6px 0 10px; padding-left: 18px; font-size: 12px; display: grid; gap: 3px; }
+.pf-drawer-close { display: none; }
+@media (max-width: 1180px) {
+  .pf-with-panel { grid-template-columns: minmax(0, 1fr); }
+  .pf-panel { position: fixed; right: 0; top: 0; height: 100vh; width: min(360px, 92vw); z-index: 40; box-shadow: var(--shadow-lg); }
+  .pf-drawer-close { display: inline-flex; }
+}
+
+/* Välkomstguide */
+.pf-welcome { background: var(--navy); color: #fff; border-radius: 16px 16px 0 0; padding: 26px 28px 24px; }
+.pf-welcome small { font-size: 11.5px; opacity: .8; }
+.pf-welcome h2 { font-size: 22px; margin: 8px 0 8px; }
+.pf-welcome p { margin: 0; font-size: 13.5px; opacity: .92; max-width: 56ch; }
+.pf-welcome__steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 20px; }
+.pf-welcome__steps div { background: var(--navy-2); border-radius: 10px; padding: 12px; }
+.pf-welcome__steps span { width: 26px; height: 26px; border-radius: 6px; background: #fff; color: var(--navy); display: grid; place-items: center; margin-bottom: 8px; }
+.pf-welcome__steps div:last-child span { background: var(--green-mid); }
+.pf-welcome__steps b { display: block; font-size: 12.5px; }
+.pf-welcome__steps small { font-size: 11px; opacity: .75; }
+.pf-welcome-foot { background: #fff; border-radius: 0 0 16px 16px; padding: 16px 28px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pf-dots { display: flex; gap: 6px; }
+.pf-dots i { width: 6px; height: 6px; border-radius: 3px; background: #D7DCE3; }
+.pf-dots i.on { width: 20px; background: var(--navy); }
+@media (max-width: 640px) { .pf-welcome__steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } .pf-welcome { padding: 20px; } .pf-welcome-foot { padding: 14px 20px; } }
+
+/* Inloggning (sidan 26) */
+.pf-login { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; min-height: 100dvh; }
+.pf-login__left { padding: 40px 64px; display: flex; flex-direction: column; }
+.pf-login__form { margin: auto 0; width: min(390px, 100%); display: grid; gap: 14px; }
+.pf-login__right { background: var(--navy); color: #fff; display: flex; align-items: center; padding: 40px 64px; }
+.pf-or { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 11.5px; }
+.pf-or::before, .pf-or::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.pf-pick { display: grid; gap: 10px; width: min(340px, 100%); }
+.pf-pick a, .pf-pick button { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--navy-2); color: #fff; text-decoration: none; border: 0; cursor: pointer; text-align: left; width: 100%; }
+.pf-pick a:first-child, .pf-pick button:first-child { background: #fff; color: var(--navy); }
+.pf-pick b { display: block; font-size: 13.5px; }
+.pf-pick small { display: block; font-size: 11.5px; opacity: .75; }
+@media (max-width: 900px) { .pf-login { grid-template-columns: 1fr; } .pf-login__right { padding: 32px 20px; } .pf-login__left { padding: 24px 20px; } }
+
+/* Mobil: menyn blir en låda */
+.pf-burger { display: none; }
+@media (max-width: 900px) {
+  .pf { grid-template-columns: minmax(0, 1fr); }
+  .pf-side { position: fixed; inset: 0 auto 0 0; width: min(300px, 86vw); z-index: 45; transform: translateX(-102%); transition: transform .2s; box-shadow: var(--shadow-lg); }
+  .pf-side--open { transform: none; }
+  .pf-burger { display: inline-flex; }
+  .pf-search { display: none; }
+  .pf-top { padding: 0 12px; }
+  .pf-content { padding: 20px 16px 56px; }
+  .pf-scrim { position: fixed; inset: 0; background: rgba(14,30,53,.35); z-index: 44; }
+}
+
+/* Utskrift */
+@media print { .pf-side, .pf-top, .pf-panel, .no-print { display: none !important; } .pf { display: block; } .pf-content { padding: 0; } }
+
+/* Diverse */
+.pf-list-plain { list-style: none; padding: 0; margin: 0; }
+.pf-kv { display: grid; grid-template-columns: 1fr auto; gap: 0; }
+.pf-kv > div { display: contents; }
+.pf-kv dt, .pf-kv dd { padding: 11px 0; border-bottom: 1px solid var(--line); margin: 0; font-size: 13px; }
+.pf-kv dd { text-align: right; font-family: var(--font-num); white-space: nowrap; }
+.pf-kv .tot dt, .pf-kv .tot dd { font-weight: 700; font-size: 14.5px; border-bottom: 0; padding-top: 14px; }
+.pf-lock { display: flex; gap: 12px; align-items: center; padding: 14px 18px; background: var(--subtle); border-radius: 12px; font-size: 12.5px; }
+.pf-two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.pf-sidebar-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 16px; align-items: start; }
+.pf-sidebar-layout--right { grid-template-columns: minmax(0, 1fr) 340px; }
+@media (max-width: 1000px) { .pf-two, .pf-sidebar-layout, .pf-sidebar-layout--right { grid-template-columns: minmax(0, 1fr); } }
+.pf-filters { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 16px 0 12px; }
+.pf-searchbox { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; min-width: 220px; flex: 0 1 280px; margin-left: auto; }
+.pf-searchbox input { border: 0; outline: 0; flex: 1; min-width: 0; font-size: 13px; }
+@media (max-width: 700px) { .pf-searchbox { margin-left: 0; flex: 1 1 100%; } }
+.pf-marker { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--green); color: #fff; font-size: 11px; font-weight: 700; }

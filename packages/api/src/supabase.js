@@ -72,6 +72,13 @@ export function createSupabaseBackend(cfg) {
     async listPeriods(t, m) { return one(await sb.from('periods').select('*').eq('tenant_id', t).eq('module_key', m).order('period', { ascending: false })); },
     async approvePeriod(t, m, p) { one(await sb.rpc('approve_period', { tenant: t, module_key: m, period: p })); emit({ table: 'periods', tenant_id: t, module_key: m }); return api.getPeriod(t, m, p); },
     async reopenPeriod(t, m, p) { one(await sb.from('periods').update({ status: 'oppen' }).eq('tenant_id', t).eq('module_key', m).eq('period', p).eq('status', 'godkand')); emit({ table: 'periods', tenant_id: t, module_key: m }); return api.getPeriod(t, m, p); },
+    async reopenForCorrection(t, m, p) {
+      const cur = await api.getPeriod(t, m, p);
+      if (!cur || cur.status !== 'publicerad') throw new Error('Bara en publicerad månad kan rättas');
+      one(await sb.from('periods').update({ status: 'oppen', version: cur.version + 1 }).eq('tenant_id', t).eq('module_key', m).eq('period', p).eq('status', 'publicerad'));
+      await api.log(t, 'rättelse påbörjad', m + ':' + p, { version: cur.version + 1 });
+      emit({ table: 'periods', tenant_id: t, module_key: m }); return api.getPeriod(t, m, p);
+    },
     async publish(t, m, p, items, reason = null) {
       const n = one(await sb.rpc('publish_period', { from_tenant: t, module_key: m, period: p, items, reason }));
       // Mejl skickas av Edge Function publish (nyckeln finns bara på servern)

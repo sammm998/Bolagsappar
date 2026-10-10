@@ -1,0 +1,30 @@
+/* packages/ui/tokens.css. Två ytor, en familj: hemsidan i cream, plattformen i vitt. */
+:root {
+  --navy: #0E1E35; --navy-2: #1B2C47; --navy-3: #26385A;
+  --green: #1F4D3A; --green-2: #173B2C; --green-soft: #E7F0EA; --green-mid: #A9C9B6;
+  --cream: #FBF8F2; --cream-2: #F4EEE3; --cream-line: #E8DFCF;
+  --white: #FFFFFF; --line: #E7E9ED; --subtle: #F7F8F9; --muted: #6B7385; --text: #0E1E35; --text-2: #3B465A;
+
+  /* Status (samma i båda ytorna). Grönt som knapp och grönt som status är samma ton. */
+  --ok-bg: #E7F0EA; --ok: #1F4D3A;
+  --warn-bg: #FBF0D9; --warn: #8A5A00; --warn-dot: #D69A1F;
+  --bad-bg: #FBE6E2; --bad: #A33A22; --bad-dot: #C9452B;
+  --info-bg: #E8EEF8; --info: #2A4A7F; --info-dot: #3D64A8;
+  --draft-bg: #EEF0F3; --draft: #5B6475;
+
+  /* App-toner för ikonrutor */
+  --tone-green: #E7F0EA; --tone-amber: #F6EBD6; --tone-blue: #E8EEF8; --tone-red: #F8E5E0;
+
+  --radius-sm: 8px; --radius: 12px; --radius-lg: 20px; --radius-pill: 999px;
+  --space: 4px;
+  --shadow-sm: 0 1px 2px rgba(14, 30, 53, .06);
+  --shadow: 0 1px 2px rgba(14, 30, 53, .05), 0 8px 24px rgba(14, 30, 53, .06);
+  --shadow-lg: 0 24px 64px rgba(14, 30, 53, .18);
+
+  --font-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --font: "Geist Variable", "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-num: "Geist Mono Variable", "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --focus: 0 0 0 3px rgba(31, 77, 58, .28);
+  --sidebar: 248px;
+}

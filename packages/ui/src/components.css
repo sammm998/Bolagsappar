@@ -1,0 +1,244 @@
+/* Komponenter i plattformen (sidan 15). Vitt, raka linjer, tydlig hierarki.
+   Marinblått bär struktur och text. Grönt används bara för nästa steg och för det som är klart. */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; font-family: var(--font); font-size: 14px; line-height: 1.45; color: var(--text); background: var(--white); -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: inherit; }
+:focus-visible { outline: none; box-shadow: var(--focus); border-radius: 6px; }
+.num, .ba-num { font-family: var(--font-num); font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.serif { font-family: var(--font-display); font-weight: 400; letter-spacing: -.01em; }
+.muted { color: var(--muted); }
+.small { font-size: 12.5px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: -.015em; }
+
+/* ---------- Knappar: en grön knapp per skärm ---------- */
+.ba-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--white); color: var(--navy); font-weight: 600; font-size: 13.5px; cursor: pointer; white-space: nowrap; text-decoration: none; transition: background .12s, border-color .12s, transform .05s; }
+.ba-btn:hover { background: var(--subtle); }
+.ba-btn:active { transform: translateY(1px); }
+.ba-btn[disabled], .ba-btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; transform: none; }
+.ba-btn--primary { background: var(--green); border-color: var(--green); color: #fff; }
+.ba-btn--primary:hover { background: var(--green-2); }
+.ba-btn--dark { background: var(--navy); border-color: var(--navy); color: #fff; }
+.ba-btn--dark:hover { background: var(--navy-2); }
+.ba-btn--soft { background: var(--green-soft); border-color: transparent; color: var(--green); }
+.ba-btn--soft:hover { background: #d9e8de; }
+.ba-btn--link { border: 0; background: none; padding: 0 4px; height: auto; color: var(--green); }
+.ba-btn--link:hover { background: none; text-decoration: underline; }
+.ba-btn--danger { color: var(--bad); }
+.ba-btn--sm { height: 32px; padding: 0 12px; font-size: 12.5px; }
+.ba-btn--lg { height: 48px; padding: 0 22px; font-size: 15px; }
+.ba-btn--block { width: 100%; }
+.ba-btn--icon { width: 36px; padding: 0; }
+@media (max-width: 700px) { .ba-btn { height: 44px; } .ba-btn--sm { height: 36px; } }
+
+/* ---------- Fält ---------- */
+.ba-field { display: grid; gap: 6px; }
+.ba-field > label, .ba-label { font-size: 12.5px; font-weight: 600; color: var(--navy); }
+.ba-field .ba-hint { font-size: 12px; color: var(--muted); }
+.ba-field .ba-err { font-size: 12px; color: var(--bad); }
+.ba-input, .ba-select, .ba-textarea { width: 100%; height: 44px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--white); color: var(--navy); font-size: 14px; }
+.ba-textarea { height: auto; min-height: 84px; padding: 10px 12px; resize: vertical; }
+.ba-input::placeholder, .ba-textarea::placeholder { color: #9AA1AE; }
+.ba-input:focus, .ba-select:focus, .ba-textarea:focus { outline: none; border-color: var(--green); box-shadow: var(--focus); }
+.ba-input.num { font-family: var(--font-num); }
+.ba-check { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; }
+.ba-check input { width: 18px; height: 18px; accent-color: var(--green); }
+
+/* ---------- Kort och paneler ---------- */
+.ba-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); }
+.ba-card--pad { padding: 18px 20px; }
+.ba-card__head { display: flex; align-items: center; gap: 12px; padding: 16px 20px 0; }
+.ba-card__head h2, .ba-card__head h3 { font-size: 15px; }
+.ba-card__body { padding: 16px 20px 20px; }
+.ba-card--subtle { background: var(--subtle); border-color: transparent; }
+.ba-card--navy { background: var(--navy); border-color: var(--navy); color: #fff; }
+.ba-card--green { background: var(--green); border-color: var(--green); color: #fff; }
+.ba-grow { flex: 1; }
+.ba-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ba-stack { display: grid; gap: 12px; }
+.ba-grid { display: grid; gap: 16px; }
+.ba-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ba-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.ba-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 1100px) { .ba-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 800px) { .ba-grid--2, .ba-grid--3 { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 520px) { .ba-grid--4 { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- Status ---------- */
+.ba-pill { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 9px; border-radius: var(--radius-pill); font-size: 11.5px; font-weight: 600; white-space: nowrap; background: var(--draft-bg); color: var(--draft); }
+.ba-pill i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
+.ba-pill--ok { background: var(--ok-bg); color: var(--ok); }
+.ba-pill--warn { background: var(--warn-bg); color: var(--warn); }
+.ba-pill--warn i { background: var(--warn-dot); }
+.ba-pill--bad { background: var(--bad-bg); color: var(--bad); }
+.ba-pill--bad i { background: var(--bad-dot); }
+.ba-pill--info { background: var(--info-bg); color: var(--info); }
+.ba-pill--info i { background: var(--info-dot); }
+.ba-pill--navy { background: var(--navy); color: #fff; }
+.ba-pill--line { background: var(--white); border: 1px solid var(--line); color: var(--navy); }
+.ba-tag { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: var(--radius-pill); background: var(--subtle); border: 1px solid var(--line); font-size: 11.5px; font-weight: 600; color: var(--navy); white-space: nowrap; }
+.ba-tag--soft { background: var(--green-soft); border-color: transparent; color: var(--green); }
+
+/* ---------- Stegvisare ---------- */
+.ba-steps { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0; }
+.ba-step { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); font-weight: 500; text-decoration: none; }
+.ba-step__n { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 11.5px; font-weight: 700; border: 1px solid var(--line); background: var(--white); color: var(--muted); }
+.ba-step--done .ba-step__n { background: var(--green); border-color: var(--green); color: #fff; }
+.ba-step--done { color: var(--navy); }
+.ba-step--current .ba-step__n { background: var(--navy); border-color: var(--navy); color: #fff; }
+.ba-step--current { color: var(--navy); font-weight: 600; }
+.ba-step__sep { width: 18px; height: 1px; background: var(--line); }
+a.ba-step:hover { color: var(--navy); }
+
+/* ---------- Filrad ---------- */
+.ba-file { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--white); min-height: 64px; }
+.ba-file__icon { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--green-soft); color: var(--green); }
+.ba-file--missing .ba-file__icon { background: var(--warn-bg); color: var(--warn); }
+.ba-file--error .ba-file__icon { background: var(--bad-bg); color: var(--bad); }
+.ba-file__src { font-size: 11.5px; color: var(--muted); }
+.ba-file__title { font-weight: 600; font-size: 13.5px; }
+.ba-file__sub { font-size: 12px; color: var(--muted); }
+.ba-file__help { font-size: 12px; font-weight: 600; color: var(--navy); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+
+/* ---------- Dra in ---------- */
+.ba-drop { display: flex; align-items: center; gap: 14px; padding: 18px 20px; border: 1.5px dashed #C9CED6; border-radius: var(--radius); background: var(--subtle); transition: background .12s, border-color .12s; }
+.ba-drop--over { border-color: var(--green); background: var(--green-soft); }
+.ba-drop__icon { width: 40px; height: 40px; border-radius: 10px; background: var(--white); border: 1px solid var(--line); display: grid; place-items: center; flex: none; }
+.ba-drop h3 { font-size: 14.5px; }
+.ba-drop p { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
+@media (max-width: 700px) { .ba-drop { flex-wrap: wrap; } }
+
+/* ---------- Nyckeltal ---------- */
+.ba-kpi { padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--white); display: grid; gap: 4px; align-content: start; min-width: 0; }
+.ba-kpi__label { font-size: 12px; color: var(--text-2); }
+.ba-kpi__value { font-size: 26px; font-weight: 600; letter-spacing: -.02em; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ba-kpi__sub { font-size: 12px; color: var(--muted); }
+.ba-kpi__sub--warn { color: var(--warn); }
+.ba-kpi__sub--ok { color: var(--green); }
+.ba-bars { display: flex; align-items: flex-end; gap: 8px; height: 56px; margin-top: 10px; }
+.ba-bars span { flex: 1; border-radius: 6px 6px 3px 3px; background: #E9EDF4; min-height: 8px; }
+.ba-bars span.on { background: var(--green); }
+.ba-bars--tall { height: 90px; }
+.ba-bars-lab { display: flex; gap: 8px; margin-top: 6px; }
+.ba-bars-lab span { flex: 1; font-size: 11px; color: var(--muted); }
+
+/* ---------- Tomt läge ---------- */
+.ba-empty { display: grid; justify-items: center; text-align: center; gap: 8px; padding: 28px 16px; }
+.ba-empty__icon { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; background: var(--green-soft); color: var(--green); margin-bottom: 4px; }
+.ba-empty h3 { font-size: 14.5px; }
+.ba-empty p { margin: 0; color: var(--muted); font-size: 13px; max-width: 46ch; }
+
+/* ---------- Avvikelse ---------- */
+.ba-dev { border-radius: var(--radius); padding: 14px 16px; background: var(--bad-bg); color: var(--bad); }
+.ba-dev--warn { background: var(--warn-bg); color: var(--warn); }
+.ba-dev--info { background: var(--info-bg); color: var(--info); }
+.ba-dev--done { background: var(--subtle); color: var(--muted); }
+.ba-dev__who { font-size: 11.5px; opacity: .9; }
+.ba-dev__title { font-weight: 700; font-size: 13.5px; margin: 2px 0; }
+.ba-dev__text { font-size: 12.5px; color: inherit; opacity: .9; }
+.ba-dev__acts { display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap; }
+.ba-dev__acts button { background: none; border: 0; padding: 0; color: inherit; font-weight: 700; font-size: 12.5px; cursor: pointer; }
+
+/* ---------- Brytare med förklaring ---------- */
+.ba-toggle-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.ba-appicon { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; flex: none; color: var(--navy); background: var(--tone-blue); }
+.ba-appicon--green { background: var(--tone-green); color: var(--green); }
+.ba-appicon--amber { background: var(--tone-amber); color: #7A5A12; }
+.ba-appicon--blue { background: var(--tone-blue); color: var(--info); }
+.ba-appicon--red { background: var(--tone-red); color: var(--bad); }
+.ba-appicon--lg { width: 44px; height: 44px; border-radius: 12px; }
+.ba-appicon--sm { width: 24px; height: 24px; border-radius: 6px; }
+.ba-switch { position: relative; width: 40px; height: 24px; border-radius: 12px; border: 1.5px solid #C9CED6; background: var(--subtle); cursor: pointer; flex: none; padding: 0; transition: background .15s; }
+.ba-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 17px; height: 17px; border-radius: 50%; background: var(--white); box-shadow: var(--shadow-sm); transition: transform .15s; }
+.ba-switch[aria-checked="true"] { background: var(--green); border-color: var(--green); }
+.ba-switch[aria-checked="true"]::after { transform: translateX(16px); }
+
+/* ---------- Segment (Ingår, Tillval, Av) ---------- */
+.ba-seg { display: inline-flex; padding: 3px; gap: 2px; border-radius: 10px; background: var(--subtle); border: 1px solid var(--line); }
+.ba-seg button { border: 0; background: none; height: 30px; padding: 0 12px; border-radius: 7px; font-size: 12.5px; font-weight: 600; color: var(--muted); cursor: pointer; }
+.ba-seg button[aria-pressed="true"] { background: var(--white); color: var(--navy); box-shadow: var(--shadow-sm); }
+
+/* ---------- Flikar ---------- */
+.ba-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+.ba-tabs::-webkit-scrollbar { display: none; }
+.ba-tabs a, .ba-tabs button { flex: none; border: 0; background: none; padding: 12px 10px 11px; font-size: 13px; font-weight: 500; color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1px; cursor: pointer; white-space: nowrap; }
+.ba-tabs a:hover, .ba-tabs button:hover { color: var(--navy); }
+.ba-tabs [aria-current="page"], .ba-tabs [aria-selected="true"] { color: var(--navy); font-weight: 600; border-bottom-color: var(--navy); }
+.ba-tabs .cnt { margin-left: 6px; font-size: 11px; padding: 1px 6px; border-radius: 9px; background: var(--bad-bg); color: var(--bad); }
+
+/* ---------- Tabell ---------- */
+.ba-table-wrap { border: 1px solid var(--line); border-radius: var(--radius); overflow-x: auto; background: var(--white); }
+.ba-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ba-table th { text-align: left; font-weight: 500; font-size: 12px; color: var(--muted); background: var(--subtle); padding: 10px 14px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.ba-table td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.ba-table tr:last-child td { border-bottom: 0; }
+.ba-table .n, .ba-table th.n { text-align: right; font-family: var(--font-num); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ba-table th.n { font-family: var(--font); }
+.ba-table tbody tr.click { cursor: pointer; }
+.ba-table tbody tr.click:hover td { background: #FBFBFC; }
+.ba-table tr.hl td { background: #FFF9F7; }
+.ba-table tfoot td { font-weight: 700; background: var(--subtle); }
+.ba-table .b { font-weight: 600; }
+.ba-table td.strong { font-weight: 700; }
+.ba-who { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.ba-who b { display: block; font-weight: 600; }
+.ba-who small { display: block; font-size: 11.5px; color: var(--muted); }
+
+/* ---------- Avatar och logga ---------- */
+.ba-av { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; font-size: 11.5px; font-weight: 700; flex: none; background: var(--subtle); color: var(--navy); border: 1px solid var(--line); }
+.ba-av--round { border-radius: 50%; background: var(--info-bg); color: var(--navy); border: 0; }
+.ba-av--lg { width: 40px; height: 40px; font-size: 13px; }
+.ba-av--sm { width: 26px; height: 26px; font-size: 10.5px; border-radius: 7px; }
+
+/* ---------- Modal och sidopanel ---------- */
+.ba-overlay { position: fixed; inset: 0; background: rgba(14, 30, 53, .45); display: grid; place-items: center; z-index: 50; padding: 16px; animation: ba-fade .15s; }
+.ba-modal { width: min(580px, 100%); max-height: calc(100vh - 32px); overflow: auto; background: var(--white); border-radius: 16px; box-shadow: var(--shadow-lg); }
+.ba-modal--wide { width: min(860px, 100%); }
+.ba-modal__head { padding: 22px 24px 0; }
+.ba-modal__body { padding: 16px 24px; }
+.ba-modal__foot { padding: 16px 24px 22px; display: flex; gap: 10px; justify-content: flex-end; align-items: center; flex-wrap: wrap; border-top: 1px solid var(--line); }
+@keyframes ba-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---------- Toast ---------- */
+.ba-toasts { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 60; display: grid; gap: 8px; width: min(520px, calc(100% - 32px)); }
+.ba-toast { background: var(--navy); color: #fff; padding: 12px 16px; border-radius: 10px; box-shadow: var(--shadow-lg); font-size: 13.5px; display: flex; gap: 10px; align-items: center; }
+.ba-toast--bad { background: var(--bad); }
+.ba-toast button { margin-left: auto; color: #fff; background: rgba(255,255,255,.15); border: 0; border-radius: 6px; padding: 4px 8px; font-weight: 600; cursor: pointer; }
+
+/* ---------- Progress ---------- */
+.ba-progress { height: 6px; border-radius: 3px; background: #E9EDF4; overflow: hidden; }
+.ba-progress > span { display: block; height: 100%; background: var(--green); border-radius: 3px; transition: width .3s; }
+.ba-progress--on-navy { background: rgba(255,255,255,.18); }
+.ba-progress--on-navy > span { background: var(--green-mid); }
+
+/* ---------- Checklista (kom igång) ---------- */
+.ba-check-list { list-style: none; padding: 0; margin: 0; }
+.ba-check-list li { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-top: 1px solid var(--line); }
+.ba-check-list li:first-child { border-top: 0; }
+.ba-check-list .dot { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid #C9CED6; display: grid; place-items: center; flex: none; background: var(--white); }
+.ba-check-list .done .dot { background: var(--green); border-color: var(--green); color: #fff; }
+.ba-check-list .done .t { text-decoration: line-through; color: var(--muted); }
+.ba-check-list .t { font-weight: 600; font-size: 13px; }
+.ba-check-list .s { font-size: 11.5px; color: var(--muted); }
+.ba-check-list a { text-decoration: none; display: flex; gap: 12px; align-items: center; flex: 1; }
+
+/* ---------- Pennan (signering) ---------- */
+.ba-sig { border: 1.5px dashed #C9CED6; border-radius: var(--radius); background: var(--subtle); padding: 10px; }
+.ba-sig canvas { width: 100%; height: 140px; display: block; background: var(--white); border-radius: 8px; touch-action: none; cursor: crosshair; }
+.ba-sig__line { font-size: 11.5px; color: var(--muted); text-align: center; margin-top: 6px; }
+
+/* ---------- Banderoll (exempelläge) ---------- */
+.ba-banner { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; background: #FFF4CC; color: #6B4E00; font-size: 13px; font-weight: 500; }
+.ba-banner b { font-weight: 700; }
+.ba-banner--info { background: var(--info-bg); color: var(--info); }
+
+/* ---------- Kodruta (siffror) ---------- */
+.ba-kbd { font-family: var(--font-num); font-size: 10.5px; padding: 1px 5px; border: 1px solid var(--line); border-radius: 4px; color: var(--muted); }
+
+/* ---------- Skelett vid laddning ---------- */
+.ba-skel { background: linear-gradient(90deg, #F1F3F6 25%, #E8EBEF 37%, #F1F3F6 63%); background-size: 400% 100%; animation: ba-skel 1.4s ease infinite; border-radius: 8px; }
+@keyframes ba-skel { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }

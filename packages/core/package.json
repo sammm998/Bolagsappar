@@ -5,9 +5,8 @@
   "type": "module",
   "description": "Beräkningsmotorer från prototyperna (Avräkning, Åkarkassan, Verkstad) och filigenkänning.",
   "main": "./src/index.js",
-  "types": "./src/index.d.ts",
   "exports": {
-    ".": { "types": "./src/index.d.ts", "default": "./src/index.js" },
+    ".": "./src/index.js",
     "./avrakning": "./src/avrakning/index.js",
     "./kassan": "./src/kassan/index.js",
     "./verkstad": "./src/verkstad/engine.js",

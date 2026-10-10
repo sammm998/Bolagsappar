@@ -3,7 +3,7 @@
 import * as A from '@bolagsappar/core/avrakning';
 import { ENG, packP, lonespec, computeInput, godkannLon, avUpprata, avSignera, fromShare } from '@bolagsappar/core/kassan';
 import { readText } from '@bolagsappar/core/filetypes';
-import { taxiMalmoSettings, genMonth, taxiCallerCsv, appCsv, oresundPages, sturupPages, ldlText, skattetabellText, forarlistaDemo, verkstadDemo } from '@bolagsappar/core/testdata';
+import { taxiMalmoSettings, genMonth, taxiCallerCsv, appCsv, oresundPages, sturupPages, ldlText, skattetabellText, forarlistaDemo, verkstadDemo, bankRows } from '@bolagsappar/core/testdata';
 import { T, U, subId } from './seed.js';
 
 const MANADER = ['2026-04', '2026-05', '2026-06', '2026-07', '2026-08', '2026-09'];
@@ -80,6 +80,9 @@ export async function seedDemo(backend) {
     const p = '2026-10';
     const M = genMonth(S, p, 200);
     const full = monthFromFiles(S, M);
+    // Visma-facit är inmatat med förskotten från kontoutdraget (exempelfilen i demon)
+    const [f0, f1] = A.defaultRange(p);
+    full.D.forskottRad = A.saveForskott(A.suggestForskott(A.parseBankRows(bankRows(S, p)), S, full.D, {}), f0, f1, {}).forskottRad;
     const Rf = A.computeMonth(S, full.D, months);
     const part = monthFromFiles(S, M, { utan: ['bamb'] });
     const D = part.D;
