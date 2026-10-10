@@ -1,0 +1,537 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Fastighetsstrategi 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --border: #E2DDD6;
+    --text-primary: #1A2332;
+    --text-secondary: #5A6478;
+    --text-muted: #8A95A3;
+    --accent: #C4922A;
+    --accent-light: #F5EDD9;
+    --positive: #2A7A4B;
+    --positive-light: #EAF5EF;
+    --warning: #B85C1A;
+    --warning-light: #FBF0E8;
+    --navy: #1A2332;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111827;
+      --surface: #1E2A3A;
+      --border: #2D3A4A;
+      --text-primary: #F0EDE8;
+      --text-secondary: #9AAABB;
+      --text-muted: #6A7A8A;
+      --accent: #D4A83A;
+      --accent-light: #2A2214;
+      --positive: #3A9A60;
+      --positive-light: #0F2A1A;
+      --warning: #D47A3A;
+      --warning-light: #2A1A0A;
+      --navy: #E8E4DC;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #111827;
+    --surface: #1E2A3A;
+    --border: #2D3A4A;
+    --text-primary: #F0EDE8;
+    --text-secondary: #9AAABB;
+    --text-muted: #6A7A8A;
+    --accent: #D4A83A;
+    --accent-light: #2A2214;
+    --positive: #3A9A60;
+    --positive-light: #0F2A1A;
+    --warning: #D47A3A;
+    --warning-light: #2A1A0A;
+    --navy: #E8E4DC;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    padding-inline: 24px;
+    padding-block: 48px;
+  }
+
+  .doc {
+    max-width: 740px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .doc-header {
+    border-top: 3px solid var(--accent);
+    padding-top: 28px;
+    margin-bottom: 40px;
+  }
+
+  .doc-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(26px, 5vw, 36px);
+    font-weight: 700;
+    color: var(--text-primary);
+    text-wrap: balance;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+
+  .doc-meta {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+
+  /* Sections */
+  section {
+    margin-bottom: 36px;
+  }
+
+  h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h3 {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  p {
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    max-width: 65ch;
+  }
+
+  /* Stat tiles */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px 18px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+
+  .stat-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+
+  .stat.accent {
+    background: var(--accent-light);
+    border-color: var(--accent);
+  }
+
+  .stat.accent .stat-value { color: var(--accent); }
+
+  .stat.positive {
+    background: var(--positive-light);
+    border-color: var(--positive);
+  }
+
+  .stat.positive .stat-value { color: var(--positive); }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 8px 12px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  td:last-child, th:last-child {
+    text-align: right;
+  }
+
+  tr.total td {
+    font-weight: 600;
+    color: var(--text-primary);
+    border-top: 2px solid var(--border);
+    border-bottom: none;
+  }
+
+  tr.positive td { color: var(--positive); font-weight: 600; }
+  tr.highlight td { background: var(--accent-light); }
+
+  /* Callout boxes */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-light);
+    padding: 14px 18px;
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 16px;
+  }
+
+  .callout p {
+    color: var(--text-primary);
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .callout strong { color: var(--accent); }
+
+  .callout.risk {
+    border-color: var(--warning);
+    background: var(--warning-light);
+  }
+
+  .callout.risk p { color: var(--text-primary); }
+
+  /* Steps */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+  }
+
+  .step-num {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 28px;
+    line-height: 1;
+    padding-top: 2px;
+  }
+
+  .step-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .step-text strong {
+    display: block;
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  /* Divider */
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin-block: 32px;
+  }
+
+  /* Footer */
+  .doc-footer {
+    font-size: 12px;
+    color: var(--text-muted);
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 480px) {
+    body { padding-inline: 16px; padding-block: 32px; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .stat-value { font-size: 18px; }
+  }
+</style>
+
+<div class="doc">
+
+  <header class="doc-header">
+    <div class="doc-label">Fastighetsstrategi</div>
+    <h1>Köp hus, behåll lägenhet</h1>
+    <div class="doc-meta">Exempelvägen 10, Malmö &nbsp;·&nbsp; September 2026</div>
+  </header>
+
+  <!-- Objektet -->
+  <section>
+    <h2>Objektet</h2>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Utgångspris</div>
+        <div class="stat-value">4 495 000</div>
+        <div class="stat-sub">kr</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Booli värdering</div>
+        <div class="stat-value">4 190 000</div>
+        <div class="stat-sub">kr, dvs. 305 000 under utgångspris</div>
+      </div>
+      <div class="stat accent">
+        <div class="stat-label">Rekommenderat maxbud</div>
+        <div class="stat-value">4 650 000</div>
+        <div class="stat-sub">kr, internt tak</div>
+      </div>
+    </div>
+    <p>Kedjehus, 92 m², 4 rum, tomt 522 m², byggår 1998. Pool, uterum och renoverat kök motiverar ett påslag mot jämförbara kedjehus i Almvik utan dessa extravärden.</p>
+  </section>
+
+  <!-- Finansiering -->
+  <section>
+    <h2>Finansiering</h2>
+    <p>Kontantinsatsen (10%) löses via belåning av befintlig lägenhet. Ingen likviditet behöver frigöras från andra tillgångar.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Post</th>
+          <th>Belopp</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Köpeskilling (utgångspris)</td>
+          <td>4 495 000 kr</td>
+        </tr>
+        <tr>
+          <td>Kontantinsats 10% (brygglån mot lägenhet)</td>
+          <td>449 500 kr</td>
+        </tr>
+        <tr>
+          <td>Bolån huset</td>
+          <td>4 045 500 kr</td>
+        </tr>
+        <tr>
+          <td>Ränta 2,97% / mån</td>
+          <td>10 013 kr</td>
+        </tr>
+        <tr>
+          <td>Amortering 2% / mån</td>
+          <td>6 743 kr</td>
+        </tr>
+        <tr class="total">
+          <td>Månadskostnad huset (efter skatteavdrag)</td>
+          <td>18 110 kr</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Lägenheten -->
+  <section>
+    <h2>Lägenheten som intäktskälla</h2>
+    <p>Brf Exempel, Riksbyggen. Värde ca 1 500 000 kr, månadsavgift 8 000 kr. Uthyrning inkl. 2 parkeringsplatser.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Post</th>
+          <th>Per månad</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Hyresintäkt (inkl. parkering)</td>
+          <td>+16 000 kr</td>
+        </tr>
+        <tr>
+          <td>Skatt 30% på 96 000 kr/år</td>
+          <td>-2 400 kr</td>
+        </tr>
+        <tr>
+          <td>Brf-avgift</td>
+          <td>-8 000 kr</td>
+        </tr>
+        <tr class="positive total">
+          <td>Netto i fickan</td>
+          <td>+5 600 kr</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      <p><strong>Obs:</strong> Andrahandstillstånd krävs från brf:ens styrelse. Kontakta styrelsen i Brf Exempel innan strategin låses. Nya uthyrningslagen (juli 2026) har mjukat upp bedömningskriterier och tidigare uthyrningshistorik väger lättare.</p>
+    </div>
+  </section>
+
+  <!-- Nettokostnad -->
+  <section>
+    <h2>Verklig månadskostnad</h2>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Huset efter skatteavdrag</div>
+        <div class="stat-value">18 110</div>
+        <div class="stat-sub">kr/mån</div>
+      </div>
+      <div class="stat positive">
+        <div class="stat-label">Minus netto hyra</div>
+        <div class="stat-value">-5 600</div>
+        <div class="stat-sub">kr/mån</div>
+      </div>
+      <div class="stat accent">
+        <div class="stat-label">Reell kostnad</div>
+        <div class="stat-value">12 510</div>
+        <div class="stat-sub">kr/mån för huset</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Förmögenhetsuppbyggnad -->
+  <section>
+    <h2>Förmögenhetsuppbyggnad 10 år</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Post</th>
+          <th>Belopp</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Eget kapital idag (hus + lägenhet)</td>
+          <td>1 500 000 kr</td>
+        </tr>
+        <tr>
+          <td>Amortering 10 år</td>
+          <td>+845 000 kr</td>
+        </tr>
+        <tr>
+          <td>Värdeökning hus (2% per år)</td>
+          <td>+975 000 kr</td>
+        </tr>
+        <tr>
+          <td>Värdeökning lägenhet (2% per år)</td>
+          <td>+328 000 kr</td>
+        </tr>
+        <tr class="total">
+          <td>Eget kapital om 10 år</td>
+          <td>ca 3 648 000 kr</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Vid 3% årlig tillväxt: ca 4 200 000 kr netto eget kapital.</p>
+  </section>
+
+  <!-- Risk -->
+  <section>
+    <h2>Riskprofil</h2>
+    <div class="callout risk">
+      <p><strong>Break-even vid prisfall:</strong> Huset täcker bolånet ner till -10% i värdeminskning. Mäklarkostnad vid försäljning (~2,5%) innebär att det faktiska break-even är vid ca -7,5%. Malmö föll ca 15% under 2022 till 2023 vid räntehöjningarna, vilket är det värsta moderna scenariot. Bor du kvar i minst 3 till 5 år är risken hanterbar.</p>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- Åtgärdsplan -->
+  <section>
+    <h2>Åtgärdsplan</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">
+          <strong>Kontakta styrelsen i Brf Exempel</strong>
+          Fråga om andrahandstillstånd vid köp av ny bostad. Formulera det som en tidsbegränsad övergångsperiod.
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">
+          <strong>Skaffa lånelöfte</strong>
+          Kontakta din bank, SBAB och Hypoteket direkt (inte Lendo, undvik många kreditupplysningar). Ansök om bolån på 4 045 500 kr plus brygglån på 449 500 kr mot lägenheten.
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">
+          <strong>Boka besiktning</strong>
+          Anlita SBR-certifierad besiktningsman. Inkludera separat poolbesiktning. Kostnad 10 000 till 15 000 kr. Anmärkningar ger förhandlingsutrymme.
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">
+          <strong>Lägg bud strategiskt</strong>
+          Öppna runt 4 400 000 kr. Internt tak 4 650 000 kr, kommunicera det aldrig till mäklaren. Steg om 25 000 till 50 000 kr per budsteg.
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-text">
+          <strong>Skriv hyreskontrakt</strong>
+          1-åriga avtal med hyresgästen. Hyra 16 000 kr/mån inkl. parkering. Visa kontraktet för banken, det räknas in i din lånkapacitet (70% av bruttohyra).
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="doc-footer">
+    Sammanställt september 2026 &nbsp;·&nbsp; Baserat på tillgänglig marknadsinformation och generella skatteregler. Kontakta bank och juridisk rådgivare innan bindande beslut fattas.
+  </footer>
+
+</div>
+
+</body></html>

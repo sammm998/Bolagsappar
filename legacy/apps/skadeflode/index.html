@@ -1,0 +1,643 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Skadeflöde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: verkstadsapp. Fast sidomeny (blir flikrad på mobil), arbetsyta med ärendelista och en detaljpanel som glider in. */
+:root{
+  --bg:#EFF1F6; --surface:#FFFFFF; --surface-2:#F5F6FA; --line:#D8DCE6; --line-2:#E7EAF1;
+  --fg:#0F1530; --muted:#565E78; --faint:#8A90A6;
+  --accent:#056EFE; --accent-ink:#FFFFFF; --accent-soft:#E1EDFF;
+  --side:#0F1530; --side-fg:#B9BFD6; --side-active:#1D2550;
+  --hero-a:#0F1530; --hero-b:#1B2A6B;
+  --ok:#1E7A4C; --ok-soft:#DDF0E5; --warn:#A8620B; --warn-soft:#F8EBD6; --bad:#B3261E; --bad-soft:#F7DEDC; --info-soft:#E4E8F7; --info:#3B4FA0;
+  --plate-blue:#1D4AA8;
+  --f-display:"Archivo",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r:12px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0A0E22; --surface:#121834; --surface-2:#171E3F; --line:#283055; --line-2:#1F2747;
+  --fg:#E8EBF5; --muted:#A0A7C2; --faint:#6F7695;
+  --accent:#5B9BFF; --accent-ink:#06122B; --accent-soft:#16295A;
+  --side:#070A1A; --side-fg:#A9B0CC; --side-active:#161D42;
+  --hero-a:#121A45; --hero-b:#1F2F7A;
+  --ok:#5CC48E; --ok-soft:#163327; --warn:#E3A34A; --warn-soft:#3A2A12; --bad:#F08A82; --bad-soft:#3D1C1A; --info-soft:#1F2647; --info:#9BA9F0;
+  --plate-blue:#2F5FC4; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0A0E22; --surface:#121834; --surface-2:#171E3F; --line:#283055; --line-2:#1F2747;
+  --fg:#E8EBF5; --muted:#A0A7C2; --faint:#6F7695;
+  --accent:#5B9BFF; --accent-ink:#06122B; --accent-soft:#16295A;
+  --side:#070A1A; --side-fg:#A9B0CC; --side-active:#161D42;
+  --hero-a:#121A45; --hero-b:#1F2F7A;
+  --ok:#5CC48E; --ok-soft:#163327; --warn:#E3A34A; --warn-soft:#3A2A12; --bad:#F08A82; --bad-soft:#3D1C1A; --info-soft:#1F2647; --info:#9BA9F0;
+  --plate-blue:#2F5FC4; color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.5}
+*{box-sizing:border-box}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-columns:232px 1fr;min-height:100%}
+/* sidomeny */
+.side{background:var(--side);color:var(--side-fg);padding:20px 14px;display:flex;flex-direction:column;gap:22px;position:sticky;top:0;height:100vh}
+.brand{display:flex;flex-direction:column;gap:10px;padding:2px 8px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo{display:flex;align-items:center;gap:10px;min-height:40px}
+.logo img{width:100%;max-width:184px;height:auto;display:block}
+.mono-mark{width:40px;height:40px;border-radius:9px;background:linear-gradient(140deg,#3A63F0,#1B2A6B);display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-stretch:75%;font-size:19px;color:#fff;letter-spacing:.02em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
+.logo-txt{display:flex;flex-direction:column;line-height:1.05}
+.logo-txt b{font-family:var(--f-display);font-weight:800;font-stretch:80%;font-size:17px;color:#fff;letter-spacing:.03em}
+.logo-txt small{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--side-fg)}
+.brand .prod{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#5B9BFF;font-weight:600}
+/* hero */
+.hero{border-radius:14px;padding:26px 28px;color:#fff;background:radial-gradient(120% 140% at 100% 0%,#0B4FCC 0%,var(--hero-a) 62%);position:relative;overflow:hidden;display:flex;flex-direction:column;gap:18px}
+.hero::after{content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;border-radius:50%;border:38px solid rgba(255,255,255,.04)}
+.hero .eyebrow{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#8DBBFF;font-weight:600}
+.hero h1{color:#fff;font-size:32px}
+.hero p{margin:0;color:#C4CAE6;max-width:60ch}
+.hero-top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start;position:relative;z-index:1}
+.todo{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;position:relative;z-index:1}
+.todo button{all:unset;cursor:pointer;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;transition:background .15s}
+.todo button:hover{background:rgba(255,255,255,.13)}
+.todo button:focus-visible{outline:2px solid #9FB3FF}
+.todo .n{font-family:var(--f-display);font-stretch:80%;font-weight:700;font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums}
+.todo .n.money{color:#FFC86B}
+.todo .d{font-size:13px;color:#D3D8EE}
+.todo .go{font-size:12px;color:#9FB3FF;font-weight:600;margin-top:4px}
+.saved{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border-radius:999px;padding:6px 14px 6px 8px;font-size:12.5px;color:#D3D8EE;white-space:nowrap}
+.saved b{font-family:var(--f-mono);color:#fff;font-weight:600}
+.saved i{width:22px;height:22px;border-radius:50%;background:#5CC48E;display:grid;place-items:center;color:#062A17;font-style:normal;font-weight:700;font-size:12px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav button{all:unset;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:6px;color:var(--side-fg);font-weight:500}
+.nav button:hover{background:var(--side-active)}
+.nav button[aria-current="page"]{background:var(--side-active);color:#fff}
+.nav button:focus-visible{outline:2px solid var(--accent)}
+.nav .cnt{font-family:var(--f-mono);font-size:11px;background:rgba(255,255,255,.08);padding:1px 7px;border-radius:10px}
+.side-foot{margin-top:auto;font-size:12px;line-height:1.45;padding:12px 10px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:6px}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:middle;background:var(--faint)}
+.dot.on{background:#5CC48E}
+/* huvudyta */
+main{min-width:0;padding:24px 28px 48px;display:flex;flex-direction:column;gap:20px}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+h1{font-family:var(--f-display);font-stretch:85%;font-weight:700;font-size:28px;line-height:1.1;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0}
+.demo-tag{font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;color:var(--warn);background:var(--warn-soft);padding:4px 9px;border-radius:4px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.kpi .l{font-size:12px;color:var(--muted);letter-spacing:.02em}
+.kpi .v{font-family:var(--f-display);font-stretch:80%;font-weight:700;font-size:28px;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .h{font-size:12px;color:var(--faint)}
+.kpi.alert .v{color:var(--bad)}
+.panel{background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r);min-width:0;box-shadow:0 1px 2px rgba(15,21,48,.04),0 4px 16px rgba(15,21,48,.04)}
+.panel-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line-2);flex-wrap:wrap}
+.panel-h h2{font-family:var(--f-display);font-stretch:85%;font-size:17px;font-weight:700;margin:0}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.chip{all:unset;cursor:pointer;font-size:12px;padding:4px 10px;border-radius:14px;border:1px solid var(--line);color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.chip:focus-visible{outline:2px solid var(--accent)}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-weight:600;text-align:left;padding:10px 16px;white-space:nowrap}
+td{padding:11px 16px;border-top:1px solid var(--line-2);vertical-align:middle;white-space:nowrap}
+tbody tr.click{cursor:pointer}
+tbody tr.click:hover td{background:var(--surface-2)}
+td.num,th.num{text-align:right}
+.mono{font-family:var(--f-mono);font-size:12.5px}
+.muted{color:var(--muted)}
+.plate{display:inline-flex;align-items:stretch;border:1.5px solid var(--fg);border-radius:3px;overflow:hidden;font-family:var(--f-mono);font-weight:600;font-size:12px;line-height:1;background:#fff;color:#111}
+.plate i{background:var(--plate-blue);width:7px}
+.plate span{padding:4px 6px;letter-spacing:.06em}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:3px 9px;border-radius:12px;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.s-intag{background:var(--info-soft);color:var(--info)}
+.s-kalkyl{background:var(--accent-soft);color:var(--accent)}
+.s-vantar{background:var(--warn-soft);color:var(--warn)}
+.s-tillagg{background:var(--warn-soft);color:var(--warn)}
+.s-produktion{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.s-faktura{background:var(--bad-soft);color:var(--bad)}
+.s-klar{background:var(--ok-soft);color:var(--ok)}
+.age{font-family:var(--f-mono);font-size:12px}
+.age.late{color:var(--bad);font-weight:600}
+.btn{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:6px;font-weight:600;font-size:13px;background:var(--accent);color:var(--accent-ink);white-space:nowrap}
+.btn:hover{filter:brightness(1.08)}
+.btn:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--surface-2)}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.ai-mark{font-family:var(--f-mono);font-size:10px;font-weight:600;letter-spacing:.08em;padding:2px 5px;border-radius:3px;background:rgba(255,255,255,.2)}
+.btn.ghost .ai-mark{background:var(--accent-soft);color:var(--accent)}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+.pad{padding:16px;display:flex;flex-direction:column;gap:14px}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted);font-weight:500}
+textarea,input[type=text]{width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:10px 12px;color:var(--fg);font-size:13.5px;line-height:1.5;resize:vertical}
+textarea:focus,input:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.out{background:var(--surface-2);border:1px dashed var(--line);border-radius:6px;padding:14px;min-height:80px;white-space:pre-wrap;font-size:13.5px;line-height:1.6}
+.out.empty{color:var(--faint)}
+.kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:7px 16px;font-size:13.5px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.note{font-size:12px;color:var(--faint)}
+.status-line{font-size:12.5px;color:var(--muted);min-height:18px}
+/* detaljpanel */
+.scrim{position:fixed;inset:0;background:rgba(10,17,23,.45);z-index:20}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--surface);z-index:21;display:flex;flex-direction:column;box-shadow:-12px 0 32px rgba(0,0,0,.18);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.drawer-h{padding:18px 20px;border-bottom:1px solid var(--line-2);display:flex;gap:12px;justify-content:space-between;align-items:flex-start}
+.drawer-h h3{font-family:var(--f-display);font-stretch:85%;font-size:20px;margin:6px 0 2px}
+.drawer-b{padding:18px 20px 28px;overflow-y:auto;display:flex;flex-direction:column;gap:22px}
+.sec-t{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:600;margin:0 0 8px}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0}
+.tl li{display:grid;grid-template-columns:86px 14px minmax(0,1fr);gap:10px;font-size:13px;padding-bottom:12px;position:relative}
+.tl li .t{font-family:var(--f-mono);font-size:11.5px;color:var(--faint);padding-top:1px}
+.tl li .m{width:9px;height:9px;border-radius:50%;background:var(--line);margin-top:5px;position:relative}
+.tl li:not(:last-child) .m::after{content:"";position:absolute;left:4px;top:11px;width:1px;height:calc(100% + 14px);background:var(--line)}
+.tl li.done .m{background:var(--accent)}
+.x{all:unset;cursor:pointer;font-size:20px;line-height:1;padding:4px 8px;border-radius:4px;color:var(--muted)}
+.x:hover{background:var(--surface-2)}
+/* kalkylkontroll */
+.diff td.miss{color:var(--bad);font-weight:600}
+tr.flag td{background:var(--bad-soft)}
+tr.partial td{background:var(--warn-soft)}
+.sumbar{display:flex;gap:24px;flex-wrap:wrap;padding:14px 16px;border-top:1px solid var(--line-2);font-variant-numeric:tabular-nums}
+.sumbar div{display:flex;flex-direction:column;gap:2px}
+.sumbar .l{font-size:12px;color:var(--muted)}
+.sumbar .v{font-family:var(--f-display);font-stretch:85%;font-weight:700;font-size:20px}
+.sumbar .v.bad{color:var(--bad)}
+/* inkorg */
+.mail-list{display:flex;flex-direction:column}
+.mail-item{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:3px;padding:12px 16px;border-top:1px solid var(--line-2)}
+.mail-item:first-child{border-top:0}
+.mail-item:hover{background:var(--surface-2)}
+.mail-item[aria-selected="true"]{background:var(--accent-soft)}
+.mail-item:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.mail-item .fr{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--muted)}
+.mail-item b{font-weight:600;font-size:13.5px}
+.mail-body{white-space:pre-wrap;font-size:13.5px;line-height:1.6;background:var(--surface-2);padding:14px;border-radius:6px}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap}
+.thumbs img{width:72px;height:56px;object-fit:cover;border-radius:4px;border:1px solid var(--line)}
+.moment{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:4px 12px;font-size:13px;padding:7px 0;border-top:1px solid var(--line-2)}
+.moment:first-child{border-top:0}
+.tag{font-size:11px;font-family:var(--f-mono);color:var(--muted)}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .side{position:sticky;top:env(safe-area-inset-top,0px);height:auto;flex-direction:row;align-items:center;padding:10px 16px;gap:12px;z-index:10;overflow-x:auto}
+  .brand span,.side-foot{display:none}
+  .brand b{font-size:18px}
+  .nav{flex-direction:row}
+  .nav button{padding:7px 10px;white-space:nowrap}
+  main{padding:18px 16px 40px}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .todo{grid-template-columns:1fr}
+  .hero{padding:20px}
+  .hero h1{font-size:26px}
+  .logo-txt,.brand .prod{display:none}
+  .brand{border:0;padding:0}
+  .mono-mark{width:34px;height:34px;font-size:16px}
+  .logo img{width:120px}
+  .grid2{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:no-preference){
+  .drawer{animation:slide .22s ease-out}
+  @keyframes slide{from{transform:translateX(24px);opacity:.6}to{transform:none;opacity:1}}
+}
+</style>
+
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <div class="logo" id="logo-slot"><div class="mono-mark">DB</div><div class="logo-txt"><b>DEMO</b><small>Bilverkstad</small></div></div>
+      <span class="prod">Skadeflöde</span>
+    </div>
+    <nav class="nav" aria-label="Huvudmeny">
+      <button data-view="oversikt" aria-current="page">Ärenden <span class="cnt" id="n-arenden">0</span></button>
+      <button data-view="intag">Nytt ärende</button>
+      <button data-view="inkorg">Skadereglerare <span class="cnt" id="n-mail">3</span></button>
+      <button data-view="kontroll">Kalkylkontroll</button>
+    </nav>
+    <div class="side-foot">
+      <div><span class="dot on"></span>Claude ansluten</div>
+      <div><span class="dot"></span>Cabas: manuell överföring</div>
+      <div><span class="dot"></span>Verkstadssystem: ej kopplat</div>
+    </div>
+  </aside>
+
+  <main>
+    <!-- ÖVERSIKT -->
+    <section id="v-oversikt" data-v>
+      <div class="hero">
+        <div class="hero-top">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span class="eyebrow" id="hero-date"></span>
+            <h1 id="hero-greet">God morgon, Demo Bilverkstad</h1>
+            <p>Claude har gått igenom inkorgen och kalkylerna. Här är det som behöver dig idag.</p>
+          </div>
+          <span class="saved"><i>✓</i>Tid sparad denna vecka <b>6 h 40 min</b></span>
+        </div>
+        <div class="todo">
+          <button data-go="inkorg"><span class="n">3</span><span class="d">svar från skadereglerare med färdiga utkast</span><span class="go">Granska svar →</span></button>
+          <button data-go="kontroll"><span class="n money" id="todo-money">2 400 kr</span><span class="d">godkänt i Cabas men inte debiterat</span><span class="go">Se kalkylkontroll →</span></button>
+          <button data-go="intag"><span class="n">1</span><span class="d">ny skadeanmälan att registrera</span><span class="go">Skapa ärende →</span></button>
+        </div>
+      </div>
+      <div class="top" style="margin-top:22px">
+        <div><h2 style="font-family:var(--f-display);font-stretch:85%;font-size:20px;margin:0">Försäkringsärenden</h2></div>
+        <span class="demo-tag">Mockup med exempeldata</span>
+      </div>
+      <div class="kpis" style="margin-top:14px">
+        <div class="kpi"><span class="l">Öppna ärenden</span><span class="v" id="k-open">0</span><span class="h">från intag till fakturering</span></div>
+        <div class="kpi"><span class="l">Väntar på skadereglerare</span><span class="v" id="k-wait">0</span><span class="h" id="k-wait-h"></span></div>
+        <div class="kpi alert"><span class="l">Godkänt men ej fakturerat</span><span class="v" id="k-unbilled">0 kr</span><span class="h">enligt kalkylkontroll</span></div>
+        <div class="kpi"><span class="l">Snitt ledtid till godkännande</span><span class="v">2,6 d</span><span class="h">senaste 30 dagarna</span></div>
+      </div>
+      <div class="panel" style="margin-top:20px">
+        <div class="panel-h">
+          <h2>Ärendelista</h2>
+          <div class="filters" id="filters"></div>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Ärende</th><th>Regnr</th><th>Bil</th><th>Försäkringsbolag</th><th>Status</th><th class="num">Kalkyl</th><th class="num">Dagar i status</th></tr></thead>
+            <tbody id="case-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTAG -->
+    <section id="v-intag" data-v hidden>
+      <div class="top">
+        <div><h1>Nytt ärende</h1><p class="sub">Klistra in kundens mejl eller skadeanmälan och lägg till bilder. Claude fyller i ärendekortet och föreslår moment att lägga in i Cabas.</p></div>
+        <span class="demo-tag">Mockup med exempeldata</span>
+      </div>
+      <div class="grid2" style="margin-top:20px">
+        <div class="panel"><div class="pad">
+          <label class="f" for="intag-text">Kundens mejl eller anmälan</label>
+          <textarea id="intag-text" rows="11"></textarea>
+          <label class="f" for="intag-img">Skadebilder (valfritt)</label>
+          <input type="file" id="intag-img" accept="image/*" multiple>
+          <div class="thumbs" id="intag-thumbs"></div>
+          <div class="row">
+            <button class="btn" id="intag-run"><span class="ai-mark">AI</span>Skapa ärendekort</button>
+            <span class="status-line" id="intag-status"></span>
+          </div>
+        </div></div>
+        <div class="panel">
+          <div class="panel-h"><h2>Ärendekort</h2><button class="btn ghost" id="intag-add" disabled>Lägg till i ärendelistan</button></div>
+          <div class="pad" id="intag-out"><p class="note">Ärendekortet visas här. Granska uppgifterna innan du lägger in kalkylen i Cabas.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INKORG -->
+    <section id="v-inkorg" data-v hidden>
+      <div class="top">
+        <div><h1>Skadereglerare</h1><p class="sub">Mejl från försäkringsbolagen kopplas till rätt ärende. Claude skriver svarsutkast, du granskar och skickar.</p></div>
+        <span class="demo-tag">Mockup med exempeldata</span>
+      </div>
+      <div class="grid2" style="margin-top:20px;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)">
+        <div class="panel"><div class="mail-list" id="mail-list" role="listbox" aria-label="Inkommande mejl"></div></div>
+        <div class="panel"><div class="pad" id="mail-view"></div></div>
+      </div>
+    </section>
+
+    <!-- KONTROLL -->
+    <section id="v-kontroll" data-v hidden>
+      <div class="top">
+        <div><h1>Kalkylkontroll</h1><p class="sub">Godkänd Cabas-kalkyl jämförs rad för rad mot arbetsordern innan fakturan går till försäkringsbolaget.</p></div>
+        <span class="demo-tag">Mockup med exempeldata</span>
+      </div>
+      <div class="panel" style="margin-top:20px">
+        <div class="panel-h">
+          <h2 id="kk-title"></h2>
+          <div class="row"><button class="btn" id="kk-run"><span class="ai-mark">AI</span>Sammanfatta avvikelser</button></div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="diff">
+            <thead><tr><th>Moment enligt kalkyl</th><th>Typ</th><th class="num">Kalkyl</th><th class="num">Arbetsorder</th><th class="num">Skillnad</th></tr></thead>
+            <tbody id="kk-rows"></tbody>
+          </table>
+        </div>
+        <div class="sumbar" id="kk-sum"></div>
+        <div class="pad" style="border-top:1px solid var(--line-2)">
+          <p class="sec-t" style="margin:0">Claude om avvikelserna</p>
+          <div class="out empty" id="kk-out">Tryck på Sammanfatta avvikelser för en kort genomgång att skicka till verkstadschefen.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-label="Ärendedetaljer"></aside>
+
+<script src="../../shared/claude-shim.js"></script>
+<script>
+(function(){
+const fmt = n => new Intl.NumberFormat('sv-SE').format(Math.round(n)) + ' kr';
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = s => document.querySelector(s);
+
+const STATUS = {
+  intag:{t:'Intag'}, kalkyl:{t:'Kalkyl i Cabas'}, vantar:{t:'Väntar godkännande'},
+  tillagg:{t:'Tillägg begärt'}, produktion:{t:'I produktion'}, faktura:{t:'Klar att fakturera'}, klar:{t:'Avstämd'}
+};
+const LIMIT = {vantar:2, tillagg:2, faktura:1, intag:1};
+
+/* Exempeldata: påhittade kunder, regnr och skadenummer */
+const cases = [
+  {id:'SK-2486', regnr:'NKP41C', bil:'Volvo XC60 B4 2022', kund:'Sara Lindqvist', bolag:'Länsförsäkringar Skåne', skadenr:'LFS-26-118734', reglerare:'Jonas Ek', typ:'Parkeringsskada, bakre stötfångare vänster', status:'tillagg', kalkyl:18450, sjalvrisk:2000, dagar:3},
+  {id:'SK-2485', regnr:'GHT82M', bil:'Toyota RAV4 Hybrid 2021', kund:'Ali Hassan', bolag:'If Skadeförsäkring', skadenr:'IF-7739102', reglerare:'Maria Holm', typ:'Viltolycka, front och motorhuv', status:'vantar', kalkyl:41200, sjalvrisk:1500, dagar:2},
+  {id:'SK-2484', regnr:'RXA07P', bil:'VW ID.4 Pro 2023', kund:'Johan Berg', bolag:'Folksam', skadenr:'FS-2026-55210', reglerare:'Erik Nyström', typ:'Hagelskada tak', status:'kalkyl', kalkyl:0, sjalvrisk:1000, dagar:1},
+  {id:'SK-2483', regnr:'MLB55K', bil:'Kia Niro EV 2022', kund:'Taxi, åkeri 14', bolag:'Trygg-Hansa', skadenr:'TH-4410287', reglerare:'Lina Sjö', typ:'Kollision höger framskärm och dörr', status:'produktion', kalkyl:27860, sjalvrisk:3000, dagar:4},
+  {id:'SK-2482', regnr:'BCD19W', bil:'Audi A4 Avant 2020', kund:'Emma Nilsson', bolag:'If Skadeförsäkring', skadenr:'IF-7738845', reglerare:'Maria Holm', typ:'Vindruta och frontkamera', status:'faktura', kalkyl:16940, sjalvrisk:1500, dagar:2},
+  {id:'SK-2481', regnr:'UYT63D', bil:'Volvo V60 T6 2021', kund:'Peter Svensson', bolag:'Länsförsäkringar Skåne', skadenr:'LFS-26-117902', reglerare:'Jonas Ek', typ:'Repa och buckla bakdörr', status:'klar', kalkyl:9820, sjalvrisk:2000, dagar:0},
+  {id:'SK-2480', regnr:'KPL28F', bil:'Skoda Octavia 2019', kund:'Fatima Khalil', bolag:'Folksam', skadenr:'FS-2026-54987', reglerare:'Erik Nyström', typ:'Påbackning, bakre stötfångare', status:'intag', kalkyl:0, sjalvrisk:1000, dagar:2}
+];
+
+const timeline = {
+  'SK-2486':[['29 sep','Skadeanmälan inkom via hemsidan',1],['30 sep','Kalkyl skickad i Cabas, 18 450 kr',1],['1 okt','Godkänd av Jonas Ek, LF',1],['2 okt','Dold skada på stötfångarhållare upptäckt vid demontering',1],['2 okt','Tillägg begärt, väntar svar',0]]
+};
+
+const kalkyl = {
+  caseId:'SK-2482',
+  rows:[
+    ['Vindruta, ny (OE)','Reservdel',7420,7420],
+    ['Lister och klips vindruta','Reservdel',640,640],
+    ['Byte vindruta','Arbete',2380,2380],
+    ['Kalibrering frontkamera (ADAS)','Arbete',1850,0],
+    ['Regnsensor, gelpad','Reservdel',290,0],
+    ['Rengöring och primer','Material',410,410],
+    ['Lackmaterial A-stolpe','Lack',1120,860],
+    ['Lackering A-stolpe vänster','Lack',2830,2830]
+  ]
+};
+
+const mails = [
+  {id:'m1', caseId:'SK-2486', fran:'Jonas Ek, Länsförsäkringar', tid:'Idag 09:12', amne:'Re: Tillägg LFS-26-118734', text:'Hej,\n\nTack för tilläggsbegäran. Innan jag kan godkänna behöver jag bilder på stötfångarhållaren efter demontering samt en förklaring till varför parkeringssensorn inte kan återanvändas.\n\nMvh\nJonas Ek\nSkadereglerare, Länsförsäkringar Skåne'},
+  {id:'m2', caseId:'SK-2485', fran:'Maria Holm, If', tid:'Igår 15:40', amne:'Kalkyl IF-7739102', text:'Hej Demo Bilverkstad,\n\nKalkylen för GHT82M godkänns med justering. Vi godkänner inte byte av motorhuv utan riktning och lackering enligt vår besiktning. Ny totalsumma enligt vår beräkning blir 36 900 kr inkl. moms. Återkom om ni har synpunkter.\n\nVänliga hälsningar\nMaria Holm, If Skadeförsäkring'},
+  {id:'m3', caseId:'SK-2484', fran:'Erik Nyström, Folksam', tid:'Igår 11:05', amne:'Hagelskada RXA07P', text:'Hej,\n\nVi har fått skadeanmälan för RXA07P. Kan ni ange beräknad ledtid och om ni utför PDR (bucklor utan lackering) på taket? Kunden önskar lånebil under reparationstiden.\n\n/Erik Nyström, Folksam'}
+];
+
+const EX_INTAG = `Hej!
+
+Jag backade in i en stolpe i parkeringshuset igår kväll. Bakre stötfångaren är spräckt på höger sida och baklampan höger har en spricka. Bilen är en Kia Sportage 2023, regnummer DFG 73L. Jag är försäkrad i Trygg-Hansa och har skadenummer TH-4412093. Självrisken är 3 000 kr enligt mitt brev.
+
+Kan jag få en tid nästa vecka? Jag behöver lånebil eftersom jag pendlar till Lund.
+
+Mvh
+Karin Åström
+070 123 45 67`;
+
+/* ---------- Claude ---------- */
+let sample = null, canImages = false;
+(async () => {
+  try { sample = await window.claude?.use?.('sample'); } catch { sample = null; }
+  if (sample) { try { const l = await sample.limits(); canImages = !!l?.images; } catch {} }
+  document.querySelector('.side-foot .dot').classList.toggle('on', !!sample);
+  document.querySelector('.side-foot div').lastChild.textContent = sample ? 'Claude ansluten' : 'Claude i demoläge';
+})();
+const errCopy = c => ({not_granted:'Claude har inte fått tillåtelse i den här vyn. Visar exempelsvar.', rate_limited:'För många förfrågningar just nu. Försök igen om en stund.', refused:'Claude kunde inte svara på det här underlaget.', session_expired:'Logga in igen för att använda Claude.'}[c] || 'Något gick fel mot Claude. Försök igen.');
+
+async function stream(prompt, outEl, statusEl, fallback, opts={}){
+  outEl.classList.remove('empty');
+  if (!sample){ outEl.textContent = fallback; statusEl && (statusEl.textContent = 'Demoläge: exempelsvar visas.'); return; }
+  outEl.textContent = 'Claude skriver...';
+  statusEl && (statusEl.textContent = '');
+  try {
+    await sample(prompt, {...opts, cache:false, onText:({text}) => { outEl.textContent = text; }});
+  } catch(e){
+    if (e.code === 'not_granted' || e.code === 'sampling_disabled'){ outEl.textContent = fallback; }
+    else outEl.textContent = e.text || '';
+    statusEl && (statusEl.textContent = errCopy(e.code));
+  }
+}
+
+const COMPANY = 'Demo Bilverkstad, Exempelgatan 2, 211 00 Malmö. Tel 040-00 00 00. Skadeverkstad sedan 1984, sex certifierade tekniker, ADAS-kalibrering med Autel IA900WA, avtal med alla försäkringsbolag, lånebil vid behov.';
+const STYLE = 'Skriv på svenska, sakligt och kort, som en erfaren skadeverkstad skriver till en skadereglerare. Använd aldrig tankstreck, använd komma, punkt eller parentes. Ingen markdown.';
+
+/* ---------- Navigering ---------- */
+function show(v){
+  document.querySelectorAll('[data-v]').forEach(s => s.hidden = s.id !== 'v-'+v);
+  document.querySelectorAll('.nav button').forEach(b => { if (b.dataset.view === v) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); });
+  try { localStorage.setItem('sf-view', v); } catch {}
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('.nav button').forEach(b => b.addEventListener('click', () => show(b.dataset.view)));
+
+/* ---------- Översikt ---------- */
+let filter = 'alla';
+function renderFilters(){
+  const opts = [['alla','Alla'],['vantar','Väntar'],['tillagg','Tillägg'],['faktura','Att fakturera'],['intag','Intag']];
+  $('#filters').innerHTML = opts.map(([k,t]) => `<button class="chip" data-f="${k}" aria-pressed="${filter===k}">${t}</button>`).join('');
+  $('#filters').querySelectorAll('.chip').forEach(c => c.onclick = () => { filter = c.dataset.f; renderFilters(); renderCases(); });
+}
+const plate = r => `<span class="plate"><i></i><span>${esc(r.slice(0,3))} ${esc(r.slice(3))}</span></span>`;
+function renderCases(){
+  const list = cases.filter(c => filter === 'alla' || c.status === filter);
+  $('#case-rows').innerHTML = list.map(c => {
+    const late = LIMIT[c.status] !== undefined && c.dagar > LIMIT[c.status];
+    return `<tr class="click" data-id="${c.id}" tabindex="0">
+      <td class="mono">${c.id}</td><td>${plate(c.regnr)}</td>
+      <td><div>${esc(c.bil)}</div><div class="muted" style="font-size:12px">${esc(c.typ)}</div></td>
+      <td>${esc(c.bolag)}</td>
+      <td><span class="pill s-${c.status}">${STATUS[c.status].t}</span></td>
+      <td class="num mono">${c.kalkyl ? fmt(c.kalkyl) : '<span class="muted">ej klar</span>'}</td>
+      <td class="num"><span class="age ${late?'late':''}">${c.dagar} d</span></td></tr>`;
+  }).join('') || `<tr><td colspan="7" class="muted">Inga ärenden i den här statusen.</td></tr>`;
+  $('#case-rows').querySelectorAll('tr.click').forEach(tr => {
+    tr.onclick = () => openCase(tr.dataset.id);
+    tr.onkeydown = e => { if (e.key === 'Enter') openCase(tr.dataset.id); };
+  });
+  const open = cases.filter(c => c.status !== 'klar');
+  $('#k-open').textContent = open.length;
+  const w = cases.filter(c => c.status === 'vantar' || c.status === 'tillagg');
+  $('#k-wait').textContent = w.length;
+  $('#k-wait-h').textContent = w.filter(c => c.dagar > 2).length + ' över 2 dagar';
+  $('#n-arenden').textContent = open.length;
+  $('#k-unbilled').textContent = fmt(kkMissing());
+}
+
+/* ---------- Ärendepanel ---------- */
+function closeDrawer(){ $('#drawer').hidden = true; $('#scrim').hidden = true; }
+$('#scrim').onclick = closeDrawer;
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+function openCase(id){
+  const c = cases.find(x => x.id === id); if (!c) return;
+  const tl = timeline[id] || [['Idag','Ärende skapat',1],['','Kalkyl i Cabas',c.status!=='intag'?1:0],['','Godkännande skadereglerare',['produktion','faktura','klar'].includes(c.status)?1:0],['','Fakturering och avstämning',c.status==='klar'?1:0]];
+  const defFynd = id === 'SK-2486'
+    ? 'Vid demontering av bakre stötfångaren hittades att stötfångarhållaren vänster är deformerad och fästet för parkeringssensor vänster ytter är avbrutet. Sensorn har sprucken kåpa. Uppskattat tillägg: hållare 1 240 kr, sensor 1 980 kr, arbete 0,8 h.'
+    : '';
+  const d = $('#drawer');
+  d.innerHTML = `
+    <div class="drawer-h">
+      <div><div class="row">${plate(c.regnr)} <span class="pill s-${c.status}">${STATUS[c.status].t}</span></div>
+        <h3>${esc(c.bil)}</h3><div class="muted">${esc(c.typ)}</div></div>
+      <button class="x" aria-label="Stäng">×</button>
+    </div>
+    <div class="drawer-b">
+      <div><p class="sec-t">Ärende</p>
+        <dl class="kv">
+          <dt>Ärendenr</dt><dd class="mono">${c.id}</dd>
+          <dt>Kund</dt><dd>${esc(c.kund)}</dd>
+          <dt>Försäkringsbolag</dt><dd>${esc(c.bolag)}</dd>
+          <dt>Skadenummer</dt><dd class="mono">${esc(c.skadenr)}</dd>
+          <dt>Skadereglerare</dt><dd>${esc(c.reglerare)}</dd>
+          <dt>Kalkyl (Cabas)</dt><dd class="mono">${c.kalkyl?fmt(c.kalkyl):'ej klar'}</dd>
+          <dt>Självrisk</dt><dd class="mono">${fmt(c.sjalvrisk)} <span class="muted">faktureras kund</span></dd>
+        </dl></div>
+      <div><p class="sec-t">Händelser</p><ol class="tl">${tl.map(([t,m,done]) => `<li class="${done?'done':''}"><span class="t">${esc(t)}</span><span class="m"></span><span>${esc(m)}</span></li>`).join('')}</ol></div>
+      <div><p class="sec-t">Tilläggsbegäran till skadereglerare</p>
+        <div class="pad" style="padding:0">
+          <label class="f" for="d-fynd">Vad hittade teknikern?</label>
+          <textarea id="d-fynd" rows="4" placeholder="Beskriv dold skada, delar och uppskattad tid">${esc(defFynd)}</textarea>
+          <div class="row"><button class="btn" id="d-run"><span class="ai-mark">AI</span>Skriv mejl till ${esc(c.reglerare.split(' ')[0])}</button><button class="btn ghost" id="d-copy">Kopiera</button><span class="status-line" id="d-status"></span></div>
+          <div class="out empty" id="d-out">Utkastet visas här. Inget skickas automatiskt.</div>
+        </div></div>
+    </div>`;
+  d.hidden = false; $('#scrim').hidden = false;
+  d.querySelector('.x').onclick = closeDrawer;
+  d.querySelector('.x').focus();
+  $('#d-run').onclick = () => {
+    const fynd = $('#d-fynd').value.trim();
+    if (!fynd){ $('#d-status').textContent = 'Beskriv först vad teknikern hittade.'; return; }
+    const prompt = `${STYLE}\n\nVerkstad: ${COMPANY}\n\nSkriv ett mejl (ämnesrad först, sedan brödtext) till skaderegleraren ${c.reglerare} på ${c.bolag} med en tilläggsbegäran för ärendet nedan. Motivera varför tillägget behövs, lista delar och arbete, säg att bilder bifogas och att arbetet står still i väntan på godkännande. Avsluta med Demo Bilverkstad och telefonnummer.\n\nÄrende: ${c.id}, regnr ${c.regnr}, ${c.bil}, skadenummer ${c.skadenr}, ursprunglig kalkyl ${fmt(c.kalkyl)}.\nTeknikerns fynd: ${fynd}`;
+    const fb = `Ämne: Tilläggsbegäran ${c.skadenr}, ${c.regnr}\n\nHej ${c.reglerare.split(' ')[0]},\n\nVid demontering av bakre stötfångaren på ${c.regnr} (${c.bil}) har vi hittat skador som inte syntes vid kalkyltillfället.\n\nStötfångarhållaren vänster är deformerad och kan inte riktas. Fästet för parkeringssensor vänster ytter är avbrutet och sensorns kåpa är sprucken, vilket ger felkod i systemet. Sensorn måste därför bytas.\n\nTillägg:\nStötfångarhållare vänster, 1 240 kr\nParkeringssensor vänster ytter, 1 980 kr\nArbete 0,8 h\n\nBilder från demonteringen bifogas. Bilen står i väntan på ert godkännande, så vi uppskattar ett snabbt besked.\n\nMed vänliga hälsningar\nDemo Bilverkstad\n040-00 00 00`;
+    stream(prompt, $('#d-out'), $('#d-status'), fb);
+  };
+  $('#d-copy').onclick = () => copyText($('#d-out').textContent, $('#d-status'));
+}
+
+function copyText(t, st){
+  navigator.clipboard?.writeText(t).then(() => { st.textContent = 'Kopierat.'; }).catch(() => { st.textContent = 'Markera texten och kopiera manuellt.'; });
+}
+
+/* ---------- Intag ---------- */
+$('#intag-text').value = EX_INTAG;
+let intagCard = null;
+$('#intag-img').onchange = () => {
+  const files = [...$('#intag-img').files].slice(0,4);
+  $('#intag-thumbs').innerHTML = '';
+  files.forEach(f => { const i = document.createElement('img'); i.alt = f.name; i.src = URL.createObjectURL(f); $('#intag-thumbs').append(i); });
+};
+const FB_CARD = {kund:'Karin Åström',telefon:'070 123 45 67',regnr:'DFG73L',bil:'Kia Sportage 2023',bolag:'Trygg-Hansa',skadenr:'TH-4412093',sjalvrisk:3000,skadetyp:'Påbackning mot stolpe',beskrivning:'Bakre stötfångare spräckt höger sida, baklampa höger sprucken.',lanebil:true,onskemal:'Tid nästa vecka, pendlar till Lund',moment:[{moment:'Bakre stötfångare, byte och lackering',typ:'Reservdel + lack'},{moment:'Baklampa höger, byte',typ:'Reservdel'},{moment:'Kontroll parkeringssensorer bak',typ:'Arbete'},{moment:'Kontroll bakre stötfångarhållare efter demontering',typ:'Arbete'}],saknas:['Bilder på skadan','Chassinummer (VIN) för korrekt reservdelsval i Cabas']};
+function renderCard(k){
+  const yes = v => v ? 'Ja' : 'Nej';
+  $('#intag-out').innerHTML = `
+    <dl class="kv">
+      <dt>Kund</dt><dd>${esc(k.kund)} <span class="muted">${esc(k.telefon||'')}</span></dd>
+      <dt>Regnr</dt><dd>${k.regnr?plate(String(k.regnr).replace(/\s/g,'').toUpperCase()):'saknas'}</dd>
+      <dt>Bil</dt><dd>${esc(k.bil)}</dd>
+      <dt>Försäkringsbolag</dt><dd>${esc(k.bolag)}</dd>
+      <dt>Skadenummer</dt><dd class="mono">${esc(k.skadenr||'saknas')}</dd>
+      <dt>Självrisk</dt><dd class="mono">${k.sjalvrisk?fmt(k.sjalvrisk):'okänd'}</dd>
+      <dt>Skada</dt><dd>${esc(k.skadetyp)}. ${esc(k.beskrivning)}</dd>
+      <dt>Lånebil</dt><dd>${yes(k.lanebil)}</dd>
+      <dt>Önskemål</dt><dd>${esc(k.onskemal||'')}</dd>
+    </dl>
+    <div><p class="sec-t">Förslag på moment att lägga in i Cabas</p>
+      ${(k.moment||[]).map(m => `<div class="moment"><span>${esc(m.moment)}</span><span class="tag">${esc(m.typ)}</span><span></span></div>`).join('')}</div>
+    ${(k.saknas||[]).length?`<div><p class="sec-t">Saknas innan kalkyl</p><ul style="margin:0;padding-left:18px">${k.saknas.map(s=>`<li>${esc(s)}</li>`).join('')}</ul></div>`:''}
+    <p class="note">Förslaget är ett stöd. Kalkylen görs och skickas alltid i Cabas av verkstaden.</p>`;
+  $('#intag-add').disabled = false;
+}
+$('#intag-run').onclick = async () => {
+  const txt = $('#intag-text').value.trim();
+  const st = $('#intag-status');
+  if (!txt){ st.textContent = 'Klistra in kundens mejl först.'; return; }
+  const files = [...$('#intag-img').files].slice(0,4);
+  if (!sample){ intagCard = FB_CARD; renderCard(FB_CARD); st.textContent = 'Demoläge: exempelkort visas.'; return; }
+  $('#intag-run').disabled = true; st.textContent = 'Claude läser anmälan...';
+  const prompt = `Du hjälper en svensk skadeverkstad (${COMPANY}) att registrera ett försäkringsärende innan kalkylen görs i Cabas. Läs kundens meddelande${files.length && canImages ? ' och de bifogade skadebilderna' : ''} och svara med ENBART ett JSON-objekt med fälten: kund, telefon, regnr (utan mellanslag, versaler), bil, bolag, skadenr, sjalvrisk (tal i kr eller null), skadetyp (kort), beskrivning (1 till 2 meningar), lanebil (bool), onskemal, moment (array av {moment, typ} där typ är Reservdel, Arbete, Lack, Material eller en kombination, 3 till 6 troliga moment att lägga in i Cabas), saknas (array med uppgifter verkstaden behöver be kunden om). Använd aldrig tankstreck. Hitta inte på uppgifter som inte finns, sätt då null.\n\nKundens meddelande:\n${txt.slice(0,6000)}`;
+  try {
+    const opts = {};
+    if (files.length && canImages) opts.images = files;
+    const k = await sample.json(prompt, opts);
+    intagCard = k; renderCard(k); st.textContent = 'Klart. Granska uppgifterna.';
+  } catch(e){
+    if (e.code === 'not_granted' || e.code === 'sampling_disabled'){ intagCard = FB_CARD; renderCard(FB_CARD); st.textContent = 'Visar exempelkort.'; }
+    else st.textContent = errCopy(e.code);
+  } finally { $('#intag-run').disabled = false; }
+};
+$('#intag-add').onclick = () => {
+  if (!intagCard) return;
+  const n = 'SK-' + (2487 + cases.length - 7);
+  cases.unshift({id:n, regnr:String(intagCard.regnr||'XXX000').replace(/\s/g,'').toUpperCase(), bil:intagCard.bil||'Okänd bil', kund:intagCard.kund||'Okänd', bolag:intagCard.bolag||'Okänt', skadenr:intagCard.skadenr||'saknas', reglerare:'Ej tilldelad', typ:intagCard.skadetyp||'', status:'intag', kalkyl:0, sjalvrisk:Number(intagCard.sjalvrisk)||0, dagar:0});
+  $('#intag-add').disabled = true; intagCard = null;
+  $('#intag-status').textContent = `Ärende ${n} skapat.`;
+  renderCases();
+};
+
+/* ---------- Inkorg ---------- */
+let selMail = null;
+function renderMails(){
+  $('#mail-list').innerHTML = mails.map(m => `<button class="mail-item" role="option" data-id="${m.id}" aria-selected="${selMail===m.id}">
+    <span class="fr"><span>${esc(m.fran)}</span><span class="mono">${esc(m.tid)}</span></span>
+    <b>${esc(m.amne)}</b><span class="muted" style="font-size:12.5px">Kopplat till ${m.caseId}</span></button>`).join('');
+  $('#mail-list').querySelectorAll('.mail-item').forEach(b => b.onclick = () => { selMail = b.dataset.id; renderMails(); renderMail(); });
+}
+const FB_REPLY = {
+  m1:'Ämne: Re: Tillägg LFS-26-118734\n\nHej Jonas,\n\nBifogat finns fyra bilder på stötfångarhållaren efter demontering. Hållaren är deformerad vid infästningen och kan inte riktas utan att hållfastheten påverkas.\n\nParkeringssensorn kan inte återanvändas eftersom fästet är avbrutet och kåpan sprucken. Sensorn ger felkod vid systemtest, och en skadad kåpa släpper in fukt.\n\nBilen står i väntan på ert besked.\n\nMed vänliga hälsningar\nDemo Bilverkstad\n040-00 00 00',
+  m2:'Ämne: Re: Kalkyl IF-7739102\n\nHej Maria,\n\nTack för beskedet. Vi har synpunkter på justeringen av motorhuven. Huven har en veck i den bakre förstärkningen som inte syns utifrån, och riktning där riskerar att påverka fotgängarskyddets funktion enligt tillverkarens reparationsanvisning.\n\nVi bifogar bilder från undersidan och föreslår att byte av motorhuv godkänns enligt ursprunglig kalkyl. Vi kan annars ta emot en ombesiktning hos oss.\n\nMed vänliga hälsningar\nDemo Bilverkstad\n040-00 00 00',
+  m3:'Ämne: Re: Hagelskada RXA07P\n\nHej Erik,\n\nVi utför PDR på taket där lacken är oskadad. Bucklor med lackskada åtgärdas med traditionell riktning och lackering. Kalkylen i Cabas kommer efter inspektion.\n\nBeräknad ledtid är 4 till 5 arbetsdagar från godkännande. Vi ordnar lånebil till kunden under reparationstiden.\n\nMed vänliga hälsningar\nDemo Bilverkstad\n040-00 00 00'
+};
+function renderMail(){
+  const m = mails.find(x => x.id === selMail);
+  if (!m){ $('#mail-view').innerHTML = '<p class="note">Välj ett mejl till vänster.</p>'; return; }
+  const c = cases.find(x => x.id === m.caseId);
+  $('#mail-view').innerHTML = `
+    <div><div class="row"><b style="font-size:16px">${esc(m.amne)}</b></div><div class="muted" style="font-size:12.5px">${esc(m.fran)} · ${esc(m.tid)} · ${plate(c.regnr)} <span class="mono">${c.id}</span></div></div>
+    <div class="mail-body">${esc(m.text)}</div>
+    <label class="f" for="mv-hint">Instruktion till Claude (valfritt)</label>
+    <input type="text" id="mv-hint" placeholder="T.ex. stå fast vid byte av motorhuv, var vänlig men bestämd">
+    <div class="row"><button class="btn" id="mv-run"><span class="ai-mark">AI</span>Föreslå svar</button><button class="btn ghost" id="mv-copy">Kopiera</button><span class="status-line" id="mv-status"></span></div>
+    <div class="out empty" id="mv-out">Svarsutkastet visas här. Granska innan du skickar.</div>`;
+  $('#mv-run').onclick = () => {
+    const hint = $('#mv-hint').value.trim();
+    const prompt = `${STYLE}\n\nVerkstad: ${COMPANY}\n\nSkriv ett svarsmejl (ämnesrad först) från Demo Bilverkstad till skaderegleraren. Svara på det som efterfrågas, håll verkstadens intressen men var korrekt mot försäkringsbolaget. Hitta inte på siffror som inte finns i underlaget.${hint ? '\nVerkstadens instruktion: ' + hint : ''}\n\nÄrende: ${c.id}, regnr ${c.regnr}, ${c.bil}, ${c.typ}, kalkyl ${c.kalkyl ? fmt(c.kalkyl) : 'ej klar'}, skadenummer ${c.skadenr}.\n\nInkommande mejl:\n${m.text}`;
+    stream(prompt, $('#mv-out'), $('#mv-status'), FB_REPLY[m.id]);
+  };
+  $('#mv-copy').onclick = () => copyText($('#mv-out').textContent, $('#mv-status'));
+}
+
+/* ---------- Kalkylkontroll ---------- */
+function kkMissing(){ return kalkyl.rows.reduce((s,r) => s + Math.max(0, r[2]-r[3]), 0); }
+function renderKK(){
+  const c = cases.find(x => x.id === kalkyl.caseId);
+  $('#kk-title').innerHTML = `${c.id} · ${plate(c.regnr)} <span class="muted" style="font-family:var(--f-body);font-size:13px;font-weight:400">${esc(c.bolag)}, ${esc(c.skadenr)}</span>`;
+  $('#kk-rows').innerHTML = kalkyl.rows.map(([m,t,k,a]) => {
+    const d = a - k; const cls = a === 0 ? 'flag' : d < 0 ? 'partial' : '';
+    return `<tr class="${cls}"><td>${esc(m)}</td><td class="muted">${t}</td><td class="num mono">${fmt(k)}</td><td class="num mono">${a?fmt(a):'<span class="miss">saknas</span>'}</td><td class="num mono ${d<0?'miss':''}">${d===0?'<span class="muted">0</span>':fmt(d)}</td></tr>`;
+  }).join('');
+  const tk = kalkyl.rows.reduce((s,r)=>s+r[2],0), ta = kalkyl.rows.reduce((s,r)=>s+r[3],0);
+  $('#kk-sum').innerHTML = `<div><span class="l">Godkänd kalkyl (exkl. moms)</span><span class="v">${fmt(tk)}</span></div><div><span class="l">På arbetsorder</span><span class="v">${fmt(ta)}</span></div><div><span class="l">Godkänt men ej debiterat</span><span class="v bad">${fmt(tk-ta)}</span></div><div><span class="l">Självrisk att fakturera kund</span><span class="v">${fmt(c.sjalvrisk)}</span></div>`;
+}
+$('#kk-run').onclick = () => {
+  const c = cases.find(x => x.id === kalkyl.caseId);
+  const rows = kalkyl.rows.map(([m,t,k,a]) => `${m} (${t}): kalkyl ${k} kr, arbetsorder ${a} kr`).join('\n');
+  const prompt = `${STYLE}\n\nDu kontrollerar en godkänd Cabas-kalkyl mot verkstadens arbetsorder innan fakturan skickas till försäkringsbolaget. Skriv en kort genomgång till verkstadschefen: vilka rader avviker, trolig orsak och vad som ska göras innan fakturering (t.ex. lägga till momentet, kontrollera att ADAS-kalibreringen faktiskt utfördes och dokumenterades). Max 8 rader, punktlista med bindestreck i början av raden är okej.\n\nÄrende ${c.id}, ${c.regnr}, ${c.bil}, ${c.bolag}.\n${rows}`;
+  const fb = `- Kalibrering frontkamera (ADAS) 1 850 kr saknas på arbetsordern. Kontrollera i Autel-loggen att kalibreringen gjordes, lägg till momentet och bifoga kalibreringsprotokollet till fakturan.\n- Regnsensor gelpad 290 kr saknas. Troligen förbrukad men inte registrerad, lägg till.\n- Lackmaterial A-stolpe är debiterat 860 kr mot godkända 1 120 kr. Justera upp om materialåtgången stämmer med kalkylen.\n- Totalt 2 400 kr godkänt men ej debiterat.\n- Kom ihåg att fakturera kunden självrisken 1 500 kr separat.`;
+  stream(prompt, $('#kk-out'), null, fb);
+};
+
+/* ---------- Hero ---------- */
+(function(){
+  const d = new Date(), h = d.getHours();
+  $('#hero-greet').textContent = (h < 10 ? 'God morgon' : h < 17 ? 'Hej' : 'God kväll') + ', Demo Bilverkstad';
+  $('#hero-date').textContent = d.toLocaleDateString('sv-SE',{weekday:'long',day:'numeric',month:'long'});
+  $('#todo-money').textContent = fmt(kkMissing());
+  document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => show(b.dataset.go));
+})();
+
+/* ---------- Start ---------- */
+renderFilters(); renderCases(); renderMails(); selMail = 'm1'; renderMails(); renderMail(); renderKK();
+let start = 'oversikt';
+try { const v = localStorage.getItem('sf-view'); if (v && document.getElementById('v-'+v)) start = v; } catch {}
+show(start);
+})();
+</script>
+
+</body></html>

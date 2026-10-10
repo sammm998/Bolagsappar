@@ -1,0 +1,28 @@
+{
+  "name": "@bolagsappar/core",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Beräkningsmotorer från prototyperna (Avräkning, Åkarkassan, Verkstad) och filigenkänning.",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": { "types": "./src/index.d.ts", "default": "./src/index.js" },
+    "./avrakning": "./src/avrakning/index.js",
+    "./kassan": "./src/kassan/index.js",
+    "./verkstad": "./src/verkstad/engine.js",
+    "./filetypes": "./src/filetypes/index.js",
+    "./config": "./src/config/skatter.js",
+    "./format": "./src/format.js",
+    "./testdata": "./testdata/index.js"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "xlsx": "0.18.5"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
+  }
+}

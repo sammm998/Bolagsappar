@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aktievärde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF0EB; --surface:#F9FAF7; --ink:#1B2430; --muted:#5E6875; --line:#D3D7CE;
+  --good:#0F6E5C; --good-soft:#D4E9E2; --bad:#9B2C2C; --bad-soft:#F1DCDA; --mid:#A8701A; --mid-soft:#F3E7D2;
+  --band:#C9D3CC; --input:#FFFFFF;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151B; --surface:#181E26; --ink:#E5E8E2; --muted:#9AA3AD; --line:#2A323D;
+    --good:#4FBF9F; --good-soft:#173A32; --bad:#E07B72; --bad-soft:#3D2222; --mid:#E0A84A; --mid-soft:#3A2F1C;
+    --band:#2E3A40; --input:#11151B;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151B; --surface:#181E26; --ink:#E5E8E2; --muted:#9AA3AD; --line:#2A323D;
+  --good:#4FBF9F; --good-soft:#173A32; --bad:#E07B72; --bad-soft:#3D2222; --mid:#E0A84A; --mid-soft:#3A2F1C;
+  --band:#2E3A40; --input:#11151B;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 110px);-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);
+  font:16px/1.5 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+h1,h2,.big{font-family:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--good);outline-offset:2px}
+input,select{background:var(--input);border:1px solid var(--line);border-radius:10px;padding:11px 12px;color:var(--ink);font:inherit;font-size:16px;width:100%;min-width:0}
+.btn{border:1px solid var(--ink);background:var(--ink);color:var(--bg);border-radius:10px;padding:11px 16px;font-weight:600;white-space:nowrap;min-height:44px}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.danger{background:transparent;color:var(--bad);border-color:var(--line)}
+.btn:disabled{opacity:.5}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.pos{color:var(--good)} .neg{color:var(--bad)}
+
+.app{max-width:1180px;margin:0 auto;padding:16px 14px 56px;display:grid;gap:20px}
+@media (min-width:920px){.app{grid-template-columns:380px 1fr;align-items:start;padding-top:24px}}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;grid-column:1/-1}
+header.top h1{font-size:28px;line-height:1.1;margin:0;font-weight:700;letter-spacing:-.02em}
+header.top p{margin:2px 0 0;color:var(--muted);font-size:13px}
+
+/* list */
+.add{display:flex;gap:8px;margin-bottom:10px}
+.sector{margin-top:18px}
+.sector h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 4px 4px;font-family:"IBM Plex Sans",sans-serif;font-weight:600}
+.row{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:12px;border-radius:12px;background:transparent;border:1px solid transparent;text-align:left;width:100%;min-height:56px}
+.row:hover{background:var(--surface)}
+.row[aria-current="true"]{background:var(--surface);border-color:var(--line)}
+.row .tk{font-weight:600}
+.row .nm{color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .up{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:19px;text-align:right}
+.row .chips{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{font-size:12px;border-radius:6px;padding:2px 7px;background:color-mix(in srgb,var(--line) 45%,transparent);color:var(--muted)}
+.chip.g{background:var(--good-soft);color:var(--good)} .chip.r{background:var(--bad-soft);color:var(--bad)} .chip.m{background:var(--mid-soft);color:var(--mid)}
+.sig{font-size:12px;font-weight:600;border-radius:6px;padding:2px 8px}
+.sig.buy{background:var(--good-soft);color:var(--good)} .sig.trim{background:var(--mid-soft);color:var(--mid)} .sig.sell{background:var(--bad-soft);color:var(--bad)} .sig.hold{color:var(--muted);border:1px solid var(--line)}
+.empty{padding:22px 4px;color:var(--muted)}
+details.rules{margin-top:22px;border-top:1px solid var(--line);padding-top:12px}
+details summary{cursor:pointer;font-weight:600;font-size:14px;padding:6px 0;min-height:32px}
+
+/* detail */
+.detail{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:clip}
+.detail.blank{display:grid;place-items:center;min-height:240px;color:var(--muted);text-align:center;padding:20px}
+.dbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line);padding:12px 14px 0}
+.dbar .t{display:flex;align-items:center;gap:10px}
+.dbar h2{margin:0;font-size:22px;line-height:1.15;letter-spacing:-.01em;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.back{display:none;border:1px solid var(--line);background:transparent;border-radius:10px;min-width:44px;min-height:40px;font-size:20px;line-height:1}
+.tabs{display:flex;gap:2px;overflow-x:auto;margin:10px -14px 0;padding:0 10px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{border:none;background:none;padding:10px 10px 12px;font-size:14px;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;min-height:44px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
+.pane{padding:18px 16px 26px}
+.pane h3{font-size:16px;margin:26px 0 8px;font-weight:600}
+.pane h3:first-child{margin-top:0}
+.sub{color:var(--muted);font-size:13px}
+.big{font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:10px;text-align:left;background:transparent}
+.kpi b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-size:22px;line-height:1.1}
+.kpi span{font-size:12px;color:var(--muted)}
+.kpi.g{border-color:transparent;background:var(--good-soft)} .kpi.r{border-color:transparent;background:var(--bad-soft)} .kpi.m{border-color:transparent;background:var(--mid-soft)}
+.box{margin-top:16px;padding:14px;border-radius:12px;border:1px solid var(--line);font-size:15px}
+.box.buy{background:var(--good-soft);border-color:transparent} .box.trim{background:var(--mid-soft);border-color:transparent} .box.sell{background:var(--bad-soft);border-color:transparent}
+.box strong{display:block;font-size:16px;margin-bottom:2px}
+.box p{margin:0}
+.why{margin-top:16px;padding:12px 14px;border-left:3px solid var(--mid);background:color-mix(in srgb,var(--mid) 8%,transparent);border-radius:0 10px 10px 0;font-size:14px}
+.hint{font-size:13px;color:var(--muted);margin:6px 0 0}
+.scale svg{display:block;width:100%;height:auto;overflow:visible}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+
+/* metric card */
+.mcard{border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px}
+.mhead{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.mhead h4{margin:0;font-size:16px}
+.mhead .v{font-family:"Bricolage Grotesque",sans-serif;font-size:28px;font-weight:700}
+.gauge{position:relative;height:10px;border-radius:5px;margin:12px 0 4px;background:linear-gradient(90deg,var(--good) 0 33%,var(--mid) 33% 66%,var(--bad) 66% 100%);opacity:.85}
+.gauge i{position:absolute;top:-5px;width:4px;height:20px;border-radius:2px;background:var(--ink);transform:translateX(-50%);box-shadow:0 0 0 2px var(--surface)}
+.gl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.mtext{font-size:14px;margin:10px 0 0}
+details.lesson{margin-top:10px;border-top:1px dashed var(--line);padding-top:6px}
+details.lesson summary{font-size:14px;color:var(--good)}
+details.lesson dl{margin:6px 0 0;font-size:14px}
+details.lesson dt{font-weight:600;margin-top:8px}
+details.lesson dd{margin:2px 0 0}
+.calc{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;background:color-mix(in srgb,var(--line) 40%,transparent);padding:2px 6px;border-radius:5px}
+
+.own{display:flex;height:22px;border-radius:7px;overflow:hidden;margin-top:10px;background:color-mix(in srgb,var(--line) 45%,transparent)}
+.own span{display:block;height:100%}
+.own .i{background:var(--ink)} .own .k{background:var(--mid)} .own .r{background:var(--good)}
+/* compare */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+.seg button{border:none;background:none;padding:7px 14px;border-radius:7px;font-size:14px;min-height:36px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.bars{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.bar{display:grid;grid-template-columns:minmax(64px,110px) 1fr 64px;gap:10px;align-items:center;font-size:13px}
+.bar .lab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .track{position:relative;height:14px;background:color-mix(in srgb,var(--line) 45%,transparent);border-radius:7px}
+.bar .fill{position:absolute;inset:0 auto 0 0;border-radius:7px;background:var(--band)}
+.bar.me .fill{background:var(--ink)} .bar.me .lab,.bar.me .val{font-weight:600}
+.bar .med{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--mid)}
+.bar .val{text-align:right;display:flex;justify-content:flex-end;gap:4px;align-items:center}
+.bar .x{border:none;background:none;color:var(--muted);padding:0 2px;font-size:16px;min-width:22px}
+.peadd{display:grid;grid-template-columns:1fr 70px 70px;gap:6px;margin-top:14px}
+.peadd .btn{grid-column:1/-1}
+
+/* forms & tables */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--muted)}
+label.f .h{display:flex;justify-content:space-between;gap:6px}
+.tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 6px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{font-weight:500;color:var(--muted);font-size:12px;white-space:normal}
+.scen input{width:64px;padding:8px 6px;text-align:right}
+.warn{color:var(--bad);font-size:13px;min-height:1.2em;margin-top:6px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--line);flex:none;margin-top:4px}
+.dot.r2{background:var(--good)} .dot.r1{background:var(--mid)} .dot.r0{background:var(--bad)}
+.foot{display:flex;justify-content:space-between;gap:12px;margin-top:26px;flex-wrap:wrap;align-items:center}
+
+/* school */
+.school .lessonbox{border:1px solid var(--line);border-radius:12px;padding:4px 14px;margin-top:10px}
+.school .lessonbox summary{font-size:16px;padding:10px 0}
+.school .lessonbox p{font-size:14px;margin:0 0 12px}
+
+@media (max-width:919px){
+  .app.has-sel .listcol{display:none}
+  .app:not(.has-sel) .detail{display:none}
+  .app.has-sel header.top{display:none}
+  .back{display:inline-block}
+  .detail{border-radius:14px;margin:0 -6px}
+}
+@media (min-width:920px){.dbar{top:0}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="top">
+    <div><h1>Aktievärde</h1><p id="sync">Lokalt sparat</p></div>
+    <button class="btn ghost" id="schoolBtn">Lär dig</button>
+  </header>
+
+  <section class="listcol" aria-label="Bevakningslista">
+    <div class="add">
+      <input id="addInput" placeholder="Lägg till ticker, t.ex. GOOGL" autocomplete="off" autocapitalize="characters" aria-label="Ticker att lägga till">
+      <button class="btn" id="addBtn" type="button">Lägg till</button>
+    </div>
+    <div id="list"></div>
+    <details class="rules">
+      <summary>Signalregler</summary>
+      <div class="grid2" style="margin-top:8px">
+        <label class="f">Köp vid rabatt mot värdet %<input data-r="mos" inputmode="decimal"></label>
+        <label class="f">Ta hem vinst över värdet %<input data-r="over" inputmode="decimal"></label>
+        <label class="f">Ta hem vinst vid uppgång från GAV %<input data-r="gain" inputmode="decimal"></label>
+        <label class="f">Andel att sälja %<input data-r="trimPct" inputmode="decimal"></label>
+      </div>
+      <p class="hint">Sälj visas när kursen ligger över värdet i bästa scenariot.</p>
+    </details>
+  </section>
+
+  <section class="detail blank" id="detail"><p>Välj ett bolag i listan.</p></section>
+</div>
+
+<script src="../../shared/claude-shim.js"></script>
+<script>
+(() => {
+"use strict";
+const LS_KEY = "aktievarde.v1";
+const SCEN = [["bear","Sämsta"],["base","Normal"],["bull","Bästa"]];
+const DEFAULT_SCEN = () => ({bear:{g1:3,g2:2,pe:12,p:25}, base:{g1:10,g2:6,pe:18,p:50}, bull:{g1:18,g2:10,pe:25,p:25}});
+const SECTORS = {
+  big:"Stora teknik- och internetbolag", chip:"Chip och halvledare", soft:"Mjukvara, media och plattformar",
+  ev:"Elbilar och nya fordon", pharma:"Läkemedel", fin:"Finans, riskkapital och krypto",
+  food:"Dagligvaror", raw:"Råvaror och gruvor", quantum:"Kvantdatorer", other:"Övrigt"
+};
+const SECTOR_OF = {GOOGL:"big",MSFT:"big",AAPL:"big",AMZN:"big",META:"big",BABA:"big",
+  NVDA:"chip",AMD:"chip",AVGO:"chip",TSM:"chip",MU:"chip",ASML:"chip",LRCX:"chip",SMCI:"chip",
+  ADBE:"soft",SNOW:"soft",RDDT:"soft",NFLX:"soft",TSLA:"ev",LI:"ev",EH:"ev",AZN:"pharma",
+  EQT:"fin",GLXY:"fin",AXFO:"food",USAR:"raw",METC:"raw",IONQ:"quantum",QUBT:"quantum"};
+const RISK = {lag:{n:"Låg (stort, stabilt bolag)",r:9}, normal:{n:"Normal",r:10}, hog:{n:"Hög (cykliskt eller politisk risk)",r:12}, mhog:{n:"Mycket hög (förlust eller spekulativt)",r:15}};
+const QM = {
+  bolag:[
+    {k:"roic",n:"ROIC",u:"%",g:15,o:8,hi:true,d:"Avkastning på pengarna som är investerade i bolaget."},
+    {k:"gm",n:"Bruttomarginal",u:"%",g:50,o:30,hi:true,d:"Hur mycket som blir kvar av varje försäljningskrona efter varukostnad."},
+    {k:"om",n:"Rörelsemarginal",u:"%",g:20,o:10,hi:true,d:"Vinst från verksamheten delat med försäljningen."},
+    {k:"fcfc",n:"FCF/nettovinst",u:"x",g:0.9,o:0.6,hi:true,d:"Hur stor del av vinsten som blir riktiga pengar i kassan."},
+    {k:"nd",n:"Nettoskuld/EBITDA",u:"x",g:1,o:2.5,hi:false,d:"Hur många års rörelseresultat skulden motsvarar. Minus betyder mer kassa än skuld."},
+    {k:"dil",n:"Aktieantal per år",u:"%",g:0,o:2,hi:false,d:"Ökar antalet aktier späds din andel ut. Minus betyder återköp."},
+    {k:"capex",n:"Capex/omsättning",u:"%",g:10,o:25,hi:false,d:"Hur mycket av försäljningen som måste investeras i maskiner och byggnader."}
+  ],
+  bank:[
+    {k:"roe",n:"ROE",u:"%",g:15,o:10,hi:true,d:"Avkastning på ägarnas eget kapital."},
+    {k:"nm",n:"Nettomarginal",u:"%",g:25,o:15,hi:true,d:"Vinst delat med intäkter."},
+    {k:"ki",n:"Kostnad/intäkt",u:"%",g:45,o:60,hi:false,d:"Hur stor del av intäkterna som går till kostnader."},
+    {k:"kf",n:"Kreditförluster/utlåning",u:"%",g:1,o:2.5,hi:false,d:"Hur mycket av lånen som inte betalas tillbaka."},
+    {k:"cet1",n:"Kärnprimärkapital (CET1)",u:"%",g:13,o:10,hi:true,d:"Bankens buffert mot förluster."}
+  ]
+};
+
+let stocks = [], rules = {mos:30, over:20, gain:50, trimPct:20};
+let selId = null, view = "list", dtab = "over", cmpMetric = "pe", yearTab = "base";
+let docRef = null, saveTimer = null, sampleFn;
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num = v => { const n = parseFloat(String(v ?? "").replace(",", ".")); return isFinite(n) ? n : 0; };
+const fmt = (v, d=2) => isFinite(v) ? v.toLocaleString("sv-SE",{minimumFractionDigits:d,maximumFractionDigits:d}) : "·";
+const pct = v => isFinite(v) ? (v>0?"+":"") + (v*100).toLocaleString("sv-SE",{maximumFractionDigits:0}) + " %" : "·";
+const uid = () => Math.random().toString(36).slice(2,10);
+const sel = () => stocks.find(s=>s.id===selId);
+function showErr(err){ const d=$("#detail"); if(d){ d.className="detail blank"; d.innerHTML=`<p>Något gick fel: ${esc(err&&err.message||err)}</p>`; } }
+window.addEventListener("error", e => showErr(e.message));
+
+/* ---------- valuation ---------- */
+const rOf = st => RISK[st.risk] ? RISK[st.risk].r : num(st.r);
+const baseOf = st => num(st.norm)>0 ? num(st.norm) : num(st.base);
+function scenario(s, base, r){
+  const rr = r/100; let e = base, pv = 0; const years = [];
+  for(let t=1;t<=10;t++){ e *= 1 + (t<=5 ? s.g1 : s.g2)/100; const d = e/Math.pow(1+rr,t); pv += d; years.push({t,e,pv:d}); }
+  const exit = e*s.pe, exitPv = exit/Math.pow(1+rr,10);
+  return {value: pv+exitPv, years, exit, exitPv, sumPv: pv};
+}
+function valuate(st){
+  const res = {}; let w = 0, psum = 0;
+  for(const [k] of SCEN){ res[k] = scenario(st.scen[k], baseOf(st), rOf(st)); w += res[k].value*st.scen[k].p/100; psum += st.scen[k].p; }
+  const price = num(st.price);
+  return {res, weighted:w, psum, upside: price>0 && baseOf(st)>0 ? w/price-1 : NaN};
+}
+function impliedG(st){
+  const price = num(st.price), base = baseOf(st), r = rOf(st), pe = st.scen.base.pe;
+  if(!(price>0 && base>0)) return null;
+  const f = g => scenario({g1:g,g2:g,pe}, base, r).value - price;
+  let lo=-50, hi=150;
+  if(f(lo)>0) return {g:-Infinity,pe,r}; if(f(hi)<0) return {g:Infinity,pe,r};
+  for(let i=0;i<60;i++){ const m=(lo+hi)/2; if(f(m)>0) hi=m; else lo=m; }
+  const b = st.scen.base, own = (Math.pow(Math.pow(1+b.g1/100,5)*Math.pow(1+b.g2/100,5),0.1)-1)*100;
+  return {g:(lo+hi)/2, own, pe, r};
+}
+
+/* ---------- multiples ---------- */
+function peRep(st){ const p=num(st.price), b=num(st.base); return p>0&&b>0 ? p/b : NaN; }
+function peUse(st){ const p=num(st.price), b=baseOf(st); return p>0&&b>0 ? p/b : NaN; }
+function psOf(st){ const p=num(st.price), s=num(st.sps); return p>0&&s>0 ? p/s : NaN; }
+function pegOf(st){ const pe=peUse(st), g=num(st.scen?.base?.g1); return isFinite(pe)&&g>0 ? pe/g : NaN; }
+const METRIC = {
+  pe:{n:"P/E", get:peUse, extKey:"pe"},
+  ps:{n:"P/S", get:psOf, extKey:"ps"},
+  peg:{n:"PEG", get:pegOf, extKey:null}
+};
+function median(a){ const v=a.filter(isFinite).sort((x,y)=>x-y); if(!v.length) return NaN; const m=Math.floor(v.length/2); return v.length%2?v[m]:(v[m-1]+v[m])/2; }
+function groupRows(st, key){
+  const M = METRIC[key];
+  const rows = stocks.filter(x=>x.sector===st.sector).map(x=>({t:x.ticker, n:x.name||x.ticker, v:M.get(x), me:x.id===st.id, own:true}));
+  if(M.extKey) (st.peers||[]).forEach((p,i)=>{ if(!stocks.some(x=>x.ticker===p.t)) rows.push({t:p.t, n:p.n||p.t, v:num(p[M.extKey])>0?num(p[M.extKey]):NaN, i, ext:true, d:p.d}); });
+  return rows;
+}
+function groupMedian(st, key){ return median(groupRows(st,key).filter(r=>!r.me).map(r=>r.v)); }
+function relClass(v, med){ if(!isFinite(v)||!isFinite(med)) return ""; const d=v/med-1; return d<-0.15?"g":d>0.15?"r":"m"; }
+function pegClass(v){ return !isFinite(v)?"":v<1?"g":v<=2?"m":"r"; }
+function mClass(st,key){ const v=METRIC[key].get(st); return key==="peg"?pegClass(v):relClass(v,groupMedian(st,key)); }
+
+/* ---------- revenue: expected vs priced in ---------- */
+const SECTOR_MARGIN = {big:25, chip:30, soft:20, ev:8, pharma:20, fin:25, food:3, raw:10, quantum:20, other:10};
+function curMargin(st){ const b=baseOf(st), s=num(st.sps); return b>0&&s>0 ? b/s*100 : NaN; }
+function marginOf(st){ const t=num(st.tm); if(t>0) return t; const c=curMargin(st), sec=SECTOR_MARGIN[st.sector]||10; return isFinite(c)&&c>0 ? Math.round(Math.max(c,sec)) : sec; }
+function revCalc(st){
+  const price=num(st.price), sps=num(st.sps); if(!(price>0&&sps>0)) return null;
+  const r=rOf(st)/100, pe=num(st.scen?.base?.pe)||18, m=marginOf(st)/100, N=5;
+  const needSPS=price*Math.pow(1+r,N)/pe/m, mult=needSPS/sps, reqG=(Math.pow(mult,1/N)-1)*100;
+  const hasAna=String(st.anaRevG??"").trim()!=="";
+  const own=num(st.scen?.base?.g1), ana=num(st.anaRevG);
+  const expMult = hasAna ? Math.pow(1+ana/100,2)*Math.pow(1+own/100,N-2) : Math.pow(1+own/100,N);
+  const expG=(Math.pow(expMult,1/N)-1)*100;
+  return {reqG, mult, expG, expMult, hasAna, ana, own, m:m*100, pe, r:r*100};
+}
+function revOut(st){
+  const c=revCalc(st);
+  if(!c) return `<p class="mtext">Kräver kurs och försäljning per aktie (fylls i under Värde).</p>`;
+  const gap=c.reqG-c.expG, cls=gap>3?"r":gap<-3?"g":"m";
+  const W=v=>Math.max(4,Math.min(100,v/Math.max(c.mult,c.expMult)*100));
+  return `<div class="bars" style="margin-top:6px">
+      <div class="bar me"><span class="lab">Kursen kräver</span><span class="track"><span class="fill" style="width:${W(c.mult)}%"></span></span><span class="val">${fmt(c.mult,1)}x</span></div>
+      <div class="bar"><span class="lab">${c.hasAna?"Förväntat":"Din tillväxt"}</span><span class="track"><span class="fill" style="width:${W(c.expMult)}%;background:var(--${cls==="g"?"good":cls==="r"?"bad":"mid"})"></span></span><span class="val">${fmt(c.expMult,1)}x</span></div></div>
+    <p class="mtext">För att kursen ska vara rimlig måste försäljningen växa cirka <b>${fmt(c.reqG,0)} % per år</b> i fem år, till ${fmt(c.mult,1)} gånger dagens nivå. Det förutsätter att bolaget då har ${fmt(c.m,0)} % nettomarginal och värderas till P/E ${fmt(c.pe,0)}.</p>
+    <p class="mtext">${c.hasAna?`Analytikerna väntar sig ${fmt(c.ana,0)} % per år de närmaste två åren. För år 3 till 5 används din tillväxt (${fmt(c.own,0)} %). Totalt blir det cirka ${fmt(c.expG,0)} % per år.`:`Analytikernas prognos saknas, så jämförelsen använder din egen tillväxt i normalscenariot (${fmt(c.expG,0)} % per år).`} ${gap>3?`Kursen kräver alltså <b>mer</b> än vad som väntas. Marknaden är optimistisk.`:gap<-3?`Kursen kräver alltså <b>mindre</b> än vad som väntas. Marknaden är försiktig, vilket kan vara ett köpläge.`:`Kursen ligger ungefär i linje med förväntningarna.`}</p>${c.hasAna&&st.anaSrc?`<p class="hint">Prognoskälla: ${esc(st.anaSrc)}</p>`:""}`;
+}
+
+/* ---------- ownership ---------- */
+function ownOf(st){
+  const i=String(st.instPct??"").trim(), k=String(st.insPct??"").trim();
+  if(i==="" && k==="") return null;
+  const inst=Math.max(0,Math.min(100,num(i))), ins=Math.max(0,Math.min(100-inst,num(k)));
+  return {inst, ins, retail:Math.max(0,100-inst-ins)};
+}
+function ownCard(st){
+  const o=ownOf(st);
+  const body = o ? `<div class="own" role="img" aria-label="Institutioner ${fmt(o.inst,0)} procent, storägare ${fmt(o.ins,0)} procent, småsparare ${fmt(o.retail,0)} procent">
+      <span class="i" style="width:${o.inst}%"></span><span class="k" style="width:${o.ins}%"></span><span class="r" style="width:${o.retail}%"></span></div>
+    <div class="legend"><span><i style="background:var(--ink)"></i>Institutioner ${fmt(o.inst,0)} %</span><span><i style="background:var(--mid)"></i>Storägare och ledning ${fmt(o.ins,0)} %</span><span><i style="background:var(--good)"></i>Småsparare cirka ${fmt(o.retail,0)} %</span></div>
+    <p class="mtext">${o.ins>=40?"En storägare dominerar och bestämmer i praktiken över bolaget. Det ger ofta långsiktighet, men småägare har lite inflytande.":o.inst>=70?"Ägs främst av stora institutioner. Aktien följs av många analytiker och rör sig ofta på fondflöden och rapporter.":o.retail>=40?"Stor andel privatpersoner. Aktien kan svänga mer på nyheter, sociala medier och stämningar.":"Blandat ägande mellan institutioner och privatpersoner."}${o.ins>=10&&o.ins<40?" Grundare eller ledning äger en betydande del och har egna pengar på spel.":""}</p>
+    ${st.ownSrc?`<p class="hint">Källa: ${esc(st.ownSrc)}</p>`:""}`
+    : `<p class="mtext">Ägardata saknas. Fyll i nedan eller tryck Hämta nyckeltal med Claude.</p>`;
+  return `<div class="mcard"><div class="mhead"><h4>Vem äger aktien?</h4></div>${body}
+    <details class="lesson"><summary>Ändra siffror och lär dig mer</summary>
+      <div class="grid2" style="margin-top:8px">
+        <label class="f">Institutioner %<input data-own="instPct" inputmode="decimal" value="${esc(st.instPct??"")}"></label>
+        <label class="f">Storägare och ledning %<input data-own="insPct" inputmode="decimal" value="${esc(st.insPct??"")}"></label>
+      </div>
+      <dl><dt>Hur räknas småsparare?</dt><dd>Det rapporteras inte direkt. Andelen är det som blir kvar när institutioner och storägare dragits bort, så det är en uppskattning.</dd>
+      <dt>Viktigt att veta</dt><dd>Indexfonder (till exempel Länsförsäkringar Global Index) räknas som institutioner, fast pengarna egentligen kommer från vanliga sparare. Den verkliga andelen småsparpengar är därför högre än siffran visar.</dd>
+      <dt>Varför spelar det roll?</dt><dd>Mycket institutionellt ägande ger ofta stabilare kurs och fler analytiker. Mycket privat ägande ger oftare stora svängningar. En stor ägare eller grundare kan betyda långsiktighet, men också att småägare har lite att säga till om.</dd></dl>
+    </details></div>`;
+}
+
+/* ---------- quality ---------- */
+function rate(m, raw){ if(raw===undefined||raw===null||String(raw).trim()==="") return null; const v=num(raw); return m.hi?(v>=m.g?2:v>=m.o?1:0):(v<=m.g?2:v<=m.o?1:0); }
+function quality(st){ const ms=QM[st.type]||QM.bolag; let pts=0,n=0; for(const m of ms){ const r=rate(m,st.q?.[m.k]); if(r!==null){pts+=r;n++;} } return {pts,max:n*2,n,total:ms.length,share:n?pts/(n*2):NaN}; }
+const qLabel = q => !q.n?"":q.share>=0.75?"Stark":q.share>=0.5?"Medel":"Svag";
+
+/* ---------- signal ---------- */
+function signal(st, v){
+  const price=num(st.price), gav=num(st.gav);
+  if(!(price>0)||!(baseOf(st)>0)) return null;
+  const w=v.weighted, bull=v.res.bull.value, gain=gav>0?price/gav-1:NaN;
+  if(price>=bull) return {k:"sell",t:"Sälj",d:`Kursen ${fmt(price)} är högre än värdet även i bästa scenariot (${fmt(bull)}). Marknaden tror på mer än ditt mest optimistiska antagande.`};
+  const overHit=price>=w*(1+rules.over/100), gainHit=isFinite(gain)&&gain>=rules.gain/100;
+  if(overHit||gainHit){ const why=[overHit?`kursen ligger ${pct(price/w-1)} över värdet`:"",gainHit?`du har ${pct(gain)} sedan köp`:""].filter(Boolean).join(" och "); return {k:"trim",t:"Ta hem vinst",d:`${why[0].toUpperCase()+why.slice(1)}. Överväg att sälja cirka ${fmt(rules.trimPct,0)} % av innehavet.`}; }
+  if(price<=w*(1-rules.mos/100)){ const q=quality(st); return {k:"buy",t:"Köp",d:`Kursen är ${pct(1-price/w).replace("+","")} under värdet, mer än din säkerhetsmarginal på ${fmt(rules.mos,0)} %.${q.n&&q.share<0.5?" Obs: kvaliteten är svag, så rabatten kan ha en förklaring.":""}`}; }
+  return {k:"hold",t:"Behåll",d:`Köpläge under ${fmt(w*(1-rules.mos/100),0)}, vinsthemtagning från ${fmt(w*(1+rules.over/100),0)}${gav>0?` eller vid ${fmt(gav*(1+rules.gain/100),0)} (GAV +${fmt(rules.gain,0)} %)`:""}.`};
+}
+
+/* ---------- scale ---------- */
+function scaleSVG(st, v){
+  const price=num(st.price), lo=v.res.bear.value, hi=v.res.bull.value, w=v.weighted;
+  if(!(price>0)||!(baseOf(st)>0)) return "";
+  let min=Math.min(lo,hi,w,price), max=Math.max(lo,hi,w,price);
+  const pad=(max-min)*0.12||max*0.1; min=Math.max(0,min-pad); max+=pad;
+  const W=360,H=46,y=20,x=n=>((n-min)/(max-min))*W, col=price<w?"var(--good)":"var(--bad)";
+  return `<svg viewBox="-8 0 ${W+16} ${H}" role="img" aria-label="Kurs ${fmt(price)} mot värde ${fmt(w)}">
+    <line x1="0" x2="${W}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="${x(lo)}" x2="${x(hi)}" y1="${y}" y2="${y}" stroke="var(--band)" stroke-width="10" stroke-linecap="round"/>
+    <line x1="${Math.min(x(price),x(w))}" x2="${Math.max(x(price),x(w))}" y1="${y}" y2="${y}" stroke="${col}" stroke-opacity=".35" stroke-width="10"/>
+    <line x1="${x(w)}" x2="${x(w)}" y1="${y-9}" y2="${y+9}" stroke="var(--mid)" stroke-width="2.5"/>
+    <circle cx="${x(price)}" cy="${y}" r="6" fill="${col}" stroke="var(--surface)" stroke-width="2"/>
+    <text x="${x(price)}" y="${H}" text-anchor="middle" font-size="11" fill="var(--muted)">Kurs ${fmt(price,0)}</text>
+    <text x="${x(w)}" y="9" text-anchor="middle" font-size="11" fill="var(--mid)">Värde ${fmt(w,0)}</text></svg>`;
+}
+
+/* ---------- lessons (with the stock's own numbers) ---------- */
+function lessonPE(st){
+  const p=num(st.price), b=num(st.base), n=num(st.norm);
+  return `<dl>
+    <dt>Vad är det?</dt><dd>Hur många års vinst du betalar för aktien, om vinsten skulle ligga still. P/E 20 betyder att det tar 20 år för bolaget att tjäna ihop det du betalar.</dd>
+    <dt>Så räknas det</dt><dd>Kurs delat med vinst per aktie.${p>0&&b>0?` Här: <span class="calc">${fmt(p)} / ${fmt(b)} = ${fmt(p/b,1)}</span>`:""}${n>0&&p>0?`. På normal vinst: <span class="calc">${fmt(p)} / ${fmt(n)} = ${fmt(p/n,1)}</span>`:""}</dd>
+    <dt>Tumregel</dt><dd>Under 15 brukar räknas som billigt, 15 till 25 normalt och över 25 dyrt. Men jämför alltid inom samma bransch, eftersom snabbväxande bolag nästan alltid har högre P/E.</dd>
+    <dt>Fallgrop</dt><dd>Engångsvinster eller ett toppår ger ett missvisande lågt P/E. Går bolaget med förlust finns inget P/E alls.</dd></dl>`;
+}
+function lessonPS(st){
+  const p=num(st.price), s=num(st.sps);
+  return `<dl>
+    <dt>Vad är det?</dt><dd>Hur mycket du betalar för varje krona bolaget säljer för, oavsett om det tjänar pengar eller inte.</dd>
+    <dt>Så räknas det</dt><dd>Kurs delat med försäljning per aktie (samma sak som börsvärdet delat med omsättningen).${p>0&&s>0?` Här: <span class="calc">${fmt(p)} / ${fmt(s)} = ${fmt(p/s,1)}</span>`:""}</dd>
+    <dt>Tumregel</dt><dd>Beror helt på hur lönsam branschen är. Dagligvaruhandel ligger ofta under 1, mjukvara och chip ofta mellan 5 och 20. Jämför därför bara inom samma bransch.</dd>
+    <dt>När är det bra?</dt><dd>För bolag som går med förlust, där P/E inte fungerar. Ett lågt P/S kan betyda att bolaget är billigt om lönsamheten förbättras.</dd>
+    <dt>Fallgrop</dt><dd>Försäljning är inte vinst. Ett bolag med lågt P/S kan ändå vara dyrt om det aldrig blir lönsamt.</dd></dl>`;
+}
+function lessonPEG(st){
+  const pe=peUse(st), g=num(st.scen?.base?.g1);
+  return `<dl>
+    <dt>Vad är det?</dt><dd>P/E justerat för tillväxt. Ett högt P/E kan vara rimligt om vinsten växer snabbt, och PEG visar om det är så.</dd>
+    <dt>Så räknas det</dt><dd>P/E delat med förväntad årlig vinsttillväxt i procent.${isFinite(pe)&&g>0?` Här: <span class="calc">${fmt(pe,1)} / ${fmt(g,0)} = ${fmt(pe/g,2)}</span>`:""} Tillväxten är den du angett för år 1 till 5 i normalscenariot.</dd>
+    <dt>Tumregel</dt><dd>Under 1 är billigt i förhållande till tillväxten, 1 till 2 är rimligt och över 2 är dyrt.</dd>
+    <dt>Fallgrop</dt><dd>PEG är bara så bra som tillväxtgissningen. Ändrar du tillväxten ändras PEG direkt.</dd></dl>`;
+}
+const SCHOOL = [
+  ["Börja här: hur tänker man?","En aktie är en liten del av ett bolag. Det bolaget är värt i längden är de vinster det tjänar i framtiden. Allt i appen handlar om två frågor: hur mycket kommer bolaget att tjäna, och hur mycket betalar jag för det idag?"],
+  ["P/E (pris delat med vinst)","Hur många års vinst du betalar för aktien. Kurs delat med vinst per aktie. Jämför alltid med bolag i samma bransch. Under 15 brukar ses som billigt och över 25 som dyrt, men snabbväxare har nästan alltid högre P/E."],
+  ["P/S (pris delat med försäljning)","Hur mycket du betalar per krona i försäljning. Användbart för bolag som går med förlust. Jämför bara inom samma bransch, eftersom lönsamheten skiljer sig enormt mellan till exempel livsmedel och mjukvara."],
+  ["PEG (P/E delat med tillväxt)","Visar om ett högt P/E motiveras av snabb tillväxt. Under 1 är billigt för tillväxten, 1 till 2 rimligt, över 2 dyrt. Bygger på en gissning om tillväxten."],
+  ["Värde och scenarier","Appen räknar fram vinsten tio år framåt i ett sämsta, normalt och bästa läge, plus vad aktien kan säljas för om tio år. Allt räknas tillbaka till ett värde idag och viktas efter hur troligt varje läge är."],
+  ["Risknivå","Pengar i framtiden är värda mindre än pengar idag, och ännu mindre om bolaget är osäkert. Därför kräver du högre avkastning av riskabla bolag, vilket ger ett lägre värde idag."],
+  ["Vad kursen kräver","Vänder på frågan: hur snabbt måste vinsten växa för att dagens kurs ska vara rimlig? Om svaret är orimligt högt är aktien sannolikt dyr."],
+  ["Omsättning: förväntat mot inprisat","Räknar ut hur mycket bolaget måste sälja om fem år för att dagens kurs ska vara rimlig, och jämför med vad analytikerna väntar sig. Kräver kursen mycket mer än någon tror är aktien sannolikt dyr. Fungerar även för förlustbolag, eftersom det utgår från försäljning."],
+  ["Vem äger aktien?","Visar hur stor del som ägs av institutioner (fonder, pensionsbolag, banker), av storägare och ledning, och av småsparare. Småsparare rapporteras inte direkt utan räknas som resten. Indexfonder räknas som institutioner fast pengarna kommer från vanliga sparare."],
+  ["Normal vinst","Om senaste årets vinst är ovanligt hög (en boom eller en engångsvinst) eller låg (en tillfällig svacka) kan du ange en mer normal vinst. Då räknar appen på den i stället."],
+  ["Kvalitet","Ett billigt bolag är bara ett fynd om det är ett bra bolag. Hög ROIC, höga marginaler, låg skuld och vinst som blir riktiga pengar är tecken på kvalitet."],
+  ["Signaler","Köp när kursen ligger klart under värdet (säkerhetsmarginal). Ta hem en del av vinsten när kursen stigit långt över värdet. Signalerna är hjälpmedel, inte råd."]
+];
+
+/* ---------- list ---------- */
+function renderList(){
+  const el = $("#list");
+  if(!stocks.length){ el.innerHTML = `<div class="empty">Listan är tom. Skriv en ticker ovan för att börja.</div>`; return; }
+  const by = {};
+  stocks.forEach(s=>{ (by[s.sector] ||= []).push(s); });
+  el.innerHTML = Object.keys(SECTORS).filter(k=>by[k]).map(k=>{
+    const rows = by[k].map(s=>({s,v:valuate(s)})).sort((a,b)=>(isFinite(b.v.upside)?b.v.upside:-9)-(isFinite(a.v.upside)?a.v.upside:-9));
+    return `<div class="sector"><h2>${esc(SECTORS[k])}</h2>${rows.map(({s,v})=>{
+      const g = signal(s,v), pe=peUse(s), ps=psOf(s), peg=pegOf(s);
+      return `<button class="row" data-id="${s.id}" aria-current="${s.id===selId}">
+        <div><div class="tk">${esc(s.ticker)} ${g?`<span class="sig ${g.k}">${g.t}</span>`:""}</div><div class="nm">${esc(s.name||"Fyll i nyckeltal")}</div></div>
+        <div><div class="up ${isFinite(v.upside)?(v.upside>=0?"pos":"neg"):""}">${isFinite(v.upside)?pct(v.upside):""}</div><div class="nm" style="text-align:right">${num(s.price)>0?fmt(num(s.price))+" "+esc(s.currency):""}</div></div>
+        <div class="chips">
+          <span class="chip ${mClass(s,"pe")}">P/E ${isFinite(pe)?fmt(pe,1):(num(s.price)>0?"förlust":"·")}</span>
+          <span class="chip ${mClass(s,"ps")}">P/S ${fmt(ps,1)}</span>
+          <span class="chip ${mClass(s,"peg")}">PEG ${fmt(peg,1)}</span>
+        </div></button>`;}).join("")}</div>`;
+  }).join("");
+}
+
+/* ---------- detail ---------- */
+function renderDetail(){
+  const d = $("#detail"), st = sel();
+  $("#app").classList.toggle("has-sel", !!st || view==="school");
+  if(view==="school"){ renderSchool(); return; }
+  if(!st){ d.className="detail blank"; d.innerHTML=`<p>Välj ett bolag i listan.</p>`; return; }
+  d.className="detail";
+  const TABS=[["over","Översikt"],["keys","Nyckeltal"],["cmp","Jämför"],["value","Värde"],["qual","Kvalitet"]];
+  d.innerHTML = `<div class="dbar"><div class="t"><button class="back" id="back" aria-label="Tillbaka till listan">‹</button><h2>${esc(st.name||st.ticker)}</h2><span class="sub">${esc(st.ticker)}</span></div>
+    <div class="tabs" role="tablist">${TABS.map(([k,n])=>`<button role="tab" data-dtab="${k}" aria-selected="${dtab===k}">${n}</button>`).join("")}</div></div>
+    <div class="pane" id="pane"></div>`;
+  renderPane();
+}
+function renderPane(){
+  const st=sel(), p=$("#pane"); if(!st||!p) return;
+  ({over:paneOver, keys:paneKeys, cmp:paneCmp, value:paneValue, qual:paneQual})[dtab](st,p);
+}
+
+function paneOver(st,p){
+  const v=valuate(st), price=num(st.price), ok=baseOf(st)>0, cur=esc(st.currency), g=signal(st,v);
+  const kp = key => { const val=METRIC[key].get(st); return `<button class="kpi ${mClass(st,key)}" data-goto="keys"><b>${fmt(val,key==="peg"?2:1)}</b><span>${METRIC[key].n}</span></button>`; };
+  p.innerHTML = `
+    <div class="sub">Kurs ${price>0?fmt(price)+" "+cur:"saknas"}${st.priceDate?` (${esc(st.priceDate)})`:""}</div>
+    ${ok&&price>0 ? `
+      <div style="margin-top:14px"><div class="big ${v.upside>=0?"pos":"neg"}">${pct(v.upside)}</div>
+      <div class="sub">${v.upside>=0?"möjlig uppsida till uppskattat värde":"kursen ligger över uppskattat värde"} (${fmt(v.weighted,0)} ${cur})</div></div>
+      <div class="scale" style="margin-top:12px">${scaleSVG(st,v)}</div>
+      ${g?`<div class="box ${g.k}"><strong>${g.t}</strong><p>${esc(g.d)}</p></div>`:""}`
+    : price>0 ? `<div class="box"><strong>Går med förlust</strong><p>Det finns ingen vinst att räkna på, så appen kan inte sätta ett värde. Titta på P/S under Nyckeltal och Jämför, och på Kvalitet.</p></div>` : `<p class="hint">Fyll i kurs och vinst under Värde.</p>`}
+    <div class="kpis">${kp("pe")}${kp("ps")}${kp("peg")}</div>
+    <p class="hint">Grönt betyder billigare än branschen (PEG: billigt för tillväxten), gult ungefär lika, rött dyrare. Tryck för förklaring.</p>
+    ${st.note?`<div class="why"><strong>Om bolaget:</strong> ${esc(st.note)}</div>`:""}
+    <div id="owncard">${ownCard(st)}</div>
+    <div class="foot"><button class="btn ghost" id="aiBtn">Hämta nyckeltal med Claude</button><span class="hint" id="aiMsg"></span></div>`;
+}
+
+function metricCard(st,key){
+  const M=METRIC[key], v=M.get(st), med=key==="peg"?NaN:groupMedian(st,key);
+  let pos, lo, hi, txt;
+  if(key==="peg"){ lo="0"; hi="3+"; pos=isFinite(v)?Math.min(100,v/3*100):null;
+    txt = !isFinite(v)?"Kan inte räknas: bolaget saknar vinst eller tillväxt i normalscenariot.":v<1?"Billigt i förhållande till tillväxten du räknar med.":v<=2?"Rimligt pris för tillväxten.":"Dyrt i förhållande till tillväxten.";
+  } else {
+    const ref=isFinite(med)?med:(key==="pe"?20:5); lo="Billigare"; hi="Dyrare";
+    pos=isFinite(v)?Math.max(0,Math.min(100,50+ (Math.log(v/ref)/Math.log(3))*50)):null;
+    txt = !isFinite(v)?(key==="pe"&&num(st.price)>0?"Bolaget går med förlust, så P/E finns inte. Använd P/S i stället.":"Saknar data. Fyll i "+(key==="ps"?"försäljning per aktie":"vinst per aktie")+" under Värde."):
+      isFinite(med)?`Branschens median är ${fmt(med,1)}. ${esc(st.ticker)} är ${Math.abs(v/med-1)<0.15?"ungefär lika dyr":v<med?`cirka ${fmt((1-v/med)*100,0)} % billigare`:`cirka ${fmt((v/med-1)*100,0)} % dyrare`}.`:"Inga jämförbara bolag ännu. Lägg till konkurrenter under Jämför.";
+  }
+  const lesson = key==="pe"?lessonPE(st):key==="ps"?lessonPS(st):lessonPEG(st);
+  return `<div class="mcard"><div class="mhead"><h4>${M.n}${key==="pe"&&num(st.norm)>0?" <span class='sub'>(normal vinst)</span>":""}</h4><span class="v">${fmt(v,key==="peg"?2:1)}</span></div>
+    ${pos!==null?`<div class="gauge"><i style="left:${pos}%"></i></div><div class="gl"><span>${lo}</span><span>${key==="peg"?"1,5":"Branschen"}</span><span>${hi}</span></div>`:""}
+    <p class="mtext">${txt}</p>
+    <details class="lesson"><summary>Vad betyder ${M.n}?</summary>${lesson}</details></div>`;
+}
+function paneKeys(st,p){
+  p.innerHTML = `<p class="hint" style="margin:0">Tre sätt att se om aktien är billig eller dyr. Inget av dem räcker ensamt, titta på alla tre.</p>
+    ${metricCard(st,"pe")}${metricCard(st,"ps")}${metricCard(st,"peg")}
+    <div class="mcard"><div class="mhead"><h4>Omsättning: förväntat mot inprisat</h4></div>
+      <p class="hint" style="margin:4px 0 0">Hur mycket måste bolaget sälja om fem år för att dagens kurs ska vara rimlig, jämfört med vad som faktiskt väntas?</p>
+      <div id="revout">${revOut(st)}</div>
+      <div class="grid2" style="margin-top:12px">
+        <label class="f">Nettomarginal om 5 år % (tomt = förslaget)<input data-k="tm" inputmode="decimal" value="${esc(st.tm)}" placeholder="${fmt(marginOf(st),0)} (förslag)"></label>
+        <label class="f">Analytikernas tillväxt %/år, närmaste 2 år<input data-k="anaRevG" inputmode="decimal" value="${esc(st.anaRevG)}" placeholder="Saknas"></label>
+      </div>
+      <details class="lesson"><summary>Hur räknas det?</summary><dl>
+        <dt>Steg 1</dt><dd>Om du köper idag vill du ha din avkastning (risknivån). Kursen behöver alltså vara ungefär så mycket högre om fem år.</dd>
+        <dt>Steg 2</dt><dd>Den framtida kursen delat med P/E år 10 ger vilken vinst som krävs. Vinsten delat med nettomarginalen ger vilken försäljning som krävs.</dd>
+        <dt>Steg 3</dt><dd>Den försäljningen jämförs med dagens, och med vad analytikerna (eller du) förväntar sig.</dd>
+        <dt>Tumregel</dt><dd>Kräver kursen mycket snabbare tillväxt än någon tror på är aktien sannolikt dyr. Kräver den långsammare tillväxt än väntat kan den vara billig.</dd></dl></details>
+    </div>
+    ${num(st.norm)>0&&isFinite(peRep(st))?`<p class="hint">Redovisat P/E på senaste årets vinst är ${fmt(peRep(st),1)}. Appen använder normal vinst eftersom den senaste vinsten bedöms som missvisande.</p>`:""}`;
+}
+
+function paneCmp(st,p){
+  const rows=groupRows(st,cmpMetric), med=median(rows.filter(r=>!r.me).map(r=>r.v));
+  const vals=rows.map(r=>r.v).filter(isFinite), max=Math.min(Math.max(...vals,med||0,0.1)*1.1, Math.max((med||1)*3, cmpMetric==="peg"?3:10));
+  const w=v=>Math.max(2,Math.min(100,v/max*100));
+  rows.sort((a,b)=>(isFinite(a.v)?a.v:1e9)-(isFinite(b.v)?b.v:1e9));
+  const me=METRIC[cmpMetric].get(st);
+  let txt="";
+  if(isFinite(me)&&isFinite(med)){ const d=me/med-1; txt=`${esc(st.name||st.ticker)} har ${METRIC[cmpMetric].n} ${fmt(me,cmpMetric==="peg"?2:1)} mot branschens ${fmt(med,cmpMetric==="peg"?2:1)}. ${Math.abs(d)<0.15?"Ungefär samma prisnivå.":d<0?`Cirka ${fmt(-d*100,0)} % billigare än branschen.`:`Cirka ${fmt(d*100,0)} % dyrare än branschen.`}`; }
+  else if(!isFinite(me)) txt = cmpMetric==="pe"?"Bolaget går med förlust och har inget P/E. Byt till P/S.":"Värdet saknas för det här bolaget.";
+  const dates=[...new Set((st.peers||[]).filter(p=>p.d).map(p=>p.d))];
+  p.innerHTML = `<p class="hint" style="margin:0 0 10px">Jämför med bolag i samma bransch: <b>${esc(SECTORS[st.sector])}</b>. Bolag i din lista räknas automatiskt.</p>
+    <div class="seg" role="group" aria-label="Nyckeltal">${Object.entries(METRIC).map(([k,m])=>`<button data-cmp="${k}" aria-pressed="${cmpMetric===k}">${m.n}</button>`).join("")}</div>
+    <div class="bars">${rows.map(r=>`<div class="bar${r.me?" me":""}"><span class="lab" title="${esc(r.n)}">${esc(r.t)}</span>
+      <span class="track">${isFinite(r.v)?`<span class="fill" style="width:${w(r.v)}%"></span>`:""}${isFinite(med)?`<span class="med" style="left:${w(med)}%"></span>`:""}</span>
+      <span class="val">${isFinite(r.v)?fmt(r.v,cmpMetric==="peg"?2:1):(cmpMetric==="pe"?"förlust":"·")}${r.ext?`<button class="x" data-peerdel="${r.i}" aria-label="Ta bort ${esc(r.t)}">×</button>`:""}</span></div>`).join("")}</div>
+    <div class="legend"><span><i style="background:var(--mid)"></i>Branschens median${isFinite(med)?` (${fmt(med,cmpMetric==="peg"?2:1)})`:""}</span><span><i style="background:var(--ink)"></i>${esc(st.ticker)}</span></div>
+    ${txt?`<p class="mtext">${txt}</p>`:""}
+    ${cmpMetric==="peg"?`<p class="hint">PEG kräver din tillväxtbedömning, så bara bolag i din lista visas.</p>`:""}
+    ${dates.length?`<p class="hint">Externa konkurrenters siffror från: ${esc(dates.join(", "))}.</p>`:""}
+    <h3>Lägg till konkurrent utanför din lista</h3>
+    <div class="peadd"><input id="peerT" placeholder="Ticker" autocapitalize="characters" aria-label="Ticker"><input id="peerPE" inputmode="decimal" placeholder="P/E" aria-label="P/E"><input id="peerPS" inputmode="decimal" placeholder="P/S" aria-label="P/S"><button class="btn ghost" id="peerAdd" type="button">Lägg till</button></div>
+    <h3>Bransch</h3>
+    <label class="f">Bolaget jämförs med<select data-k="sector">${Object.entries(SECTORS).map(([k,n])=>`<option value="${k}"${st.sector===k?" selected":""}>${n}</option>`).join("")}</select></label>`;
+}
+
+function paneValue(st,p){
+  p.innerHTML = `
+    <div id="vres"></div>
+    <h3>Grunddata</h3>
+    <div class="grid2">
+      <label class="f">Aktiekurs<input data-k="price" inputmode="decimal" value="${esc(st.price)}"></label>
+      <label class="f">Valuta<input data-k="currency" value="${esc(st.currency)}" maxlength="4"></label>
+      <label class="f">Vinst per aktie (12 mån)<input data-k="base" inputmode="decimal" value="${esc(st.base)}"></label>
+      <label class="f">Normal vinst per aktie<input data-k="norm" inputmode="decimal" value="${esc(st.norm)}" placeholder="Valfritt"></label>
+      <label class="f">Försäljning per aktie (12 mån)<input data-k="sps" inputmode="decimal" value="${esc(st.sps)}" placeholder="För P/S"></label>
+      <label class="f">Mitt GAV<input data-k="gav" inputmode="decimal" value="${esc(st.gav)}" placeholder="Valfritt"></label>
+      <label class="f" style="grid-column:1/-1">Risknivå<select data-k="risk">${Object.entries(RISK).map(([k,o])=>`<option value="${k}"${(st.risk||"normal")===k?" selected":""}>${o.n}, ${o.r} %</option>`).join("")}</select></label>
+      <label class="f" style="grid-column:1/-1">Namn<input data-k="name" value="${esc(st.name)}"></label>
+    </div>
+    <p class="hint">Normal vinst används i stället för senaste årets om den är ifylld (för cykliska bolag eller vid engångsposter). Högre risknivå ger lägre värde idag.</p>
+    <h3>Scenarier</h3>
+    <p class="hint" style="margin:0 0 8px">Tillväxt är hur mycket vinsten ökar per år. P/E år 10 är vad köpare antas betala då (moget bolag ofta 15 till 20). Sannolikheterna ska bli 100 %.</p>
+    <div class="tablewrap"><table class="scen"><thead><tr><th></th><th>Tillväxt år 1 till 5 %</th><th>Tillväxt år 6 till 10 %</th><th>P/E år 10</th><th>Sanno&shy;likhet %</th><th>Värde</th></tr></thead>
+      <tbody>${SCEN.map(([k,n])=>`<tr><td>${n}</td>${["g1","g2","pe","p"].map(f=>`<td><input data-s="${k}" data-f="${f}" inputmode="decimal" value="${st.scen[k][f]}" aria-label="${n} ${f}"></td>`).join("")}<td id="out-${k}"></td></tr>`).join("")}</tbody></table></div>
+    <div class="warn" id="probwarn"></div>
+    <h3>Vad kursen kräver</h3><div id="implied"></div>
+    <details style="margin-top:18px"><summary>Visa år för år</summary>
+      <div class="seg" style="margin:8px 0">${SCEN.map(([k,n])=>`<button data-year="${k}" aria-pressed="${yearTab===k}">${n}</button>`).join("")}</div>
+      <div class="tablewrap" id="years"></div></details>
+    <div class="foot"><span class="hint">Värdet är en uppskattning, inte ett facit.</span><button class="btn danger" id="delBtn">Ta bort ${esc(st.ticker)}</button></div>`;
+  updateValue();
+}
+function updateValue(){
+  const st=sel(); if(!st||!$("#vres")) return;
+  const v=valuate(st), ok=baseOf(st)>0, price=num(st.price), cur=esc(st.currency);
+  let sens="";
+  if(ok){
+    let term=0; for(const [k] of SCEN) term+=v.res[k].exitPv*st.scen[k].p/100;
+    const alt=d=>{let w=0; for(const [k] of SCEN){ w+=scenario({...st.scen[k],pe:Math.max(1,st.scen[k].pe+d)},baseOf(st),rOf(st)).value*st.scen[k].p/100;} return w;};
+    sens=`<p class="hint">Cirka ${fmt(term/v.weighted*100,0)} % av värdet bygger på priset om tio år. Med 5 lägre P/E då blir värdet ${fmt(alt(-5),0)}, med 5 högre ${fmt(alt(5),0)} ${cur}.</p>`;
+  }
+  $("#vres").innerHTML = ok ? `<div class="big">${fmt(v.weighted,0)} <span style="font-size:18px">${cur}</span></div>
+    <div class="sub">Uppskattat värde per aktie${price>0?`, kurs ${fmt(price,0)} ${cur} (${pct(v.upside)})`:""}</div>${sens}`
+    : `<p class="hint" style="margin:0">Ange vinst per aktie (eller normal vinst) för att räkna fram ett värde.</p>`;
+  for(const [k] of SCEN){ const o=$("#out-"+k); if(o) o.textContent = ok?fmt(v.res[k].value,0):"·"; }
+  $("#probwarn").textContent = Math.abs(v.psum-100)>0.01?`Sannolikheterna blir ${fmt(v.psum,0)} %, ska vara 100 %.`:"";
+  const ig=impliedG(st);
+  $("#implied").innerHTML = !ig?`<p class="hint" style="margin:0">Kräver kurs och vinst.</p>`
+    : !isFinite(ig.g)?`<p class="mtext">Kursen ligger utanför det som går att räkna fram.</p>`
+    : `<div class="big" style="font-size:30px">${fmt(ig.g,1)} %</div><p class="mtext">vinsttillväxt per år i tio år krävs för att kursen ska vara rimlig. Ditt normalscenario motsvarar ${fmt(ig.own,1)} % per år, så marknaden är ${ig.g>ig.own+2?"mer optimistisk än du":ig.g<ig.own-2?"mer pessimistisk än du":"i linje med dig"}.</p><p class="hint">Fråga dig: kan bolaget verkligen växa så snabbt i tio år?</p>`;
+  const r=v.res[yearTab];
+  $("#years").innerHTML = ok?`<table><thead><tr><th>År</th><th>Vinst/aktie</th><th>Värt idag</th></tr></thead><tbody>${r.years.map(y=>`<tr><td>${y.t}</td><td>${fmt(y.e)}</td><td>${fmt(y.pv)}</td></tr>`).join("")}
+    <tr><td>Försäljning år 10</td><td>${fmt(r.exit)}</td><td>${fmt(r.exitPv)}</td></tr><tr><td><b>Värde idag</b></td><td></td><td><b>${fmt(r.value)}</b></td></tr></tbody></table>`:"";
+}
+
+function paneQual(st,p){
+  const q=quality(st);
+  p.innerHTML = `<p class="hint" style="margin:0">Ett billigt bolag är bara ett fynd om det är ett bra bolag. Fyll i från årsrapporten eller tryck Hämta nyckeltal under Översikt.</p>
+    <div style="margin-top:14px"><span class="big" style="font-size:32px">${q.n?q.pts+"/"+q.max:"·"}</span> <span>${qLabel(q)}${q.n&&q.n<q.total?` (${q.n} av ${q.total} ifyllda)`:""}</span></div>
+    <div class="grid2" style="margin-top:14px">
+      <label class="f" style="grid-column:1/-1">Bolagstyp<select data-k="type"><option value="bolag"${st.type!=="bank"?" selected":""}>Vanligt bolag</option><option value="bank"${st.type==="bank"?" selected":""}>Bank eller finans</option></select></label>
+      ${(QM[st.type]||QM.bolag).map(m=>`<label class="f"><span class="h">${m.n} (${m.u})<i class="dot${(r=>r===null?"":" r"+r)(rate(m,st.q?.[m.k]))}" id="qd-${m.k}"></i></span><input data-q="${m.k}" inputmode="decimal" value="${esc(st.q?.[m.k]??"")}" placeholder="${m.hi?"Bra från":"Bra under"} ${fmt(m.g,m.u==="x"?1:0)}"><span style="font-size:12px">${m.d}</span></label>`).join("")}
+    </div>
+    <p class="hint">Grönt är bra, gult godkänt, rött svagt.</p>`;
+}
+
+function renderSchool(){
+  const d=$("#detail"); d.className="detail";
+  d.innerHTML = `<div class="dbar"><div class="t"><button class="back" id="back" aria-label="Tillbaka">‹</button><h2>Lär dig nyckeltalen</h2></div><div style="height:12px"></div></div>
+    <div class="pane school"><p class="hint" style="margin:0">Korta förklaringar på vanlig svenska. Under Nyckeltal för varje bolag ser du samma tal uträknade med bolagets egna siffror.</p>
+    ${SCHOOL.map(([t,b],i)=>`<details class="lessonbox"${i===0?" open":""}><summary>${t}</summary><p>${b}</p></details>`).join("")}</div>`;
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click", e => {
+  const t=e.target;
+  const row=t.closest(".row[data-id]"); if(row){ selId=row.dataset.id; view="detail"; dtab="over"; renderList(); renderDetail(); try{window.scrollTo(0,0);}catch{} return; }
+  if(t.id==="schoolBtn"){ view="school"; selId=null; renderList(); renderDetail(); try{window.scrollTo(0,0);}catch{} return; }
+  if(t.closest("#back")){ selId=null; view="list"; renderList(); renderDetail(); return; }
+  const tb=t.closest("[data-dtab]"); if(tb){ dtab=tb.dataset.dtab; document.querySelectorAll("[data-dtab]").forEach(b=>b.setAttribute("aria-selected",b===tb)); renderPane(); return; }
+  const go=t.closest("[data-goto]"); if(go){ dtab=go.dataset.goto; renderDetail(); return; }
+  const cm=t.closest("[data-cmp]"); if(cm){ cmpMetric=cm.dataset.cmp; renderPane(); return; }
+  const yr=t.closest("[data-year]"); if(yr){ yearTab=yr.dataset.year; document.querySelectorAll("[data-year]").forEach(b=>b.setAttribute("aria-pressed",b===yr)); updateValue(); return; }
+  const pd=t.closest("[data-peerdel]"); if(pd){ const st=sel(); st.peers.splice(+pd.dataset.peerdel,1); touch(st); renderPane(); return; }
+  if(t.id==="peerAdd"){ const st=sel(), tk=$("#peerT").value.trim().toUpperCase(); if(!tk||tk===st.ticker) return;
+    const pe=$("#peerPE").value.trim(), ps=$("#peerPS").value.trim();
+    st.peers=st.peers||[]; const ex=st.peers.find(x=>x.t===tk), rec=ex||{t:tk};
+    if(pe) rec.pe=num(pe); if(ps) rec.ps=num(ps); rec.d=new Date().toLocaleDateString("sv-SE"); if(!ex) st.peers.push(rec);
+    touch(st); renderPane(); return; }
+  if(t.id==="delBtn"){ const st=sel(); if(st&&confirm(`Ta bort ${st.ticker}?`)){ stocks=stocks.filter(s=>s.id!==selId); selId=null; view="list"; save(); renderList(); renderDetail(); } return; }
+  if(t.id==="aiBtn"){ aiFill(); return; }
+});
+document.addEventListener("input", e => {
+  const el=e.target;
+  if(el.dataset.r){ rules[el.dataset.r]=num(el.value); save(); renderList(); return; }
+  const st=sel(); if(!st) return;
+  if(el.dataset.own){ st[el.dataset.own]=el.value; touch(st);
+    const c=$("#owncard"), k=el.dataset.own, pos=el.selectionStart; c.innerHTML=ownCard(st); c.querySelector("details.lesson").open=true;
+    const ni=c.querySelector(`[data-own="${k}"]`); ni.focus(); try{ni.setSelectionRange(pos,pos);}catch{} return; }
+  if(el.dataset.q){ st.q=st.q||{}; st.q[el.dataset.q]=el.value; const m=(QM[st.type]||QM.bolag).find(x=>x.k===el.dataset.q); const dEl=$("#qd-"+m.k); if(dEl){ const r=rate(m,el.value); dEl.className="dot"+(r===null?"":" r"+r);} touch(st); return; }
+  if(el.dataset.k==="type"||el.dataset.k==="sector"){ st[el.dataset.k]=el.value; touch(st); renderPane(); return; }
+  if(el.dataset.k){ st[el.dataset.k]=el.value; if(el.dataset.k==="name") document.querySelector(".dbar h2").textContent=el.value||st.ticker; }
+  else if(el.dataset.s){ st.scen[el.dataset.s][el.dataset.f]=num(el.value); }
+  else return;
+  touch(st); updateValue(); const ro=$("#revout"); if(ro) ro.innerHTML=revOut(st);
+});
+function touch(st){ st.updated=Date.now(); save(); renderList(); }
+$("#addBtn").addEventListener("click", () => { addStock($("#addInput").value); $("#addInput").value=""; });
+$("#addInput").addEventListener("keydown", e => { if(e.key==="Enter"){ e.preventDefault(); addStock(e.target.value); e.target.value=""; } });
+function addStock(t){
+  t=String(t||"").trim().toUpperCase(); if(!t) return;
+  const ex=stocks.find(s=>s.ticker===t);
+  if(ex) selId=ex.id;
+  else { const st=normalize([{ticker:t}])[0]; st.updated=Date.now(); stocks.push(st); selId=st.id; save(); }
+  view="detail"; dtab="over"; renderList(); renderDetail();
+}
+
+/* ---------- Claude fill ---------- */
+async function aiFill(){
+  const st=sel(), msg=$("#aiMsg"), btn=$("#aiBtn");
+  if(sampleFn===undefined){ try{ sampleFn=await window.claude?.use?.("sample") ?? null; }catch{ sampleFn=null; } }
+  if(!sampleFn){ msg.textContent="Claude är inte tillgänglig här. Fyll i manuellt under Värde."; return; }
+  btn.disabled=true; msg.textContent="Hämtar…";
+  try{
+    const out=await sampleFn.json(
+`Du är en finansdatabas. Ge senast kända nyckeltal för aktien med ticker "${st.ticker}".
+Svara ENDAST med JSON:
+{"name": string, "currency": string (ISO, valutan aktien handlas i), "price": number|null, "eps_ttm": number|null (vinst per aktie 12 mån, utspädd), "sales_per_share_ttm": number|null (omsättning per aktie 12 mån), "institutional_ownership_pct": number|null (andel aktier som ägs av institutioner, %), "insider_major_holder_pct": number|null (andel som ägs av grundare, ledning och strategiska storägare, %), "revenue_growth_consensus_pct": number|null (analytikernas förväntade årliga omsättningstillväxt de närmaste 2 åren, i procent), "is_bank": boolean, "as_of": "YYYY-MM",
+ "quality": {${[...QM.bolag,...QM.bank].map(m=>`"${m.k}": number|null`).join(", ")}}}
+Procenttal anges som t.ex. 18 för 18 %. Använd null för det du inte vet säkert. Hitta inte på.`, {modelTier:"default"});
+    if(out&&typeof out==="object"){
+      if(out.name&&!st.name) st.name=out.name;
+      if(out.currency) st.currency=String(out.currency).toUpperCase();
+      if(isFinite(out.price)&&out.price){ st.price=String(out.price); st.priceDate=(out.as_of||"")+" (uppskattning)"; }
+      if(isFinite(out.eps_ttm)&&out.eps_ttm) st.base=String(out.eps_ttm);
+      if(isFinite(out.sales_per_share_ttm)&&out.sales_per_share_ttm>0) st.sps=String(out.sales_per_share_ttm);
+      if(isFinite(out.revenue_growth_consensus_pct)&&out.revenue_growth_consensus_pct!==null&&String(st.anaRevG).trim()===""){ st.anaRevG=String(out.revenue_growth_consensus_pct); st.anaSrc="Claude-uppskattning"; }
+      if(isFinite(out.institutional_ownership_pct)&&out.institutional_ownership_pct!==null&&String(st.instPct).trim()===""){ st.instPct=String(out.institutional_ownership_pct); if(isFinite(out.insider_major_holder_pct)&&out.insider_major_holder_pct!==null) st.insPct=String(out.insider_major_holder_pct); st.ownSrc="Claude-uppskattning, ej verifierad"; }
+      if(typeof out.is_bank==="boolean") st.type=out.is_bank?"bank":"bolag";
+      if(out.quality&&typeof out.quality==="object"){ st.q=st.q||{}; for(const m of QM[st.type]){ const x=out.quality[m.k]; if(typeof x==="number"&&isFinite(x)) st.q[m.k]=String(Math.round(x*100)/100); } }
+      touch(st); renderDetail();
+      const m2=$("#aiMsg"); if(m2) m2.textContent=`Uppskattning per ${out.as_of||"okänt datum"}, inte realtid. Kontrollera siffrorna.`;
+    }
+  }catch(e){ const m={not_granted:"Du nekade åtkomst till Claude.",rate_limited:"För många förfrågningar, försök igen senare."}[e?.code]; const m2=$("#aiMsg"); if(m2) m2.textContent=m||"Kunde inte hämta. Fyll i manuellt."; }
+  finally{ const b=$("#aiBtn"); if(b) b.disabled=false; }
+}
+
+/* ---------- storage ---------- */
+function saveLocal(){ try{ localStorage.setItem(LS_KEY,JSON.stringify(stocks)); localStorage.setItem(LS_KEY+".rules",JSON.stringify(rules)); }catch{} }
+function setRules(r){ if(r&&typeof r==="object") for(const k in rules) if(isFinite(r[k])) rules[k]=num(r[k]); document.querySelectorAll("[data-r]").forEach(i=>i.value=rules[i.dataset.r]); }
+function save(){
+  saveLocal(); if(!docRef) return;
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(async()=>{ try{ await docRef.set({stocks:JSON.parse(JSON.stringify(stocks)),rules:{...rules},savedAt:Date.now()}); $("#sync").textContent="Sparat i ditt konto"; }catch{ $("#sync").textContent="Sparat lokalt"; } },700);
+}
+function normalize(arr){
+  return (Array.isArray(arr)?arr:[]).filter(s=>s&&s.ticker).map(s=>{
+    const t=String(s.ticker).toUpperCase();
+    return {id:s.id||uid(), ticker:t, name:s.name||"", currency:s.currency||"USD", price:s.price??"", gav:s.gav??"",
+      basis:"eps", base:s.base??"", norm:s.norm??"", sps:s.sps??"", risk:RISK[s.risk]?s.risk:"normal", r:s.r??10,
+      sector:SECTORS[s.sector]?s.sector:(SECTOR_OF[t]||"other"), note:s.note||"", priceDate:s.priceDate||"", tm:s.tm??"", anaRevG:s.anaRevG??"", instPct:s.instPct??"", insPct:s.insPct??"", ownSrc:s.ownSrc||"", anaSrc:s.anaSrc||"",
+      peers:Array.isArray(s.peers)?s.peers.filter(p=>p&&p.t):[], type:s.type==="bank"?"bank":"bolag",
+      q:(s.q&&typeof s.q==="object")?s.q:{}, scen:Object.assign(DEFAULT_SCEN(),s.scen||{}), updated:s.updated||0};
+  });
+}
+try{ stocks=normalize(JSON.parse(localStorage.getItem(LS_KEY)||"[]")); }catch{ stocks=[]; }
+try{ setRules(JSON.parse(localStorage.getItem(LS_KEY+".rules")||"null")); }catch{ setRules(null); }
+renderList(); renderDetail();
+(async()=>{
+  try{
+    if(!window.claude?.use) return;
+    const [d,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);
+    if(!d||!user) return;
+    const id=await user.id(); if(!id) return;
+    docRef=d.doc(`data/users/${id}/watchlist`);
+    const selTicker=sel()?.ticker, snap=await docRef.get();
+    if(snap.exists){
+      const remote=normalize(snap.data().stocks); setRules(snap.data().rules);
+      const savedAt=snap.data().savedAt||0, extra=stocks.filter(l=>!remote.some(r=>r.ticker===l.ticker)&&(l.updated||0)>savedAt);
+      stocks=remote.concat(extra); saveLocal(); if(extra.length) save();
+    } else if(stocks.length) save();
+    $("#sync").textContent="Synkas med ditt konto";
+    if(selId&&!sel()){ const m=stocks.find(s=>s.ticker===selTicker); selId=m?m.id:null; if(!selId&&view==="detail") view="list"; }
+    renderList(); renderDetail();
+  }catch{ $("#sync").textContent="Sparat lokalt"; }
+})();
+})();
+</script>
+</body>
+</html>

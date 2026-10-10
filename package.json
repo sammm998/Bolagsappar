@@ -1,0 +1,23 @@
+{
+  "name": "bolagsappar",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.28.0",
+  "scripts": {
+    "test": "pnpm -r --if-present test",
+    "lint": "eslint . && node scripts/check-text.mjs",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "build": "pnpm -r --if-present build",
+    "dev": "pnpm --filter @bolagsappar/platform dev",
+    "dev:web": "pnpm --filter @bolagsappar/web dev",
+    "test:rls": "node supabase/tests/run.mjs",
+    "legacy": "cd legacy && python3 -m http.server 8000"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^9.39.5",
+    "globals": "^17.13.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
+  }
+}

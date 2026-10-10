@@ -1,0 +1,118 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`compute(S, D) ger samma avräkning som prototypen > låser nuvarande resultat (ändras bara med avsikt) 1`] = `
+{
+  "att": [
+    [
+      "Åkeri Norra AB",
+      -24953,
+    ],
+    [
+      "Limhamn Trafik AB",
+      -11585,
+    ],
+    [
+      "Söder Taxi HB",
+      -7390,
+    ],
+    [
+      "Kust Taxi AB",
+      -14030,
+    ],
+    [
+      "Väster Taxi AB",
+      -15628,
+    ],
+    [
+      "Öresund Bil AB",
+      -25984,
+    ],
+    [
+      "Hamnens Taxi AB",
+      -32195,
+    ],
+    [
+      "Ribersborg Trafik AB",
+      -13024,
+    ],
+    [
+      "Pildamm Taxi AB",
+      -13452,
+    ],
+    [
+      "Kirseberg Bil HB",
+      -13818,
+    ],
+    [
+      "Fosie Trafik AB",
+      -35229,
+    ],
+    [
+      "Husie Taxi AB",
+      -13928,
+    ],
+    [
+      "Bunkeflo Bil AB",
+      -18996,
+    ],
+    [
+      "Oxie Trafik AB",
+      -15756,
+    ],
+    [
+      "Rosengård Taxi AB",
+      -15949,
+    ],
+    [
+      "Slottsstaden Bil AB",
+      -22103,
+    ],
+    [
+      "Värnhem Trafik AB",
+      -18204,
+    ],
+    [
+      "Möllan Taxi HB",
+      -5019,
+    ],
+    [
+      "Lindängen Bil AB",
+      -28457,
+    ],
+    [
+      "Hyllie Trafik AB",
+      -45702,
+    ],
+    [
+      "Kroksbäck Taxi AB",
+      -27584,
+    ],
+    [
+      "Västra Hamnen Bil AB",
+      -26886,
+    ],
+    [
+      "Toftanäs Trafik AB",
+      -22585,
+    ],
+    [
+      "Klagshamn Taxi AB",
+      -5599,
+    ],
+  ],
+  "kpi": {
+    "app": 129320.6,
+    "fel": 0,
+    "inbet": 0,
+    "korningar": 1284,
+    "kort": 691506.6,
+    "kundAntal": 8,
+    "kundTotal": 543626,
+    "serv": 40933.62,
+    "skuldNeg": 0,
+    "skuldPos": 0,
+    "utbet": -474056,
+    "vx": 542900,
+  },
+}
+`;

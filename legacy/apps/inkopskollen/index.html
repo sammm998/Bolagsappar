@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Inköpskollen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F3EF; --card:#FFFFFF; --ink:#18221E; --muted:#69736E; --line:#E2E5E0;
+  --brand:#14694D; --brand-soft:#E2EFE8; --sign:#E8B500; --good:#1E8A5A; --warn:#C27C00; --bad:#C2432E; --band:#CFE5D8;
+  --shadow:0 1px 2px rgba(20,40,30,.06),0 6px 20px rgba(20,40,30,.06);
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1412; --card:#171F1C; --ink:#E7ECE9; --muted:#95A19B; --line:#26302C;
+  --brand:#3FB384; --brand-soft:#1A2E25; --sign:#F0C21A; --good:#55C08C; --warn:#E3A93A; --bad:#E2715A; --band:#1F3E30;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25)}}
+:root[data-theme="dark"]{
+  --bg:#0E1412; --card:#171F1C; --ink:#E7ECE9; --muted:#95A19B; --line:#26302C;
+  --brand:#3FB384; --brand-soft:#1A2E25; --sign:#F0C21A; --good:#55C08C; --warn:#E3A93A; --bad:#E2715A; --band:#1F3E30;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(64px + env(safe-area-inset-top,0px))}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 "Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.price,.logo span{font-family:"Bricolage Grotesque","Instrument Sans",system-ui,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--sign);outline-offset:2px}
+
+/* App bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--card) 88%,transparent);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--line)}
+.barin{max-width:980px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:10px}
+.logo{display:flex;align-items:center;gap:9px;margin-right:auto}
+.logo span{font-weight:800;font-size:20px;letter-spacing:-.02em}
+.iconbtn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center}
+
+.wrap{max-width:980px;margin:0 auto;padding:18px 16px 72px}
+.intro h1{font-size:30px;line-height:1.1;margin:6px 0 4px;font-weight:800;letter-spacing:-.02em}
+.intro p{margin:0;color:var(--muted);max-width:52ch}
+.tools{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin:16px 0 18px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:600;white-space:nowrap}
+.chip.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.sort{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+.sort select{font:inherit;font-size:14px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+
+/* Cards */
+.grid{display:grid;grid-template-columns:1fr;gap:16px}
+@media (min-width:640px){.grid{grid-template-columns:1fr 1fr}}
+@media (min-width:940px){.grid{grid-template-columns:1fr 1fr 1fr}}
+.card{position:relative;background:var(--card);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.card .media{position:relative;display:block;width:100%;aspect-ratio:16/9;padding:0;border:0;background:var(--band);overflow:hidden}
+.media img,.media .art,.dimg img,.dimg .art{width:100%;height:100%;object-fit:cover;display:block}
+.card.is-sold .media img,.card.is-sold .media .art{filter:grayscale(.55) brightness(.97)}
+.stag{display:inline-block;font-size:12px;font-weight:700;border-radius:6px;padding:3px 8px;margin-bottom:8px;letter-spacing:.01em}
+.st-bid{background:color-mix(in srgb,var(--warn) 18%,var(--card));color:var(--warn)}
+.st-soon{background:var(--bg);color:var(--muted)}
+.st-sale{background:var(--brand-soft);color:var(--brand)}
+.st-sold{background:var(--ink);color:var(--card)}
+.updated{font-size:13px;color:var(--muted);margin:-6px 0 14px}
+.pill{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:6px;background:var(--card);border-radius:999px;padding:5px 11px 5px 5px;font-size:13px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.pill b{display:grid;place-items:center;min-width:28px;height:28px;border-radius:999px;background:var(--c);color:#fff;font-family:"Bricolage Grotesque",sans-serif;font-size:14px}
+.ribbon{position:absolute;left:10px;top:10px;background:var(--ink);color:var(--card);border-radius:8px;padding:5px 10px;font-weight:700;font-size:13px;letter-spacing:.02em}
+.annons{position:absolute;right:10px;top:10px;display:inline-flex;align-items:center;gap:5px;background:color-mix(in srgb,var(--card) 92%,transparent);border-radius:999px;padding:6px 11px;font-size:13px;font-weight:600;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.card .body{display:block;width:100%;text-align:left;background:none;border:0;padding:14px 16px 10px}
+.price{font-size:24px;font-weight:800;letter-spacing:-.015em;line-height:1.1;font-variant-numeric:tabular-nums}
+.was{font-size:13px;color:var(--muted);margin-top:2px}
+.addr{font-weight:600;font-size:16px;margin-top:6px;overflow-wrap:anywhere}
+.loc{color:var(--muted);font-size:14px}
+.facts{font-size:14px;margin-top:8px;color:var(--ink)}
+.kpis{display:flex;gap:8px;margin-top:12px}
+.kpis span{flex:1;background:var(--brand-soft);border-radius:10px;padding:8px 10px;font-weight:700;font-variant-numeric:tabular-nums;font-size:15px}
+.kpis i{display:block;font-style:normal;font-weight:500;font-size:12px;color:var(--muted)}
+.foot{display:flex;border-top:1px solid var(--line);margin-top:auto}
+.tbtn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:none;border:0;padding:11px;font-size:14px;font-weight:600;color:var(--muted)}
+.tbtn+.tbtn{border-left:1px solid var(--line)}
+.tbtn.del{color:var(--bad)}
+.armed{background:var(--bad)!important;color:#fff!important;border-color:var(--bad)!important}
+.add{margin:20px 0 6px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:15px;border:0;background:var(--brand);color:#fff;border-radius:14px;font-weight:700;font-size:16px;box-shadow:var(--shadow)}
+.empty{color:var(--muted)}
+
+/* Panels */
+.panel{background:var(--card);border-radius:14px;margin:14px 0;box-shadow:var(--shadow)}
+summary{padding:15px 16px;font-weight:700;cursor:pointer;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";float:right;font-weight:400;color:var(--muted)}
+details[open] summary::after{content:"−"}
+.form{padding:2px 16px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);min-width:0}
+.form label.full{grid-column:1/-1}
+.form input,.form select{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;width:100%}
+.form .chk{flex-direction:row;align-items:center;gap:8px;color:var(--ink);font-size:15px}
+.form .chk input{width:20px;height:20px}
+.hint{grid-column:1/-1;font-size:13px;color:var(--muted);margin:0}
+.danger{background:none;border:0;color:var(--bad);padding:10px 0;font-weight:700;justify-self:start;border-radius:8px}
+.danger.armed{padding:10px 14px}
+.how{padding:0 16px 16px;font-size:14px;color:var(--muted)}
+.how p{margin:0 0 10px}.how b{color:var(--ink)}
+
+/* Detail */
+.detail{max-width:760px}
+.dimg{position:relative;aspect-ratio:16/10;border-radius:18px;overflow:hidden;background:var(--band);box-shadow:var(--shadow)}
+.imgacts{position:absolute;left:10px;bottom:10px;display:flex;gap:8px}
+.glass{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:8px 13px;font-size:14px;font-weight:600;background:color-mix(in srgb,var(--card) 90%,transparent);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.head{padding:18px 2px 6px}
+.head .price{font-size:32px}
+.head h2{font-size:21px;margin:8px 0 0;font-weight:700;line-height:1.2}
+.fchips{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px;margin-top:14px}
+.fchip{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:7px 11px;min-width:0}
+.fchip i{display:block;font-style:normal;font-size:12px;color:var(--muted)}
+.fchip b{font-size:15px;font-variant-numeric:tabular-nums}
+.card2{background:var(--card);border-radius:16px;padding:16px;margin:14px 0;box-shadow:var(--shadow)}
+.card2 h3{margin:0 0 10px;font-size:17px;font-weight:700}
+.soldbox{border-left:4px solid var(--ink);font-size:15px}
+.market .mhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.market h3{margin:0}
+.msub{font-size:13px;color:var(--muted);margin-top:2px;max-width:46ch}
+.mnow{text-align:right;flex:none}
+.mnow b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-size:28px;font-weight:800;line-height:1}
+.mnow span{font-size:13px;font-weight:600}
+.pos{color:var(--good)}.neg{color:var(--bad)}
+.mchart{width:100%;height:auto;display:block;margin:10px 0 6px}
+.mfacts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.mfacts span{background:var(--bg);border-radius:10px;padding:8px 10px;font-weight:700;font-variant-numeric:tabular-nums;font-size:15px}
+.mfacts i{display:block;font-style:normal;font-weight:500;font-size:11.5px;color:var(--muted)}
+@media (max-width:560px){.mfacts{grid-template-columns:1fr 1fr}}
+.mdist{margin-top:10px;border-top:1px solid var(--line)}
+.mdist summary{padding:12px 0 6px;font-size:15px}
+.tw2{overflow-x:auto}
+.mdist table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.mdist th{text-align:left;color:var(--muted);font-weight:500;font-size:12.5px;padding:6px 4px;border-bottom:1px solid var(--line)}
+.mdist td{padding:7px 4px;border-bottom:1px solid var(--line)}
+.mdist td:not(:first-child),.mdist th:not(:first-child){text-align:right}
+.mdist tr.hl td{font-weight:700;background:var(--brand-soft)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.st{background:var(--brand-soft);border-radius:12px;padding:10px}
+.st.stop{background:color-mix(in srgb,var(--sign) 22%,var(--card))}
+.st i{display:block;font-style:normal;font-size:12px;color:var(--muted)}
+.st b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px}
+.bn{margin:12px 0 0;font-size:14px;color:var(--muted)}
+@media (max-width:420px){.st b{font-size:15px}}
+.verdict{display:flex;gap:14px;align-items:center}
+.ring{flex:none}
+.vt{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:22px;line-height:1.1}
+.verdict p{margin:4px 0 0;font-size:16px}
+.ruler{padding:0 6px}
+.track{position:relative;height:56px}
+.track .base{position:absolute;left:0;right:0;top:26px;height:4px;background:var(--line);border-radius:2px}
+.track .band{position:absolute;top:18px;height:20px;background:var(--band);border-radius:5px}
+.track .tick{position:absolute;top:10px;width:2px;height:36px;transform:translateX(-1px)}
+.track .tick.max{background:var(--sign);width:4px;transform:translateX(-2px);border-radius:2px}
+.track .tick.after{background:var(--good);height:28px;top:14px}
+.track .tick.soldt{background:var(--ink);width:3px;height:40px;top:8px}
+.track .pin{position:absolute;top:0;transform:translateX(-50%)}
+.track .pin span{display:block;width:18px;height:18px;border-radius:50%;background:var(--brand);border:3px solid var(--card);margin-top:19px;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.labels{position:relative;height:40px;font-size:13px;color:var(--muted)}
+.labels div{position:absolute;transform:translateX(-50%);white-space:nowrap;text-align:center;line-height:1.25}
+.labels b{display:block;color:var(--ink);font-weight:700}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.kgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.k{background:var(--card);border-radius:14px;padding:14px;box-shadow:var(--shadow);min-width:0}
+.k i{display:block;font-style:normal;font-size:13px;color:var(--muted)}
+.k b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-size:21px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.k small{color:var(--muted);font-size:12.5px}
+.scen{display:grid;grid-template-columns:1fr auto;gap:8px 12px;font-size:15px}
+.scen .r{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.scen .note{grid-column:1/-1;color:var(--muted);font-size:13px}
+.flags{list-style:none;margin:0;padding:0}
+.flags li{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:15px}
+.flags li:first-child{border-top:0;padding-top:2px}
+.flags li::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;margin-top:7px;background:var(--c)}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--card);padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:10;max-width:90vw}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+@media (max-width:420px){.form{grid-template-columns:1fr}.kgrid{grid-template-columns:1fr 1fr}.k b{font-size:18px}}
+@media (prefers-reduced-motion:no-preference){.card{transition:transform .15s ease,box-shadow .15s ease}.card:hover{transform:translateY(-2px)}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+const KEY='inkopskollen-v1';
+const DEF_SET={ranta:3.5,insats:15,maklare:2.5,ar:2,stress:10,tillvaxt:2,kap:5,krav:3,biVikt:30};
+const EXAMPLES=[
+ {id:'a1',typ:'Radhus',rum:5,tomt:292,byggar:1976,url:'',sold:3335000,soldDate:'',name:'Exempelgatan 1',area_:'Oxie Kyrkby',form:'tr',price:2995000,area:147,avgift:0,drift:4820,avgald:6000,lanKvm:0,compKvm:22500,compSame:true,compAvgift:0,renov:300000,renovKvm:25800,pantbrev:0},
+ {id:'a2',status:'Budgivning pågår',statusNote:'',typ:'Parhus',rum:4,tomt:0,byggar:2003,url:'',name:'Exempelgatan 2',area_:'Videdal',form:'br',price:3195000,area:137,avgift:8057,drift:2705,avgald:0,lanKvm:0,compKvm:27700,compSame:false,compAvgift:6440,renov:0,renovKvm:0,pantbrev:0},
+ {id:'a3',status:'Till salu',statusNote:'visning 11 okt',typ:'Kedjehus',rum:0,tomt:0,byggar:1962,url:'',name:'Exempelgatan 3',area_:'Söderkulla',form:'br',price:3495000,area:100.5,avgift:6894,drift:0,avgald:0,lanKvm:2413,compKvm:29100,compSame:true,compAvgift:0,renov:0,renovKvm:0,pantbrev:0},
+ {id:'a4',status:'Till salu',statusNote:'visning 11 okt',typ:'Radhus',rum:5,tomt:155,byggar:1976,url:'',name:'Exempelgatan 4',area_:'Oxie Kyrkby',form:'tr',price:2695000,area:113,avgift:0,drift:3488,avgald:5882,lanKvm:0,compKvm:24000,compSame:true,compAvgift:0,renov:0,renovKvm:0,pantbrev:0},
+ {id:'a18',status:'Snart till salu',statusNote:'visning 18 okt',typ:'Villa',rum:5,tomt:708,byggar:1987,url:'',name:'Exempelgatan 5',area_:'Hindby',form:'ag',price:0,area:128,biarea:10,avgift:0,drift:3890,avgald:0,lanKvm:0,compKvm:33000,compSame:true,compAvgift:0,renov:0,renovKvm:0,pantbrev:0},
+ {id:'a10',status:'Snart till salu',statusNote:'',typ:'Kedjehus',rum:5,tomt:409,byggar:1967,url:'',name:'Exempelgatan 6',area_:'Oxie',form:'ag',price:4995000,area:135,biarea:89,avgift:0,drift:3810,avgald:0,lanKvm:0,compKvm:28000,compSame:true,compAvgift:0,renov:0,renovKvm:0,pantbrev:0},
+ {id:'a11',status:'Till salu',statusNote:'visning 11 okt',typ:'Kedjehus',rum:5,tomt:225,byggar:2007,url:'',name:'Exempelgatan 7',area_:'Kulladal',form:'ag',price:4695000,area:100,biarea:33,avgift:0,drift:3917,avgald:0,lanKvm:0,compKvm:37000,compSame:true,compAvgift:0,renov:0,renovKvm:0,pantbrev:0},
+ {id:'a12',status:'Såld',statusNote:'',typ:'Villa',rum:5,tomt:1001,byggar:1968,url:'',name:'Exempelgatan 8',area_:'Arlöv',form:'ag',price:4195000,area:113,biarea:113,avgift:0,drift:2258,avgald:0,lanKvm:0,compKvm:29000,compSame:true,compAvgift:0,renov:0,renovKvm:0,pantbrev:0},
+ {id:'a13',status:'Budgivning pågår',statusNote:'',typ:'Villa',rum:5,tomt:368,byggar:1978,url:'',name:'Exempelgatan 9',area_:'Kristineberg',form:'ag',price:3995000,area:116,biarea:39,avgift:0,drift:3314,avgald:0,lanKvm:0,compKvm:32000,compSame:true,compAvgift:0,renov:0,renovKvm:0,pantbrev:0},
+ {id:'a14',status:'Snart till salu',statusNote:'',typ:'Radhus',rum:4,tomt:0,byggar:1986,url:'',name:'Exempelgatan 10',area_:'Husie',form:'br',price:2995000,area:103,biarea:0,avgift:7338,drift:1884,avgald:0,lanKvm:0,compKvm:25000,compSame:true,compAvgift:0,renov:0,renovKvm:0,pantbrev:0},
+ {id:'a15',status:'Snart till salu',statusNote:'',typ:'Kedjehus',rum:4,tomt:398,byggar:1975,url:'',name:'Exempelgatan 11',area_:'Kulladal',form:'ag',price:4595000,area:109,biarea:16,avgift:0,drift:4722,avgald:0,lanKvm:0,compKvm:34000,compSame:true,compAvgift:0,renov:0,renovKvm:0,pantbrev:0},
+ {id:'a16',status:'Till salu',statusNote:'visning 11 okt',typ:'Kedjehus',rum:4,tomt:558,byggar:1965,url:'',name:'Exempelgatan 12',area_:'Videdal',form:'ag',price:4795000,area:103,biarea:0,avgift:0,drift:3535,avgald:0,lanKvm:0,compKvm:41000,compSame:true,compAvgift:0,renov:0,renovKvm:0,pantbrev:0},
+ {id:'a17',status:'Budgivning pågår',statusNote:'',typ:'Radhus',rum:5,tomt:0,byggar:1982,url:'',name:'Exempelgatan 13',area_:'Lindeborg',form:'br',price:2995000,area:128.5,biarea:0,avgift:7617,drift:800,avgald:0,lanKvm:0,compKvm:23500,compSame:true,compAvgift:0,renov:0,renovKvm:0,pantbrev:0},
+ {id:'a9',status:'Budgivning pågår',statusNote:'',typ:'Villa',rum:5,tomt:512,byggar:1981,url:'',name:'Exempelgatan 14',area_:'Käglinge',form:'ag',price:5295000,area:180,biarea:68,avgift:0,drift:5000,avgald:0,lanKvm:0,compKvm:26500,compSame:false,compAvgift:0,renov:0,renovKvm:0,pantbrev:0},
+ {id:'a8',status:'Till salu',statusNote:'visning 18 okt',typ:'Radhus',rum:4,tomt:141,byggar:1972,url:'',name:'Exempelgatan 15',area_:'Oxie',form:'tr',price:2895000,area:110,biarea:0,avgift:0,drift:2844,avgald:0,lanKvm:0,compKvm:25500,compSame:true,compAvgift:0,renov:0,renovKvm:0,pantbrev:0},
+ {id:'a7',status:'Till salu',statusNote:'visning 11 och 12 okt',typ:'Villa',rum:5,tomt:575,byggar:1972,url:'',name:'Exempelgatan 16',area_:'Åkarp',form:'ag',price:4495000,area:114,biarea:139,avgift:0,drift:4717,avgald:0,lanKvm:0,compKvm:26500,compSame:true,compAvgift:0,renov:0,renovKvm:0,pantbrev:0},
+ {id:'a6',status:'Till salu',statusNote:'inga bud, visning 11 okt',typ:'Radhus',rum:6,tomt:286,byggar:1977,url:'',name:'Exempelgatan 17',area_:'Oxie Kyrkby',form:'ag',price:3295000,area:158,avgift:0,drift:7887,avgald:0,lanKvm:0,compKvm:22700,compSame:true,compAvgift:0,renov:0,renovKvm:0,pantbrev:1850000,biarea:20,taxv:3000000},
+ {id:'a5',status:'Till salu',statusNote:'visning 11 okt',typ:'Lägenhet',rum:0,tomt:0,byggar:0,url:'',name:'Exempelgatan 18',area_:'Husie',form:'br',price:2895000,area:97,avgift:6941,drift:833,avgald:0,lanKvm:5180,compKvm:24000,compSame:true,compAvgift:0,renov:0,renovKvm:0,pantbrev:0}
+];
+let state={set:{...DEF_SET},items:EXAMPLES.map(o=>({...o})),view:null,filter:'all',sort:'score'};
+
+const PATCHES=[{"key": "p2-a10", "id": "a10", "set": {"drift": 3810}}, {"key": "p2-a11", "id": "a11", "set": {"drift": 3917, "byggar": 2007, "compKvm": 37000}}, {"key": "p2-a13", "id": "a13", "set": {"drift": 3314, "byggar": 1978}}, {"key": "p2-a14", "id": "a14", "set": {"drift": 1884}}, {"key": "p2-a15", "id": "a15", "set": {"drift": 4722}}, {"key": "p2-a16", "id": "a16", "set": {"drift": 3535, "rum": 4, "byggar": 1965}}, {"key": "p4-a6area", "id": "a6", "set": {"area": 145, "biarea": 33, "drift": 7887, "pantbrev": 1850000, "compKvm": 23000, "rum": 6}}, {"key": "p5-a6comp", "id": "a6", "set": {"compKvm": 22300}}, {"key": "p6-a6bygglov", "id": "a6", "set": {"compKvm": 23000}}, {"key": "p7-a6area158", "id": "a6", "set": {"area": 158, "biarea": 20, "compKvm": 22700}}, {"key": "p8-a6taxv", "id": "a6", "set": {"taxv": 3000000}}, {"key": "p9-st-a2", "id": "a2", "set": {"status": "Budgivning pågår", "statusNote": ""}}, {"key": "p9-st-a3", "id": "a3", "set": {"status": "Till salu", "statusNote": "visning 11 okt"}}, {"key": "p9-st-a4", "id": "a4", "set": {"status": "Till salu", "statusNote": "visning 11 okt"}}, {"key": "p9-st-a5", "id": "a5", "set": {"status": "Till salu", "statusNote": "visning 11 okt"}}, {"key": "p9-st-a6", "id": "a6", "set": {"status": "Till salu", "statusNote": "inga bud, visning 11 okt"}}, {"key": "p9-st-a7", "id": "a7", "set": {"status": "Till salu", "statusNote": "visning 11 och 12 okt"}}, {"key": "p9-st-a8", "id": "a8", "set": {"status": "Till salu", "statusNote": "visning 18 okt"}}, {"key": "p9-st-a9", "id": "a9", "set": {"status": "Budgivning pågår", "statusNote": ""}}, {"key": "p9-st-a10", "id": "a10", "set": {"status": "Snart till salu", "statusNote": ""}}, {"key": "p9-st-a11", "id": "a11", "set": {"status": "Till salu", "statusNote": "visning 11 okt"}}, {"key": "p9-st-a12", "id": "a12", "set": {"status": "Såld", "statusNote": ""}}, {"key": "p9-st-a13", "id": "a13", "set": {"status": "Budgivning pågår", "statusNote": ""}}, {"key": "p9-st-a14", "id": "a14", "set": {"status": "Snart till salu", "statusNote": ""}}, {"key": "p9-st-a15", "id": "a15", "set": {"status": "Snart till salu", "statusNote": ""}}, {"key": "p9-st-a16", "id": "a16", "set": {"status": "Till salu", "statusNote": "visning 11 okt"}}, {"key": "p9-st-a17", "id": "a17", "set": {"status": "Budgivning pågår", "statusNote": ""}}, {"key": "p9-st-a18", "id": "a18", "set": {"status": "Snart till salu", "statusNote": "visning 18 okt"}}, {"key": "p9-a2drift", "id": "a2", "set": {"drift": 2705}}];
+let seeded=EXAMPLES.map(o=>o.id);
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&Array.isArray(s.items)){state.set={...DEF_SET,...s.set};state.items=s.items;
+  const known=Array.isArray(s.seeded)?s.seeded:['a1','a2','a3','a4','a5'];
+  state.items.forEach(i=>{const ex=EXAMPLES.find(e=>e.id===i.id);if(!ex)return;if(!i.url)i.url=ex.url;['typ','rum','tomt','byggar'].forEach(f=>{if(i[f]===undefined)i[f]=ex[f]});
+    if(ex.sold&&!i.sold&&!(s.done||[]).includes('sold-'+i.id)){i.sold=ex.sold;i.soldDate=ex.soldDate}
+    if(i.id==='a6'&&i.compKvm===21800)i.compKvm=22300});
+  state.done=[...(s.done||[]),...state.items.filter(i=>i.sold).map(i=>'sold-'+i.id)];
+  PATCHES.forEach(pt=>{if(state.done.includes(pt.key))return;const it=state.items.find(i=>i.id===pt.id);if(it)Object.assign(it,pt.set);state.done.push(pt.key)});
+  EXAMPLES.filter(o=>!known.includes(o.id)&&!state.items.some(i=>i.id===o.id)).forEach(o=>state.items.unshift({...o}));
+  save();}}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({set:state.set,items:state.items,seeded,done:state.done||[]}))}catch(e){}}
+
+const kr=v=>Math.round(v).toLocaleString('sv-SE')+' kr';
+const mkr=v=>(v/1e6).toLocaleString('sv-SE',{minimumFractionDigits:2,maximumFractionDigits:2})+' Mkr';
+const pct=v=>(v*100).toLocaleString('sv-SE',{maximumFractionDigits:1})+' %';
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const FORM={br:'Bostadsrätt',ag:'Äganderätt',tr:'Äganderätt, tomträtt'};
+
+function calc(o,s){if(+o.price>0)return calc0(o,s);const r0=calc0({...o,price:1},s);const r=calc0({...o,price:Math.round(r0.fair/1000)*1000},s);r.noPrice=true;return r}
+function calc0(o,s){
+  const a=+o.area||1, price=+o.price||0, ea=a+(+o.biarea||0)*(s.biVikt??30)/100;
+  const adj=(o.form==='br'&&!o.compSame&&+o.compAvgift>0)?-((+o.avgift-+o.compAvgift)*12)/(s.kap/100):0;
+  const fair=(+o.compKvm)*ea+adj;
+  const after=(+o.renovKvm>0)?(+o.renovKvm)*ea+adj:fair;
+  const renov=+o.renov||0;
+  const uplift=after-fair-renov;
+  const buyCost=o.form==='br'?0:price*0.015+825+(+o.pantbrev||0)*0.02;
+  const maxBid=fair*(1-s.krav/100)+Math.max(0,uplift)*0.5-buyCost;
+  const total=price+renov+buyCost;
+  const net=v=>v*(1-s.maklare/100);
+  const stressV=after*Math.pow(1-s.stress/100,1);
+  const normV=after*Math.pow(1+s.tillvaxt/100,s.ar);
+  const stressRes=net(stressV)-total;
+  const normRes=net(normV)-total;
+  const beDrop=1-total/net(after);
+  const loan=price*(1-s.insats/100);
+  const cash=price*s.insats/100+renov+buyCost;
+  const interest=loan*(s.ranta/100)/12*0.7;
+  const monthly=interest+(+o.avgift||0)+(+o.drift||0)+(+o.avgald||0)/12;
+  const avgKvm=o.form==='br'?(+o.avgift)*12/a:0;
+  const flags=[];let risk=15;
+  if(o.form==='br'){
+    if(avgKvm>800){risk-=5;flags.push(['bad',`Hög avgift: ${Math.round(avgKvm)} kr/m²/år. Normalt 600 till 700.`])}
+    else if(avgKvm>650){risk-=2;flags.push(['warn',`Avgiften är något hög: ${Math.round(avgKvm)} kr/m²/år.`])}
+    else flags.push(['good',`Rimlig avgift: ${Math.round(avgKvm)} kr/m²/år.`]);
+    if(!+o.lanKvm){risk-=1;flags.push(['warn','Föreningens lån per m² okänt. Läs årsredovisningen.'])}
+    else if(o.lanKvm>10000){risk-=6;flags.push(['bad',`Högt belånad förening: ${kr(o.lanKvm)}/m². Räntehöjningar slår direkt mot avgiften.`])}
+    else if(o.lanKvm>5000){risk-=3;flags.push(['warn',`Måttlig belåning i föreningen: ${kr(o.lanKvm)}/m².`])}
+    else flags.push(['good',`Låg belåning i föreningen: ${kr(o.lanKvm)}/m².`]);
+    if(!o.compSame)flags.push(['warn','Jämförelsepriset kommer från en annan förening. Avgiftsskillnaden är inräknad.']);
+  }
+  if(o.form==='tr'){risk-=3;flags.push(['warn',`Tomträtt: avgäld ${kr(+o.avgald||0)}/år. Kolla nästa omreglering och friköpspris.`])}
+  if(o.form==='ag')flags.push(['good','Äganderätt med egen mark. Ingen föreningsrisk.']);
+  if(o.form!=='br'&&+o.taxv>0){const ktv=price/(+o.taxv),kts=ktv.toFixed(2).replace('.',','),ref=(typeof KT_NOW!=='undefined'?KT_NOW:1.42).toFixed(2).replace('.',',');
+    flags.push(ktv<=1.2?['good',`K/T-kontroll: priset är ${kts} gånger taxeringsvärdet. Malmösnittet för villor är ${ref}, så priset ligger lågt.`]:ktv<=1.42?['warn',`K/T-kontroll: priset är ${kts} gånger taxeringsvärdet, nära Malmösnittet ${ref}.`]:['bad',`K/T-kontroll: priset är ${kts} gånger taxeringsvärdet, över Malmösnittet ${ref}.`])}
+  if(renov>0)flags.push([uplift>0?'good':'bad',uplift>0?`Renoveringen ger cirka ${kr(uplift)} i värde utöver kostnaden.`:`Renoveringen kostar mer än den höjer värdet (${kr(uplift)}).`]);
+  if(beDrop<0.05)flags.push(['bad',`Litet säkerhetsutrymme: priserna kan bara falla ${pct(Math.max(0,beDrop))} innan du går med förlust vid försäljning.`]);
+  const dv=fair>0?price/fair-1:1;
+  const s1=clamp((0.10-dv)/0.20,0,1)*60;
+  const s2=clamp((beDrop+0.05)/0.15,0,1)*10;
+  const run=((+o.avgift||0)+(+o.drift||0)+(+o.avgald||0)/12)/a;
+  const s3=clamp((80-run)/60,0,1)*15;
+  const score=Math.round(s1+s2+s3+clamp(risk,0,15)*10/15);
+  const fl=v=>Math.floor(v/25000)*25000;
+  let firstBid,bidNote;
+  if(maxBid>=price){firstBid=fl(Math.min(price,maxBid*0.95));bidNote=firstBid>=price?'Starta på utropet. Det visar att du är seriös utan att driva upp priset.':'Starta strax under utropet och låt mäklaren komma tillbaka till dig.'}
+  else if(maxBid>=price*0.9){firstBid=fl(Math.max(price*0.9,maxBid*0.95));if(firstBid>maxBid)firstBid=fl(maxBid);bidNote='Starta under utropet. Säljaren kan tacka nej, men det sätter ankaret lågt. Höj bara om det finns konkurrens.'}
+  else{firstBid=fl(maxBid*0.95);bidNote='Ditt maxbud ligger långt under utropet. Lägg bara ett chansbud om budgivningen uteblir eller priset sänks.'}
+  return {firstBid,bidNote,fair,after,uplift,buyCost,maxBid,stressV,normV,stressRes,normRes,beDrop,loan,cash,monthly,interest,avgKvm,flags,score,diff:(price-maxBid)/maxBid};
+}
+function tone(score){return score>=70?['var(--good)','Bra köp']:score>=50?['var(--warn)','Rimligt']:score>=35?['var(--bad)','Dyrt']:['var(--bad)','Undvik']}
+function sentence(o,r){
+  const d=r.diff;
+  if(d<=-0.03)return r.score<50?`Priset ligger <b>${pct(-d)} under</b> ditt maxbud, men höga löpande kostnader eller litet säkerhetsutrymme drar ner betyget.`:`Priset ligger <b>${pct(-d)} under</b> ditt maxbud. Här finns utrymme.`;
+  if(d<=0.03)return `Priset ligger <b>nära</b> ditt maxbud. Bjud inte högre.`;
+  return `Priset ligger <b>${pct(d)} över</b> ditt maxbud. Vänta på prissänkning eller släpp.`;
+}
+
+function armed(btn,label,fn){
+  if(btn.dataset.armed==='1'){clearTimeout(btn._t);fn();return}
+  btn.dataset.armed='1';btn._orig=btn._orig||btn.innerHTML;btn.textContent=label;btn.classList.add('armed');
+  btn._t=setTimeout(()=>{btn.dataset.armed='';btn.innerHTML=btn._orig;btn.classList.remove('armed')},4000);
+}
+function toast(msg){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t)}
+  t.textContent=msg;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),3500)}
+
+const IC={
+ sliders:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>',
+ edit:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg>',
+ trash:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
+ ext:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg>',
+ back:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+ cam:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+ plus:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'
+};
+const TYPES=['Villa','Radhus','Parhus','Kedjehus','Lägenhet'];
+const STATUS_DATE='8 oktober 2026';
+const MARKET={"source": "Svensk Mäklarstatistik", "asOf": "sep 2026", "months": ["okt -22", "nov -22", "dec -22", "jan -23", "feb -23", "mar -23", "apr -23", "maj -23", "jun -23", "jul -23", "aug -23", "sep -23", "okt -23", "nov -23", "dec -23", "jan -24", "feb -24", "mar -24", "apr -24", "maj -24", "jun -24", "jul -24", "aug -24", "sep -24", "okt -24", "nov -24", "dec -24", "jan -25", "feb -25", "mar -25", "apr -25", "maj -25", "jun -25", "jul -25", "aug -25", "sep -25", "okt -25", "nov -25", "dec -25", "jan -26", "feb -26", "mar -26", "apr -26", "maj -26", "jun -26", "jul -26", "aug -26", "sep -26"], "kt": [1.23, 1.19, 1.19, 1.2, 1.22, 1.22, 1.22, 1.23, 1.23, 1.23, 1.23, 1.23, 1.22, 1.22, 1.2, 1.21, 1.25, 1.26, 1.3, 1.29, 1.31, 1.27, 1.27, 1.26, 1.28, 1.28, 1.29, 1.31, 1.32, 1.31, 1.3, 1.31, 1.32, 1.33, 1.32, 1.32, 1.32, 1.31, 1.3, 1.3, 1.32, 1.33, 1.35, 1.36, 1.37, 1.38, 1.41, 1.42], "dist": [["Rosengård-Husie", 22752, 2.1, 6.9], ["Fosie-Oxie", 17938, 3.1, 4.7], ["Västra Innerstaden", 43190, 1.2, 5.0], ["Centrum", 49537, -3.6, 4.0], ["Hyllie", 26555, -4.3, 1.6], ["Malmö totalt", 36364, -1.2, 1.9], ["Södra Innerstaden", 29999, -1.1, -2.1], ["Kirseberg", 25359, -0.9, -1.4], ["Limhamn-Bunkeflo", 38073, 0.5, -2.5]]};
+const KT_NOW=MARKET.kt[MARKET.kt.length-1];
+function hue(str){let h=0;for(const c of String(str))h=(h*31+c.charCodeAt(0))%360;return h}
+function houseArt(o){
+  const h=(hue(o.name)%60)+170, sky1=`hsl(${h} 45% 82%)`, sky2=`hsl(${h+20} 40% 93%)`;
+  const wall='hsl(28 30% 96%)', roof=`hsl(${(hue(o.name+'r')%40)+5} 32% 38%)`, win='hsl(205 45% 72%)', door='hsl(150 25% 30%)', grass='hsl(110 30% 62%)';
+  const t=(o.typ||'').toLowerCase();let b='';
+  const one=(x,w,hh,dr)=>`<rect x="${x}" y="${120-hh}" width="${w}" height="${hh}" fill="${wall}"/><path d="M${x-8} ${120-hh} L${x+w/2} ${120-hh-34} L${x+w+8} ${120-hh} Z" fill="${roof}"/>
+    <rect x="${x+10}" y="${120-hh+14}" width="${w*0.22}" height="${w*0.18}" rx="2" fill="${win}"/><rect x="${x+w-10-w*0.22}" y="${120-hh+14}" width="${w*0.22}" height="${w*0.18}" rx="2" fill="${win}"/>${dr?`<rect x="${x+w/2-8}" y="${120-24}" width="16" height="24" rx="2" fill="${door}"/>`:''}`;
+  if(t.includes('lägen')){b=`<rect x="88" y="34" width="124" height="86" fill="${wall}"/><rect x="84" y="28" width="132" height="8" fill="${roof}"/>`;
+    for(let r=0;r<4;r++)for(let c=0;c<5;c++)b+=`<rect x="${98+c*23}" y="${44+r*18}" width="14" height="10" rx="1.5" fill="${win}"/>`}
+  else if(t.includes('rad')||t.includes('kedje')||t.includes('par')){const n=t.includes('par')?2:3;const w=n===2?80:62;const x0=150-(n*w+(n-1)*4)/2;
+    for(let i=0;i<n;i++)b+=one(x0+i*(w+4),w,54,true)}
+  else b=one(104,92,58,true)+`<rect x="196" y="86" width="40" height="34" fill="${wall}"/><path d="M192 86 L216 70 L240 86Z" fill="${roof}"/><rect x="204" y="96" width="24" height="24" fill="hsl(28 10% 70%)"/>`;
+  return `<svg class="art" viewBox="0 0 300 160" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="g${o.id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky1}"/><stop offset="1" stop-color="${sky2}"/></linearGradient></defs>
+  <rect width="300" height="160" fill="url(#g${o.id})"/><circle cx="250" cy="34" r="14" fill="hsl(45 90% 75%)"/><ellipse cx="40" cy="122" rx="30" ry="22" fill="hsl(120 25% 50%)"/><ellipse cx="270" cy="124" rx="26" ry="18" fill="hsl(120 25% 46%)"/>
+  ${b}<rect y="120" width="300" height="40" fill="${grass}"/><rect y="138" width="300" height="22" fill="hsl(110 25% 55%)"/></svg>`;
+}
+function media(o,big){return o.img?`<img src="${o.img}" alt="${esc(o.name)}">`:houseArt(o)}
+function factsLine(o){const p=[];p.push(`${(+o.area).toLocaleString('sv-SE')}${+o.biarea?'+'+o.biarea:''} m²`);if(+o.rum)p.push(o.rum+' rum');if(+o.tomt)p.push(o.tomt+' m² tomt');if(+o.sold||+o.price)p.push(Math.round((+o.sold||+o.price)/o.area).toLocaleString('sv-SE')+' kr/m²');return p.join(' · ')}
+const isSold=o=>+o.sold>0||o.status==='Såld';
+function visible(){let it=state.items.slice();
+  if(state.filter==='sale')it=it.filter(o=>!isSold(o));if(state.filter==='sold')it=it.filter(o=>isSold(o));
+  const s=state.set;
+  if(state.sort==='score')it.sort((a,b)=>isSold(a)-isSold(b)||calc(b,s).score-calc(a,s).score);
+  if(state.sort==='price')it.sort((a,b)=>isSold(a)-isSold(b)||a.price-b.price);
+  if(state.sort==='kvm')it.sort((a,b)=>isSold(a)-isSold(b)||a.price/a.area-b.price/b.area);
+  return it}
+function cardHtml(o){const r=calc(o,state.set);const [c,t]=tone(r.score);const sold=+o.sold>0;const sd=isSold(o);
+  return `<article class="card${sd?' is-sold':''}">
+  <button class="media" data-open="${o.id}" aria-label="Öppna ${esc(o.name)}">${media(o)}
+    ${sd?`<span class="ribbon">Såld</span>`:r.noPrice?`<span class="pill" style="--c:var(--muted)"><b>?</b> Inget pris än</span>`:`<span class="pill" style="--c:${c}"><b>${r.score}</b> ${t}</span>`}</button>
+  ${o.url?`<a class="annons" href="${esc(o.url)}" target="_blank" rel="noopener">Annons ${IC.ext}</a>`:''}
+  <button class="body" data-open="${o.id}">
+    ${o.status&&!sold?`<div class="stag st-${o.status==='Budgivning pågår'?'bid':o.status==='Såld'?'sold':o.status==='Snart till salu'?'soon':'sale'}">${esc(o.status)}${o.statusNote?' · '+esc(o.statusNote):''}</div>`:''}
+    ${sd&&!sold?`<div class="price">Såld</div><div class="was">Slutpris ej publicerat. Utrop ${kr(+o.price)}</div>`:sold?`<div class="price">${kr(+o.sold)}</div><div class="was">Slutpris, utrop ${kr(+o.price)} (${o.sold>=o.price?'+':''}${pct((o.sold-o.price)/o.price)})</div>`:r.noPrice?`<div class="price">Pris ej satt</div><div class="was">Marknadsvärde cirka ${mkr(r.fair)}</div>`:`<div class="price">${kr(+o.price)}</div>`}
+    <div class="addr">${esc(o.name)}</div>
+    <div class="loc">${[o.typ,o.area_].filter(Boolean).map(esc).join(' · ')}</div>
+    <div class="facts">${factsLine(o)}</div>
+    ${sd?'':`<div class="kpis"><span><i>Första bud</i>${mkr(r.firstBid)}</span><span><i>Maxbud</i>${mkr(r.maxBid)}</span></div>`}
+  </button>
+  <div class="foot"><button class="tbtn" data-edit="${o.id}">${IC.edit}<span>Ändra</span></button><button class="tbtn del" data-del="${o.id}">${IC.trash}<span>Ta bort</span></button></div>
+  </article>`}
+function bindList(root){
+  root.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{state.view=b.dataset.open;render();window.scrollTo(0,0)});
+  root.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{state.view=b.dataset.edit;state.openForm=true;render();setTimeout(()=>{const d=document.getElementById('editBox');if(d)d.scrollIntoView({behavior:'smooth'})},60)});
+  root.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{const o=state.items.find(i=>i.id===b.dataset.del);if(o)armed(b,'Bekräfta',()=>{state.items=state.items.filter(i=>i.id!==o.id);save();render();toast(o.name+' borttagen')})});
+}
+function marketPanel(){
+  const k=MARKET.kt,n=k.length,W=600,H=170,pl=34,pr=12,pt=12,pb=26,lo=1.15,hi=1.45;
+  const X=i=>pl+(W-pl-pr)*i/(n-1),Y=v=>pt+(H-pt-pb)*(1-(v-lo)/(hi-lo));
+  const pts=k.map((v,i)=>X(i).toFixed(1)+','+Y(v).toFixed(1)).join(' ');
+  const area=`M${X(0)},${Y(lo)} L`+k.map((v,i)=>X(i).toFixed(1)+' '+Y(v).toFixed(1)).join(' L')+` L${X(n-1)},${Y(lo)} Z`;
+  const grid=[1.2,1.3,1.4].map(v=>`<line x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${pl-6}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${v.toFixed(1).replace('.',',')}</text>`).join('');
+  const yrs=MARKET.months.map((m,i)=>m.startsWith('jan')?`<text x="${X(i)}" y="${H-6}" text-anchor="middle" font-size="11" fill="var(--muted)">20${m.slice(-2)}</text>`:'').join('');
+  const ch=(a,b)=>((k[n-1]/k[n-1-a]-1)*100);
+  const fmt=v=>(v>=0?'+':'')+v.toLocaleString('sv-SE',{maximumFractionDigits:1})+' %';
+  const rows=MARKET.dist.map(([nm,kv,m3,m12])=>`<tr class="${/Fosie|Husie/.test(nm)?'hl':''}"><td>${nm}</td><td>${kv.toLocaleString('sv-SE')}</td><td class="${m3<0?'neg':'pos'}">${fmt(m3)}</td><td class="${m12<0?'neg':'pos'}">${fmt(m12)}</td></tr>`).join('');
+  return `<section class="card2 market"><div class="mhead"><div><h3>Marknaden i Malmö</h3><div class="msub">Villor, slutpris delat med taxeringsvärde (K/T). ${MARKET.source}, ${MARKET.asOf}.</div></div>
+   <div class="mnow"><b>${KT_NOW.toFixed(2).replace('.',',')}</b><span class="pos">${fmt(ch(12))} på 12 mån</span></div></div>
+   <svg viewBox="0 0 ${W} ${H}" class="mchart" role="img" aria-label="K/T för villor i Malmö de senaste 48 månaderna">${grid}<path d="${area}" fill="var(--brand-soft)"/><polyline points="${pts}" fill="none" stroke="var(--brand)" stroke-width="2.5" stroke-linejoin="round"/><circle cx="${X(n-1)}" cy="${Y(k[n-1])}" r="4.5" fill="var(--brand)" stroke="var(--card)" stroke-width="2"/>${yrs}</svg>
+   <div class="mfacts"><span><i>Botten vintern 2022/23</i>1,19</span><span><i>Förra toppen 2021</i>1,35</span><span><i>Största fall sedan 1996</i>cirka 10 %</span><span><i>Snitt 10 år</i>+4,2 %/år</span></div>
+   <details class="mdist"><summary>Bostadsrätter per område</summary><div class="tw2"><table><thead><tr><th>Område</th><th>kr/m²</th><th>3 mån</th><th>12 mån</th></tr></thead><tbody>${rows}</tbody></table></div></details></section>`;
+}
+function appbar(back){return `<header class="bar"><div class="barin">
+  ${back?`<button class="iconbtn" id="backBtn" aria-label="Tillbaka">${IC.back}</button>`:''}
+  <div class="logo"><svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><rect width="32" height="32" rx="9" fill="var(--brand)"/><path d="M7 16 L16 8 L25 16 V25 H7 Z" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/><path d="M11.5 19.5 l3 3 l6 -6.5" fill="none" stroke="var(--sign)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Inköpskollen</span></div>
+  <button class="iconbtn" id="setBtn" aria-label="Antaganden">${IC.sliders}</button></div></header>`}
+function render(){
+  const app=document.getElementById('app');
+  if(state.view){renderDetail(app,state.items.find(i=>i.id===state.view));return}
+  const nSale=state.items.filter(o=>!isSold(o)).length,nSold=state.items.length-nSale;
+  const chip=(k,l)=>`<button class="chip${state.filter===k?' on':''}" data-f="${k}">${l}</button>`;
+  app.innerHTML=`${appbar(false)}<div class="wrap">
+  <section class="intro"><h1>Dina bostäder</h1><div class="updated">Status uppdaterad ${esc(STATUS_DATE)}</div><p>Betyg, maxbud och vad som händer om du måste sälja tidigare än tänkt.</p>
+  <div class="tools"><div class="chips">${chip('all','Alla '+state.items.length)}${chip('sale','Till salu '+nSale)}${chip('sold','Sålda '+nSold)}</div>
+  <label class="sort"><span>Sortera</span><select id="sortSel"><option value="score">Bäst betyg</option><option value="price">Lägst pris</option><option value="kvm">Lägst kr/m²</option></select></label></div></section>
+  ${marketPanel()}
+  <div class="grid" id="grid">${visible().map(cardHtml).join('')||'<p class="empty">Inga bostäder här ännu.</p>'}</div>
+  <button class="add" id="addBtn">${IC.plus} Lägg till bostad</button>
+  ${settingsBlock()}${howBlock()}</div>`;
+  bindList(app);
+  app.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.f;render()});
+  const ss=document.getElementById('sortSel');ss.value=state.sort;ss.onchange=()=>{state.sort=ss.value;render()};
+  document.getElementById('addBtn').onclick=()=>{const o={id:'o'+Date.now(),name:'Ny bostad',url:'',typ:'Radhus',rum:0,tomt:0,byggar:0,area_:'',form:'ag',price:3000000,area:120,biarea:0,avgift:0,drift:3500,avgald:0,lanKvm:0,compKvm:25000,compSame:true,compAvgift:0,renov:0,renovKvm:0,pantbrev:0};state.items.unshift(o);save();state.view=o.id;state.openForm=true;render();window.scrollTo(0,0)};
+  document.getElementById('setBtn').onclick=()=>{const d=document.getElementById('settings');d.open=true;d.scrollIntoView({behavior:'smooth'})};
+  bindSettings();
+}
+function settingsBlock(){const s=state.set;const f=(k,l,st)=>`<label>${l}<input type="number" step="${st||'0.1'}" data-set="${k}" value="${s[k]}"></label>`;
+  return `<details id="settings" class="panel"><summary>Antaganden för alla bostäder</summary><div class="form">
+  ${f('ranta','Bolåneränta %')}${f('insats','Kontantinsats %','1')}
+  ${f('ar','Om du säljer efter (år)','1')}${f('stress','Prisfall i stresstest %','1')}
+  ${f('tillvaxt','Normal prisökning per år %')}${f('maklare','Mäklararvode vid försäljning %')}
+  ${f('krav','Säkerhetsmarginal i maxbud %')}${f('kap','Kalkylränta för avgiftsskillnad %')}${f('biVikt','Biarea värderas som % av boarea','5')}
+  <p class="hint">Ränteavdrag på 30 % är inräknat i boendekostnaden. Amortering räknas som sparande, inte kostnad.</p>
+  <button class="danger" id="resetBtn" type="button">Återställ exempelbostäderna</button></div></details>`}
+function howBlock(){return `<details class="panel"><summary>Så räknas det</summary><div class="how">
+<p><b>Marknadsvärde</b> = jämförbart slutpris per m² × boarea, plus biarea (källare, garage) värderad till 30 % av boarean. Kommer jämförelsen från en annan förening justeras värdet för avgiftsskillnaden.</p>
+<p><b>Maxbud</b> = marknadsvärde minus din säkerhetsmarginal, plus halva nettovinsten av en renovering, minus lagfart och pantbrev.</p>
+<p><b>Stresstest</b> visar vad du får kvar om priserna faller och du måste sälja. Räntan räknas som boendekostnad, inte förlust.</p>
+<p><b>Betyget</b> väger priset mot marknadsvärdet (60 p), säkerhetsutrymme vid prisfall (10 p), löpande kostnad per m² utan ränta (15 p) och risker som avgift, föreningens lån och tomträtt (10 p). Ett hus till exakt marknadsvärde hamnar runt 50, alltså Rimligt. 5 % under marknadsvärdet ger cirka 70, Bra köp.</p>
+<p>Viktigast är jämförelsepriset. Använd slutpriser för samma typ av bostad, helst på samma gata eller i samma förening.</p></div></details>`}
+function bindSettings(){
+  document.querySelectorAll('[data-set]').forEach(i=>i.oninput=()=>{const v=parseFloat(i.value);if(!isNaN(v)){state.set[i.dataset.set]=v;save();refreshList()}});
+  const rb=document.getElementById('resetBtn');if(rb)rb.onclick=()=>armed(rb,'Tryck igen för att återställa',()=>{state.items=EXAMPLES.map(o=>({...o}));state.view=null;save();render();toast('Exempelbostäderna återställda')});
+}
+function refreshList(){
+  if(state.view){updateResult(state.items.find(i=>i.id===state.view));return}
+  const g=document.getElementById('grid');if(!g)return;g.innerHTML=visible().map(cardHtml).join('');bindList(g);
+}
+function renderDetail(app,o){
+  if(!o){state.view=null;render();return}
+  const f=(k,l,opt={})=>`<label class="${opt.full?'full':''}">${l}<input ${opt.text?'type="text"':'type="number" inputmode="decimal"'} data-k="${k}" value="${esc(String(o[k]??''))}"></label>`;
+  app.innerHTML=`${appbar(true)}<div class="wrap detail">
+  <div class="dmedia" id="imgBox"></div><input type="file" accept="image/*" id="imgIn" hidden>
+  <div id="result"></div>
+  <details id="editBox" class="panel" ${state.openForm?'open':''}><summary>Ändra uppgifter</summary><div class="form">
+    ${f('name','Adress',{text:true,full:true})}
+    ${f('url','Länk till annonsen',{text:true,full:true})}
+    <label>Hustyp<select data-k="typ">${TYPES.map(t=>`<option ${o.typ===t?'selected':''}>${t}</option>`).join('')}</select></label>
+    ${f('area_','Område',{text:true})}
+    <label>Upplåtelseform<select data-k="form">${Object.entries(FORM).map(([k,v])=>`<option value="${k}" ${o.form===k?'selected':''}>${v}</option>`).join('')}</select></label>
+    ${f('price','Pris du räknar på (kr)')}
+    ${f('area','Boarea (m²)')}${f('biarea','Biarea (m²)')}
+    ${f('rum','Antal rum')}${f('tomt','Tomt (m²)')}
+    ${f('byggar','Byggår')}${f('compKvm','Jämförbart slutpris (kr/m²)')}
+    ${f('taxv','Taxeringsvärde (kr)')}
+    <label class="chk full"><input type="checkbox" data-k="compSame" ${o.compSame?'checked':''}> Jämförelsen är från samma förening eller gata</label>
+    ${f('compAvgift','Jämförelsens avgift (kr/mån)')}${f('avgift','Månadsavgift (kr/mån)')}
+    ${f('drift','Drift (kr/mån)')}${f('avgald','Tomträttsavgäld (kr/år)')}
+    ${f('lanKvm','Föreningens lån (kr/m²)')}${f('pantbrev','Nya pantbrev (kr)')}
+    ${f('renov','Renoveringsbudget (kr)')}${f('renovKvm','Värde renoverat (kr/m²)')}
+    ${f('sold','Slutpris om såld (kr)')}${f('soldDate','Såld när',{text:true})}
+    <p class="hint">Lämna 0 där något inte gäller.</p>
+    <button class="danger" id="delBtn" type="button">Ta bort bostaden</button>
+  </div></details>
+  ${settingsBlock()}</div>`;
+  state.openForm=false;
+  document.getElementById('backBtn').onclick=()=>{state.view=null;render();window.scrollTo(0,0)};
+  document.getElementById('setBtn').onclick=()=>{const d=document.getElementById('settings');d.open=true;d.scrollIntoView({behavior:'smooth'})};
+  const db=document.getElementById('delBtn');db.onclick=()=>armed(db,'Tryck igen för att ta bort',()=>{state.items=state.items.filter(i=>i.id!==o.id);save();state.view=null;render();window.scrollTo(0,0);toast(o.name+' borttagen')});
+  app.querySelectorAll('[data-k]').forEach(i=>{
+    const h=()=>{const k=i.dataset.k;o[k]=i.type==='checkbox'?i.checked:(i.type==='number'?(parseFloat(i.value)||0):i.value);save();updateResult(o);if(k==='typ'||k==='name')drawImg(o)};
+    i.oninput=h;i.onchange=h;
+  });
+  const imgIn=document.getElementById('imgIn');
+  imgIn.onchange=async()=>{const file=imgIn.files&&imgIn.files[0];if(!file)return;
+    try{const data=await shrink(file,900,0.74);const prev=o.img;o.img=data;
+      try{localStorage.setItem(KEY,JSON.stringify({set:state.set,items:state.items,seeded,done:state.done||[]}))}catch(e){o.img=prev;toast('Bilden får inte plats. Ta bort någon annan bild och försök igen.')}
+      drawImg(o)}catch(e){toast('Bilden gick inte att läsa.')}
+    imgIn.value=''};
+  bindSettings();drawImg(o);updateResult(o);
+}
+function drawImg(o){
+  const box=document.getElementById('imgBox');if(!box)return;
+  box.innerHTML=`<div class="dimg">${media(o)}${o.url?`<a class="annons" href="${esc(o.url)}" target="_blank" rel="noopener">Öppna annonsen ${IC.ext}</a>`:''}
+   <div class="imgacts"><button class="glass" id="imgPick">${IC.cam}<span>${o.img?'Byt bild':'Lägg till bild'}</span></button>${o.img?`<button class="glass" id="imgDel">${IC.trash}<span>Ta bort</span></button>`:''}</div></div>`;
+  document.getElementById('imgPick').onclick=()=>document.getElementById('imgIn').click();
+  const d=document.getElementById('imgDel');if(d)d.onclick=()=>{delete o.img;save();drawImg(o)};
+}
+function shrink(file,max,q){return new Promise((res,rej)=>{const fr=new FileReader();fr.onerror=rej;fr.onload=()=>{const im=new Image();im.onerror=rej;im.onload=()=>{
+  const sc=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);
+  c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',q))};im.src=fr.result};fr.readAsDataURL(file)})}
+function updateResult(o){
+  const s=state.set,r=calc(o,s),[c,t]=tone(r.score),sold=+o.sold>0;
+  const vals=[+o.price,r.maxBid,r.fair,r.after].concat(sold?[+o.sold]:[]);
+  const lo=Math.min(...vals)*0.92,hi=Math.max(...vals)*1.06;
+  const X=v=>clamp((v-lo)/(hi-lo)*100,0,100);
+  const chip=(k,v)=>v?`<div class="fchip"><i>${k}</i><b>${v}</b></div>`:'';
+  const ring=`<svg viewBox="0 0 64 64" width="72" height="72" class="ring"><circle cx="32" cy="32" r="27" fill="none" stroke="var(--line)" stroke-width="7"/><circle cx="32" cy="32" r="27" fill="none" stroke="${c}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${(r.score/100*169.6).toFixed(1)} 170" transform="rotate(-90 32 32)"/><text x="32" y="38" text-anchor="middle" font-size="19" font-weight="800" fill="var(--ink)" font-family="Bricolage Grotesque, sans-serif">${r.score}</text></svg>`;
+  document.getElementById('result').innerHTML=`
+  <section class="head">
+    ${sold?`<div class="price">${kr(+o.sold)}</div><div class="was">Slutpris${o.soldDate?' '+esc(o.soldDate):''}. Utrop ${kr(+o.price)} (${o.sold>=o.price?'+':''}${pct((o.sold-o.price)/o.price)})</div>`:r.noPrice?`<div class="price">Pris ej satt</div><div class="was">Snart till salu. Marknadsvärde cirka ${kr(r.fair)}.</div>`:`<div class="price">${kr(+o.price)}</div>`}
+    <h2>${esc(o.name)}</h2><div class="loc">${[o.typ,o.area_].filter(Boolean).map(esc).join(' · ')}</div>
+    <div class="fchips">${chip('Boarea',(+o.area).toLocaleString('sv-SE')+' m²')}${chip('Biarea',+o.biarea?o.biarea+' m²':'')}${chip('Rum',+o.rum?o.rum:'')}${chip('Tomt',+o.tomt?o.tomt+' m²':'')}${chip('Byggår',+o.byggar?o.byggar:'')}${chip('Upplåtelse',FORM[o.form])}${chip('K/T',+o.taxv&&o.form!=='br'?((+o.sold||+o.price)/o.taxv).toFixed(2).replace('.',','):'')}${chip('Pris/m²',(+o.sold||+o.price)?Math.round((+o.sold||+o.price)/o.area).toLocaleString('sv-SE')+' kr':'')}${chip(o.form==='br'?'Avgift':'Drift',kr(o.form==='br'?+o.avgift:+o.drift)+'/mån')}</div>
+  </section>
+  ${sold?`<div class="card2 soldbox">Appens maxbud var <b>${kr(r.maxBid)}</b>, ${o.sold>r.maxBid?pct((o.sold-r.maxBid)/r.maxBid)+' under':pct((r.maxBid-o.sold)/r.maxBid)+' över'} slutpriset. Sparad som jämförelse för området.</div>`:''}
+  ${r.noPrice?`<section class="card2"><div class="vt" style="color:var(--muted)">Inget utropspris än</div><p style="margin:4px 0 0">Betyget räknas när priset är satt. Fyll i det under Ändra. Räknat på marknadsvärdet blir maxbudet <b>${kr(r.maxBid)}</b>.</p></section>`:`<section class="card2 verdict">${ring}<div><div class="vt" style="color:${c}">${t}</div><p>${sentence(o,r)}</p></div></section>`}
+  ${sold?'':`<section class="card2 bid"><h3>Budstrategi</h3>
+    <div class="steps"><div class="st"><i>1. Första bud</i><b>${mkr(r.firstBid)}</b></div><div class="st"><i>2. Höj med</i><b>25 000 kr</b></div><div class="st stop"><i>3. Sluta vid</i><b>${mkr(Math.floor(r.maxBid/25000)*25000)}</b></div></div>
+    <p class="bn">${r.bidNote} Gå aldrig över maxbudet i budgivningen. Ser huset bättre ut än väntat på visningen, höj jämförelsepriset under Ändra i stället.</p></section>`}
+  <section class="card2"><h3>Var ligger priset?</h3>
+  <div class="ruler"><div class="track"><div class="base"></div>
+      <div class="band" style="left:${X(r.fair*0.95)}%;width:${X(r.fair*1.05)-X(r.fair*0.95)}%"></div>
+      ${r.after>r.fair*1.01?`<div class="tick after" style="left:${X(r.after)}%"></div>`:''}
+      <div class="tick max" style="left:${X(r.maxBid)}%"></div>
+      ${sold?`<div class="tick soldt" style="left:${X(+o.sold)}%"></div>`:''}
+      <div class="pin" style="left:${X(+o.price)}%"><span></span></div></div>
+    <div class="labels"><div style="left:${X(+o.price)}%"><b>${mkr(+o.price)}</b>${sold?'utrop':'pris'}</div></div>
+    <div class="legend"><span><i style="background:var(--sign)"></i>Maxbud ${mkr(r.maxBid)}</span><span><i style="background:var(--band)"></i>Marknadsvärde ${mkr(r.fair)}</span>${r.after>r.fair*1.01?`<span><i style="background:var(--good)"></i>Renoverat ${mkr(r.after)}</span>`:''}${sold?`<span><i style="background:var(--ink)"></i>Slutpris ${mkr(+o.sold)}</span>`:''}</div></div></section>
+  <section class="kgrid">
+    <div class="k"><i>Ditt maxbud</i><b>${kr(r.maxBid)}</b><small>${Math.round(r.maxBid/o.area).toLocaleString('sv-SE')} kr/m²</small></div>
+    <div class="k"><i>Boendekostnad</i><b>${kr(r.monthly)}/mån</b><small>ränta ${kr(r.interest)} efter avdrag</small></div>
+    <div class="k"><i>Prisfall du tål</i><b style="color:${r.beDrop<0.05?'var(--bad)':r.beDrop<0.1?'var(--warn)':'var(--good)'}">${pct(Math.max(0,r.beDrop))}</b><small>innan försäljning ger förlust</small></div>
+    <div class="k"><i>Kontanter som krävs</i><b>${kr(r.cash)}</b><small>insats${+o.renov?', renovering':''}${r.buyCost?', lagfart':''}</small></div>
+  </section>
+  <section class="card2"><h3>Om du måste sälja efter ${s.ar} år</h3><div class="scen">
+    <div>Priserna faller ${s.stress} %</div><div class="r" style="color:${r.stressRes<0?'var(--bad)':'var(--good)'}">${r.stressRes<0?'Förlust ':'Plus '}${kr(Math.abs(r.stressRes))}</div>
+    <div>Priserna stiger ${s.tillvaxt} % per år</div><div class="r" style="color:${r.normRes<0?'var(--bad)':'var(--good)'}">${r.normRes<0?'Förlust ':'Plus '}${kr(Math.abs(r.normRes))}</div>
+    <div class="note">Efter mäklararvode${r.buyCost?', lagfart':''}${+o.renov?' och renovering':''}, före vinstskatt (22 % om du bott där). Ett fall på 10 % motsvarar det största prisfallet för villor i Malmö sedan 1996 (2022 till 2023), och det var återhämtat inom tre år.</div></div></section>
+  <section class="card2"><h3>Att kontrollera</h3><ul class="flags">${r.flags.map(([k,txt])=>`<li style="--c:var(--${k})">${txt}</li>`).join('')}</ul></section>`;
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+load();render();
+</script>
+</body>
+</html>
