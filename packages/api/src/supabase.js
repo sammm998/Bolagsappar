@@ -136,6 +136,7 @@ export function createSupabaseBackend(cfg) {
     async guideStats() { return one(await sb.from('guide_progress').select('tenant_id, module_key, step_key, user_id, done_at')); },
     async allMemberships() { return one(await sb.from('memberships').select('*')); },
     async bookings() { return one(await sb.from('bookings').select('*').order('created_at', { ascending: false })); },
+    async setBooking(id, patch) { one(await sb.from('bookings').update(patch).eq('id', id)); },
     async createBooking(b) { one(await sb.from('bookings').insert(b)); return { ok: true }; },
     async createTenant(t) { return one(await sb.from('tenants').insert(t).select().single()); },
     async taxRates() { return one(await sb.from('tax_rates').select('*')); },

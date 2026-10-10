@@ -160,3 +160,5 @@
 .pf-mail:focus-visible { outline: none; box-shadow: var(--focus); }
 .ba-table tr.is-dev td { background: var(--bad-bg); }
 .ba-table .bad, .pf-kv dd.bad { color: var(--bad); font-weight: 600; }
+.pf-eyebrow a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.pf-eyebrow a:hover { color: var(--text); }

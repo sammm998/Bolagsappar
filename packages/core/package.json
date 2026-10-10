@@ -14,7 +14,8 @@
     "./config": "./src/config/skatter.js",
     "./format": "./src/format.js",
     "./testdata": "./testdata/index.js",
-    "./skadeflode": "./src/skadeflode/index.js"
+    "./skadeflode": "./src/skadeflode/index.js",
+    "./admin": "./src/admin.js"
   },
   "scripts": {
     "test": "vitest run"

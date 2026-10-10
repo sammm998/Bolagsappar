@@ -180,8 +180,14 @@ export async function seedDemo(backend) {
   }
 
   // Guidestatistik för adminportalen
-  const steg = [['kassan', 'skatt'], ['kassan', 'skatt'], ['kassan', 'forsta-lon'], ['avrakning', 'publicera']];
-  steg.forEach(([m, s], i) => db.guide_progress.push({ user_id: U.ahmed, tenant_id: subId(i + 2), module_key: m, step_key: s, done_at: '2026-10-0' + (i + 1) + 'T10:00:00Z' }));
+  // Påhittade guidesteg så att "Var fastnar användarna?" har något att visa.
+  const ks = db.licenses.filter(l => l.module_key === 'kassan' && l.variant === 'sub').map(l => l.tenant_id);
+  const as = db.licenses.filter(l => l.module_key === 'avrakning' && l.variant === 'sub').map(l => l.tenant_id);
+  const klar = (lista, m, s, n) => lista.slice(0, n).forEach((t, i) => db.guide_progress.push({ user_id: U.ahmed, tenant_id: t, module_key: m, step_key: s, done_at: '2026-10-0' + (1 + i % 9) + 'T10:00:00Z' }));
+  klar(ks, 'kassan', 'forare', 9); klar(ks, 'kassan', 'procent', 8); klar(ks, 'kassan', 'skatt', 5); klar(ks, 'kassan', 'forsta-lon', 4); klar(ks, 'kassan', 'avtal', 3);
+  klar(as, 'avrakning', 'logga-in', 21); klar(as, 'avrakning', 'notiser', 18); klar(as, 'avrakning', 'bilar', 16);
+  db.bookings.push({ id: 'demo-boka-1', status: 'bokad', created_at: '2026-10-02T09:00:00Z', namn: 'Kontakt Exempel', foretag: '[Städfirma]', epost: 'kontakt@stadfirma.example', telefon: '', bransch: 'Städ', dag: '2026-11-14', fritext: 'Vill se över schemaläggning och lön.' });
+  db.bookings.push({ id: 'demo-boka-2', status: 'ny', created_at: '2026-10-09T15:20:00Z', namn: 'Kontakt Exempel 2', foretag: 'Bygg Exempel AB', epost: 'info@bygg.example', telefon: '', bransch: 'Bygg', dag: null, fritext: 'Underentreprenörer och avräkning per projekt.' });
 
   db.seededDemo = true;
   if (avtalFn) await avtalFn();

@@ -310,6 +310,7 @@ export function createLocalBackend(opts = {}) {
     },
     async allMemberships() { need(isPlatform()); return db.memberships.map(clone); },
     async bookings() { need(isPlatform()); return db.bookings.map(clone); },
+    async setBooking(id, patch) { need(isPlatform()); const x = db.bookings.find(y => y.id === id); Object.assign(x, clone(patch)); save(); emit({ table: 'bookings' }); },
     async createBooking(b) { const x = { id: uuid(), status: 'ny', created_at: now().toISOString(), ...clone(b) }; db.bookings.push(x); save(); return { id: x.id }; },
     async createTenant(t) {
       need(isPlatform());

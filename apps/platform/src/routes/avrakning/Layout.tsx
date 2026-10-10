@@ -61,7 +61,7 @@ export function AvrakningLayout() {
       <ActCtx.Provider value={actions}>
         {exempel && <div style={{ marginBottom: 14 }}><Banner action={<Link className="ba-btn ba-btn--sm" to="/$tenant/avrakning/$period/filer" params={{ tenant: a.tenant.slug, period }} search={{}}>Avsluta exempelläget</Link>}>{GEMENSAMT.exempelBanner}</Banner></div>}
         <div className="pf-head" style={{ alignItems: 'center' }}>
-          <div><div className="pf-eyebrow">Avräkning</div><h1 className="pf-h1">{manadAr(period)}</h1></div>
+          <div><div className="pf-eyebrow">Avräkning · <Link to="/$tenant/avrakning/historik" params={{ tenant: a.tenant.slug }}>Historik</Link> · <Link to="/$tenant/avrakning/installningar" params={{ tenant: a.tenant.slug }}>Inställningar</Link></div><h1 className="pf-h1">{manadAr(period)}</h1></div>
           <Steps items={items} renderLink={(s, ch, cls) => <Link to={'/' + a.tenant.slug + '/avrakning/' + period + '/' + s.key} search={exempel ? { exempel: 1 } : {}} className={cls} aria-current={s.state === 'current' ? 'step' : undefined}>{ch}</Link>} />
           <span className="ba-grow" />
           <div className="ba-row" ref={setActions} />

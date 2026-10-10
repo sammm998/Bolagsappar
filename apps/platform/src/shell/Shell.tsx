@@ -93,7 +93,7 @@ function NavLink({ to, icon, tone, children, count, exact }: { to: string; icon:
   const full = '/' + a.tenant.slug + (to ? '/' + to : '');
   const active = exact ? path === full || path === full + '/' : path === full || path.startsWith(full + '/');
   return (
-    <Link to={full} aria-current={active ? 'page' : undefined}>
+    <Link to={full} activeOptions={{ exact: true }} aria-current={active ? 'page' : undefined}>
       {tone ? <span className={'ba-appicon ba-appicon--sm ba-appicon--' + tone}><Icon name={icon} size={13} /></span> : <Icon name={icon} />}
       {children}{count != null && <span className={'cnt' + (typeof count === 'string' ? ' cnt--new' : '')}>{count}</span>}
     </Link>
