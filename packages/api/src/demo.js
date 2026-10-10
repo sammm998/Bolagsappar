@@ -136,7 +136,7 @@ export async function seedDemo(backend) {
     const packed = Object.fromEntries(Object.entries(skatt).map(([k, v]) => [k, ENG.packTabell(v)]));
     put(t, 'kassan', 'skatt', { ar: 2026, tabeller: packed });
     // Augusti: LDL, delning från centralen, lön godkänd
-    const aug = ldlText({ period: '2026-08', bilar: bilar.map((b, i) => [String(901 + i), reg(b.reg)]), forare, foretag: 'AKERI NORRA AB', seed: 81, skippa: 0.78 });
+    const aug = ldlText({ period: '2026-08', bilar: bilar.slice(0, 2).map((b, i) => [String(901 + i), reg(b.reg)]), forare: forare.slice(0, 2), foretag: 'AKERI NORRA AB', seed: 81, skippa: 0.35 });
     const shAug = db.shares.find(s => s.to_tenant === t && s.period === '2026-08' && s.module_key === 'avrakning');
     const fa = fromShare(shAug.payload);
     const shifts = ENG.parseLDL(aug).shifts;

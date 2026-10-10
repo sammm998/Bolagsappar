@@ -67,7 +67,7 @@ function WelcomeGuide({ module, variant, onClose }: { module: string; variant: s
       <div className="pf-welcome-foot">
         <div className="pf-dots" aria-hidden>{g.welcome.map((_: any, k: number) => <i key={k} className={k === i ? 'on' : ''} />)}</div>
         <span className="ba-grow" />
-        {i === 0 && <Button variant="link" onClick={() => done(true)}>{GEMENSAMT.exempel}</Button>}
+        {i === 0 && ((module === 'avrakning' && variant === 'main') || module === 'kassan') && <Button variant="link" onClick={() => done(true)}>{GEMENSAMT.exempel}</Button>}
         <Button onClick={() => done()}>Hoppa över</Button>
         <Button variant="primary" iconRight="arrow" onClick={() => last ? done() : setI(i + 1)}>{last ? 'Kom igång' : 'Nästa'}</Button>
       </div>

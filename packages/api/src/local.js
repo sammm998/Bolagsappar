@@ -35,7 +35,7 @@ export function createLocalBackend(opts = {}) {
     if (!opts.persist && !storage) return;
     clearTimeout(saveT);
     saveT = setTimeout(() => {
-      if (opts.persist) { opts.persist(clone({ ...db, session })); return; }
+      if (opts.persist) { opts.persist({ ...db, session }); return; }
       try { storage.setItem(KEY, JSON.stringify({ ...db, session })); } catch (e) { console.warn('[lokal] kunde inte spara', e); }
     }, 80);
   }
