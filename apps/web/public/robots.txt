@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://bolagsappar.se/sitemap-index.xml

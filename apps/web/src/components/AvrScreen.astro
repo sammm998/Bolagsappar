@@ -1,0 +1,14 @@
+---
+// Riktig skärm i miniatyr: Avräkning oktober för Taxi Malmö. Beloppen är påhittade.
+const rows = [['Åkeri Norra AB', '48 215,00', 'ok'], ['Limhamn Trafik AB', '31 902,50', 'ok'], ['Kust Taxi AB', '29 910,00', 'warn'], ['Söder Taxi HB', '22 410,00', 'ok']];
+---
+<div class="screen" role="img" aria-label="Avräkningen för oktober i plattformen: 159 307,50 kr att betala till åkarna">
+  <div class="screen-head"><span class="av">TM</span><b>Avräkning oktober</b><span style="margin-left:auto" class="pill pill--ok">Publicerad</span></div>
+  <div class="screen-body">
+    <div class="small muted">Att betala till åkare</div>
+    <div class="big">159 307,50 kr</div>
+    <ul class="rows">
+      {rows.map(([n, b, s]) => <li><span>{n}</span><span class="num">{b}</span><span class={'pill pill--' + s}>{s === 'ok' ? 'Klar' : 'Kontrollera'}</span></li>)}
+    </ul>
+  </div>
+</div>

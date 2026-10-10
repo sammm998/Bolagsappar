@@ -1,0 +1,25 @@
+---
+import Base from '../../layouts/Base.astro';
+import AvrScreen from '../../components/AvrScreen.astro';
+import { KUNDCASE } from '../../lib/site';
+export function getStaticPaths() { return KUNDCASE.map(k => ({ params: { kund: k.slug }, props: { k } })); }
+const { k } = Astro.props as { k: any };
+const Content = k.Content;
+---
+<Base title={k.kund} description={k.ingress}>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div><p class="eyebrow">Kundcase · {k.typ}</p><h1>{k.rubrik}</h1><p class="lead">{k.ingress}</p></div>
+      <AvrScreen />
+    </div>
+  </section>
+  <section class="sec sec--white">
+    <div class="wrap grid grid--3">{k.siffror.map(([v, t]: string[]) => <div class="card"><div class="amount" style="font-family:var(--font-display);font-size:64px;line-height:1;color:var(--navy)">{v}</div><p style="margin-top:8px">{t}</p></div>)}</div>
+  </section>
+  <section class="sec">
+    <div class="wrap price">
+      <div class="prose"><Content /></div>
+      <figure style="margin:0"><blockquote class="quote">{k.citat}</blockquote><p>{k.citatAv}</p></figure>
+    </div>
+  </section>
+</Base>

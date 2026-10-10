@@ -1,0 +1,31 @@
+---
+import Base from '../layouts/Base.astro';
+const DAGAR = [
+  ['Dag 1', 'Arbetsdagen', 'Vi sitter med den som gör jobbet i dag. Vi går igenom en hel månad: vilka filer som kommer, vad som brukar bli fel, vem som godkänner.'],
+  ['Dag 2 till 3', 'Kartan', 'Ni får flödet nedskrivet med era ord och ett förslag med fast månadspris. Säger ni ja börjar vi bygga.'],
+  ['Dag 4 till 10', 'Bygget', 'Vi bygger appen med era riktiga filer. Ni ser den varje dag och säger till om något är fel.'],
+  ['Dag 11 till 13', 'Test', 'Ni kör en riktig månad i appen bredvid det gamla sättet. Vi jämför siffrorna rad för rad.'],
+  ['Dag 14', 'Igång', 'Appen är igång med era egna filer och flöden. Era användare får en inloggningslänk.']
+];
+---
+<Base title="Så jobbar vi" description="En dag hos er, en app inom fjorton dagar, sedan sköter vi den till fast månadspris.">
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Så jobbar vi</p>
+      <h1>Dag 1 till dag 14</h1>
+      <p class="lead">Ni behöver inte veta vad ni vill ha. Ni behöver bara visa hur ni jobbar. Vi sköter resten, och priset är bestämt innan vi börjar.</p>
+    </div>
+  </section>
+  <section class="sec sec--white">
+    <div class="wrap grid" style="max-width:860px">
+      {DAGAR.map(([d, t, x]) => <div class="day"><b>{d.toUpperCase()}</b><h3 style="font-size:26px;margin:4px 0 6px">{t}</h3><p style="margin:0;color:var(--text-2)">{x}</p></div>)}
+    </div>
+  </section>
+  <section class="sec">
+    <div class="wrap grid grid--3">
+      <div class="card"><h3>Era ord</h3><p>Appen använder samma ord som ni. Körningar eller uppdrag, åkare eller underleverantörer.</p></div>
+      <div class="card"><h3>Era filer</h3><p>Ni fortsätter ta ut samma filer som i dag. Appen känner igen dem, oavsett ordning.</p></div>
+      <div class="card"><h3>Ert godkännande</h3><p>Inget skickas utan att någon hos er har tittat. Avvikelser markeras, ni bestämmer.</p></div>
+    </div>
+  </section>
+</Base>

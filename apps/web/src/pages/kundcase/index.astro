@@ -1,0 +1,19 @@
+---
+import Base from '../../layouts/Base.astro';
+import { KUNDCASE } from '../../lib/site';
+---
+<Base title="Kundcase" description="Så gick det för kunderna. Ett kundcase per kund.">
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Kundcase</p>
+      <h1>Så gick det för dem</h1>
+      <p class="lead">Varje ny kund ger ett nytt kundcase. Här finns de som är igång.</p>
+    </div>
+  </section>
+  <section class="sec sec--white">
+    <div class="wrap grid grid--3">
+      {KUNDCASE.map(k => <a class="card card--link" href={'/kundcase/' + k.slug}><span class="pill pill--ok" style="align-self:flex-start">{k.typ}</span><h3>{k.kund}</h3><p>{k.rubrik}</p><span class="more">Läs kundcaset</span></a>)}
+      <div class="card"><h3>Jetpack</h3><p>Logistik, avräkning mot underleverantörer. Bygger just nu.</p></div>
+    </div>
+  </section>
+</Base>

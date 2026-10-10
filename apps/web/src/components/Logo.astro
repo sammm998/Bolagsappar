@@ -1,0 +1,9 @@
+---
+// Samma symbol som i plattformen (packages/ui Logo). Förslag, se öppen fråga 11.
+const { dark = false, size = 22 } = Astro.props as { dark?: boolean; size?: number };
+const c = dark ? '#FFFFFF' : '#0E1E35', g = dark ? '#A9C9B6' : '#1F4D3A', s = size / 2 - 1;
+---
+<span style={`display:inline-flex;align-items:center;gap:${size * 0.4}px;font-weight:700;font-size:${size * 0.9}px;letter-spacing:-.02em;color:${c}`}>
+  <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true"><rect x="0" y="0" width={s} height={s} rx={s * 0.32} fill={c} /><rect x={s + 2} y="0" width={s} height={s} rx={s * 0.32} fill={c} /><rect x="0" y={s + 2} width={s} height={s} rx={s * 0.32} fill={c} /><rect x={s + 2} y={s + 2} width={s} height={s} rx={s * 0.32} fill={g} /></svg>
+  <span>bolagsappar</span>
+</span>

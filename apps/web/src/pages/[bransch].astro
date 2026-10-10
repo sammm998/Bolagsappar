@@ -1,0 +1,35 @@
+---
+import Base from '../layouts/Base.astro';
+import { BRANSCHER } from '../lib/site';
+export function getStaticPaths() { return BRANSCHER.map(b => ({ params: { bransch: b.slug }, props: { b } })); }
+const { b } = Astro.props as { b: any };
+const Content = b.Content;
+---
+<Base title={b.titel} description={b.ingress}>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="eyebrow">{b.for}</p>
+        <h1 set:html={b.rubrik} />
+        <p class="lead">{b.ingress}</p>
+        <div class="btns"><a class="btn btn--primary" href="/boka">Boka en arbetsdag</a>{b.kundcase && <a class="btn btn--ghost" href={'/kundcase/' + b.kundcase}>Se en avräkning</a>}</div>
+      </div>
+      <div>
+        <div class="ba"><div><b>Före</b>{b.fore}</div><div><b>Efter</b>{b.efter}</div></div>
+        <ul class="sources" aria-label="Filer och system vi läser">{(b.kallor || []).map((k: string) => <li>{k}</li>)}</ul>
+      </div>
+    </div>
+  </section>
+  <section class="sec sec--white">
+    <div class="wrap">
+      <p class="eyebrow">Apparna</p>
+      <div class="grid grid--3" style="margin-top:8px">{(b.appar || []).map((a: any) => <div class="card"><h3>{a.namn}</h3><p>{a.text}</p></div>)}</div>
+    </div>
+  </section>
+  <section class="sec">
+    <div class="wrap price">
+      <div class="prose"><Content /></div>
+      <figure style="margin:0"><blockquote class="quote">{b.citat}</blockquote><p>{b.citatAv}</p></figure>
+    </div>
+  </section>
+</Base>

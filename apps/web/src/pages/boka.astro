@@ -1,0 +1,65 @@
+---
+import Base from '../layouts/Base.astro';
+const BR = ['Taxi', 'Åkeri', 'Verkstad', 'Logistik', 'Annat'];
+const url = import.meta.env.PUBLIC_SUPABASE_URL || '';
+const key = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
+---
+<Base title="Boka en arbetsdag" description="En dag med oss. Sedan vet ni. Arbetsdagen är gratis." cta={false}>
+  <section class="hero">
+    <div class="wrap price">
+      <div>
+        <p class="eyebrow">Boka en arbetsdag</p>
+        <h1>En dag med oss. Sedan vet <em>ni.</em></h1>
+        <p class="lead">Arbetsdagen är gratis. Efteråt får ni ett förslag med fast månadspris. Säger ni nej har ni ändå fått en karta över hur ni jobbar.</p>
+        <ol class="steps-list"><li><b>1</b>Vi ringer inom en arbetsdag och bekräftar.</li><li><b>2</b>Vi kommer till er, eller ses digitalt.</li><li><b>3</b>Inom en vecka får ni ett förslag.</li></ol>
+      </div>
+      <form class="form price-card" id="boka" data-url={url} data-key={key} novalidate>
+        <fieldset class="choices" aria-describedby="br-l"><legend class="legend" id="br-l" style="margin-bottom:8px">Bransch</legend>
+          {BR.map((b, i) => <label><input type="radio" name="bransch" value={b} checked={i === 0} /><span>{b}</span></label>)}
+        </fieldset>
+        <div class="field"><label for="foretag">Företag</label><input id="foretag" name="foretag" required autocomplete="organization" placeholder="Taxi Exempel AB" /></div>
+        <div class="field"><label for="namn">Ditt namn</label><input id="namn" name="namn" required autocomplete="name" placeholder="Förnamn Efternamn" /></div>
+        <div class="two">
+          <div class="field"><label for="telefon">Telefon</label><input id="telefon" name="telefon" type="tel" autocomplete="tel" placeholder="07X XXX XX XX" /></div>
+          <div class="field"><label for="epost">E-post</label><input id="epost" name="epost" type="email" autocomplete="email" placeholder="namn@foretag.se" /></div>
+        </div>
+        <div class="field"><label for="fritext">Vad tar mest tid i dag?</label><textarea id="fritext" name="fritext" placeholder="Månadsavräkningen. Vi sitter två dagar med Excel och PDF:er."></textarea></div>
+        <fieldset class="choices choices--days" id="dagar"><legend class="legend" style="margin-bottom:8px">Föreslå en dag</legend><noscript><div class="field"><input type="date" name="dag" aria-label="Föreslå en dag" /></div></noscript></fieldset>
+        <div id="svar" role="status" aria-live="polite"></div>
+        <button class="btn btn--primary" type="submit">Skicka förfrågan</button>
+        <p class="small muted" style="margin:0">Vi använder uppgifterna bara för att kontakta er om arbetsdagen. Se <a href="/integritet">integritetspolicyn</a>.</p>
+      </form>
+    </div>
+  </section>
+</Base>
+<script>
+  // Fem vardagar framåt att välja bland. Bokningen skrivs till tabellen bookings (alla får skapa, bara Bolagsappar läser).
+  const DAG = ['Sön', 'Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör'];
+  const form = document.getElementById('boka') as HTMLFormElement;
+  const box = document.getElementById('dagar')!;
+  const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const d = new Date(); let n = 0;
+  while (n < 5) { d.setDate(d.getDate() + 1); if (d.getDay() === 0 || d.getDay() === 6) continue; n++;
+    const l = document.createElement('label');
+    l.innerHTML = `<input type="radio" name="dag" value="${iso(d)}"><span>${DAG[d.getDay()]}<b>${d.getDate()}</b><small>${d.toLocaleDateString('sv-SE', { month: 'short' })}</small></span>`;
+    box.appendChild(l); }
+  const svar = document.getElementById('svar')!;
+  const show = (t: string, ok: boolean) => { svar.className = 'notice ' + (ok ? 'notice--ok' : 'notice--bad'); svar.textContent = t; };
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(form).entries()) as Record<string, string>;
+    if (!f.foretag?.trim() || !f.namn?.trim()) { show('Fyll i företag och ditt namn.', false); return; }
+    if (!f.telefon?.trim() && !f.epost?.trim()) { show('Fyll i telefon eller e-post så att vi kan nå er.', false); return; }
+    const body = { bransch: f.bransch, foretag: f.foretag.trim(), namn: f.namn.trim(), telefon: f.telefon?.trim() || null, epost: f.epost?.trim() || null, fritext: f.fritext?.trim() || null, dag: f.dag || null };
+    const url = form.dataset.url, key = form.dataset.key;
+    const btn = form.querySelector('button') as HTMLButtonElement; btn.disabled = true;
+    try {
+      if (!url || !key) throw new Error('lokalt');
+      const r = await fetch(url + '/rest/v1/bookings', { method: 'POST', headers: { apikey: key, Authorization: 'Bearer ' + key, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify(body) });
+      if (!r.ok) throw new Error(String(r.status));
+      form.reset(); show('Tack. Vi ringer inom en arbetsdag och bekräftar.', true);
+    } catch (err) {
+      show((err as Error).message === 'lokalt' ? 'Formuläret är inte kopplat i den här miljön. Mejla oss på [e-post] så bokar vi.' : 'Det gick inte att skicka. Försök igen eller mejla [e-post].', false);
+    } finally { btn.disabled = false; }
+  });
+</script>

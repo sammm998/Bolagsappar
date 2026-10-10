@@ -1,0 +1,86 @@
+---
+// Samma skal på alla sidor: sidhuvud, mobilmeny (helskärm, branscherna överst) och sidfot. Varje sida slutar i "Boka en arbetsdag".
+import '@bolagsappar/ui/fonts';
+import '@bolagsappar/ui/tokens.css';
+import '../styles/site.css';
+import Logo from '../components/Logo.astro';
+import { BRANSCHER, APP } from '../lib/site';
+
+interface Props { title: string; description: string; cta?: boolean }
+const { title, description, cta = true } = Astro.props;
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const full = title === 'Bolagsappar' ? 'Bolagsappar · Appar för företag som fastnat i Excel och mejl' : `${title} · Bolagsappar`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const NAV = [['/#branscher', 'Branscher'], ['/sa-jobbar-vi', 'Så jobbar vi'], ['/kundcase', 'Kundcase'], ['/pris', 'Pris'], ['/om-oss', 'Om oss']];
+---
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{full}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#FBF8F2" />
+    <meta property="og:title" content={full} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="sv_SE" />
+  </head>
+  <body>
+    <a class="skip" href="#innehall">Till innehållet</a>
+    <header class="top" id="top">
+      <div class="wrap">
+        <a class="logo" href="/" aria-label="Bolagsappar, till startsidan"><Logo /></a>
+        <nav class="nav" aria-label="Huvudmeny">
+          {NAV.map(([href, label]) => <a href={href} aria-current={path === href ? 'page' : undefined}>{label}</a>)}
+        </nav>
+        <div class="top-cta">
+          <a class="login" href="/logga-in">Logga in</a>
+          <a class="btn btn--primary btn--sm" href="/boka">Boka en arbetsdag</a>
+        </div>
+        <details class="mobil">
+          <summary aria-label="Meny">Meny</summary>
+          <div class="panel">
+            <span class="sec">Branscher</span>
+            {BRANSCHER.map(b => <a href={'/' + b.slug}>{b.namn}</a>)}
+            <span class="sec">Bolagsappar</span>
+            {NAV.slice(1).map(([href, label]) => <a href={href}>{label}</a>)}
+            <a href={APP}>Logga in</a>
+            <a class="btn btn--primary" href="/boka">Boka en arbetsdag</a>
+          </div>
+        </details>
+      </div>
+    </header>
+    <main id="innehall">
+      <slot />
+      {cta && (
+        <section class="sec sec--line cta">
+          <div class="wrap">
+            <p class="eyebrow">Boka en arbetsdag</p>
+            <h2>En dag med oss. Sedan vet <em>ni.</em></h2>
+            <p class="lead" style="margin-left:auto;margin-right:auto">Arbetsdagen är gratis. Efteråt får ni ett förslag med fast månadspris.</p>
+            <div class="btns"><a class="btn btn--primary" href="/boka">Boka en arbetsdag</a></div>
+          </div>
+        </section>
+      )}
+    </main>
+    <footer class="foot">
+      <div class="wrap">
+        <div class="foot-grid">
+          <div><Logo dark /><p style="margin-top:14px;max-width:22em">Appar för företag som fastnat i Excel och mejl. Fast månadspris, ingen IT-avdelning behövs.</p></div>
+          <div><h4>Branscher</h4><ul>{BRANSCHER.map(b => <li><a href={'/' + b.slug}>{b.namn}</a></li>)}</ul></div>
+          <div><h4>Bolagsappar</h4><ul><li><a href="/sa-jobbar-vi">Så jobbar vi</a></li><li><a href="/kundcase">Kundcase</a></li><li><a href="/pris">Pris</a></li><li><a href="/om-oss">Om oss</a></li><li><a href="/boka">Boka en arbetsdag</a></li></ul></div>
+          <div><h4>Trygghet</h4><ul><li><a href="/sakerhet">Säkerhet</a></li><li><a href="/integritet">Integritetspolicy</a></li><li><a href={APP}>Logga in</a></li></ul></div>
+        </div>
+        <div class="foot-bottom"><span>Bolagsappar · [org.nr] · Malmö</span><span>Data i Sverige och EU</span></div>
+      </div>
+    </footer>
+    <script>
+      const top = document.getElementById('top');
+      const f = () => top?.classList.toggle('is-scrolled', window.scrollY > 4);
+      addEventListener('scroll', f, { passive: true }); f();
+    </script>
+  </body>
+</html>

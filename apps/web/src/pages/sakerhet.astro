@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+const P = [
+  ['Data i Sverige och EU', 'Databasen och filerna ligger hos [leverantör] i EU. Inga personuppgifter lämnar EU utan att det står i integritetspolicyn.'],
+  ['Varje konto ser bara sitt', 'Behörigheterna ligger i databasen och testas automatiskt vid varje ändring. Ett konto kan aldrig läsa ett annat kontos data.'],
+  ['Lön syns aldrig uppåt', 'En huvudkund ser aldrig lön, personal eller bokföring hos sina underkunder. Bara det underkunden själv delar.'],
+  ['Filerna läses i webbläsaren', 'Filer ni drar in tolkas på er dator. Originalfilen sparas bara om ni har valt det.'],
+  ['Inloggning med e-postlänk', 'Ingen behöver komma ihåg ett lösenord. Länken gäller en gång och en kort tid. Avtal signeras med pennan och låses med en kontrollsumma.'],
+  ['Support bara med ert godkännande', 'Våra utvecklare ser er data bara om ni ger tillgång, under en begränsad tid. Allt som görs då loggas och syns hos er.'],
+  ['Publicerat ändras aldrig', 'En publicerad avräkning kan inte ändras. En rättelse blir en ny version med orsak, och båda versionerna finns kvar.'],
+  ['AI bara på servern', 'Där AI används skriver den utkast som en människa granskar. Nyckeln finns bara på servern och inget skickas automatiskt.']
+];
+---
+<Base title="Säkerhet" description="GDPR, data i EU, behörigheter som testas automatiskt och inloggning med e-postlänk.">
+  <section class="hero"><div class="wrap"><p class="eyebrow">Säkerhet</p><h1>Er data är er.</h1><p class="lead">Så skyddar vi uppgifterna i plattformen. Har ni frågor, mejla [e-post].</p></div></section>
+  <section class="sec sec--white"><div class="wrap grid grid--2">{P.map(([t, x]) => <div class="card"><h3>{t}</h3><p>{x}</p></div>)}</div></section>
+</Base>
