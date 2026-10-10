@@ -4,6 +4,14 @@
 	auto_https off
 }
 :{$PORT:8080} {
+	# Domäner (öppen fråga 12): taxiavrakning.se till /taxi, akaravrakning.se till /akeri, www till utan www.
+	@taxi host taxiavrakning.se www.taxiavrakning.se
+	redir @taxi https://bolagsappar.se/taxi/ 301
+	@akeri host akaravrakning.se www.akaravrakning.se
+	redir @akeri https://bolagsappar.se/akeri/ 301
+	@www host www.bolagsappar.se
+	redir @www https://bolagsappar.se{uri} 301
+
 	root * /srv
 	encode zstd gzip
 	header /_astro/* Cache-Control "public, max-age=31536000, immutable"

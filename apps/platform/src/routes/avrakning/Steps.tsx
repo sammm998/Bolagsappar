@@ -341,7 +341,7 @@ export function Godkann() {
         {m.status === 'oppen' && okontrollerade > 0 && <div style={{ marginTop: 14 }}><Deviation tone="warn" title={`${okontrollerade} ${okontrollerade === 1 ? 'avvikelse är' : 'avvikelser är'} inte markerade som kontrollerade`} text="Du kan godkänna ändå, men titta på dem först." actions={[{ label: 'Till kontroll', onClick: () => go('kontroll') }]} /></div>}
         {m.periodRow?.approved_at && m.status !== 'oppen' && <p className="small muted">Godkänd {String(m.periodRow.approved_at).slice(0, 16).replace('T', ' ')}.</p>}
         <div className="ba-row" style={{ marginTop: 16 }}>
-          {m.status === 'oppen' && <Button variant="primary" icon="check" loading={busy} onClick={approve}>Godkänn {manad(m.period)}</Button>}
+          {m.status === 'oppen' && <Button variant="primary" icon="check" loading={busy} disabled={!a.canApprove} title={a.canApprove ? undefined : 'Din roll får inte godkänna. Se Inställningar, Användare.'} onClick={approve}>Godkänn {manad(m.period)}</Button>}
           {m.status === 'godkand' && <><Button variant="primary" iconRight="arrow" onClick={() => go('publicera')}>Till publicering</Button><Button onClick={reopen} loading={busy}>Öppna igen</Button></>}
           {m.status === 'publicerad' && <Button onClick={correction} loading={busy} icon="pencil">Gör en rättelse</Button>}
         </div>
@@ -431,7 +431,7 @@ export function Publicera() {
         {needReason && m.status !== 'publicerad' && <label className="ba-field"><span className="ba-label">Orsak till rättelsen</span><Textarea value={reason} onChange={e => setReason(e.target.value)} placeholder="Till exempel: fel pris på bron för bil 112" /></label>}
         {m.status === 'publicerad'
           ? <><Banner tone="info">Publicerad {String(m.periodRow?.published_at || '').slice(0, 16).replace('T', ' ')}, version {m.version}.</Banner><Button icon="download" onClick={visma}>Underlag för Visma (Excel)</Button><Link className="ba-btn" to="/$tenant/akare" params={{ tenant: a.tenant.slug }}>Se vem som har öppnat</Link></>
-          : <Button variant="primary" size="lg" icon="send" block loading={busy} disabled={!mottagare.length} onClick={publish}>{m.exempel ? 'I exempelläget skickas inget' : `Publicera till ${mottagare.length} åkare`}</Button>}
+          : <Button variant="primary" size="lg" icon="send" block loading={busy} disabled={!mottagare.length || !a.canApprove} onClick={publish}>{m.exempel ? 'I exempelläget skickas inget' : `Publicera till ${mottagare.length} åkare`}</Button>}
       </aside>
     </div>
   );

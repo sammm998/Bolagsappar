@@ -8,7 +8,9 @@ Instruktioner för Claude Code i det här repot. Läs `README.md` för strukture
 - **Jämförelsetesterna mot `legacy/` ska alltid gå igenom** (`packages/core/test/*.compare.test.js`). `legacy/` ändras inte.
 - **Bara påhittad data i repot.** Inga riktiga namn, personnummer, regnummer eller kundfiler. Regnummer börjar på Q, personnummer slutar på 0000.
 - **Svenska i allt användaren ser.** Belopp i sv-SE, datum ÅÅÅÅ-MM-DD. Aldrig tankstreck (`pnpm lint` stoppar dem), använd komma, punkt eller parentes.
-- **Platshållare står kvar** (`[PRIS]`, `[MRR]`, `[org.nr]` med flera) tills ägaren svarar på de öppna frågorna i README.
+- **Platshållare står kvar** (`[org.nr]`, citat och liknande) tills ägaren svarar på de öppna frågorna i README. Priserna är tillfälliga och ligger bara i `packages/modules/src/priser.js`.
+- **Loggan** finns bara i `packages/ui/src/brand/` (uttagen ur specifikationen). Rita den aldrig för hand.
+- **Godkännande:** använd `kanGodkanna` och `godkannRoller` från `packages/core/src/behorighet.js`. Samma regel finns i databasen.
 - **Ingen BankID.** Inloggning med e-postlänk. Signering med pennan (`SignaturePad` i `packages/ui`, `Signatur` i mobilen, `packages/core/signatur.js`).
 - **Skattesatser i konfiguration med giltighetsdatum**, aldrig hårdkodade i en skärm.
 - **Filer läses i webbläsaren** (pdf.js och SheetJS). Originalfilen lämnar inte datorn.

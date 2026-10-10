@@ -1,8 +1,9 @@
 // Inställningar för kontot: bolaget (white label), användare och roller, supportinloggning och granskningslogg.
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Avatar, Button, Card, EmptyState, Pill, Select, TextField, useToast, Banner } from '@bolagsappar/ui';
+import { Avatar, Button, Card, Checkbox, EmptyState, Pill, Select, TextField, useToast, Banner } from '@bolagsappar/ui';
 import { initialer } from '@bolagsappar/core/format';
+import { godkannRoller } from '@bolagsappar/core/behorighet';
 import { useAccount, useSession, ROLLNAMN } from '../../lib/session';
 import { useBackend } from '../../lib/backend';
 import { useAudit, useMembers, useSupport } from '../../lib/q';
@@ -76,6 +77,8 @@ function Anvandare() {
     <div className="pf-sidebar-layout pf-sidebar-layout--right">
       <div className="ba-table-wrap"><table className="ba-table"><thead><tr><th>Användare</th><th>Roll</th><th>Senast inloggad</th></tr></thead>
         <tbody>{(m.data || []).map(x => <tr key={x.user_id}><td><div className="ba-who"><Avatar round size="sm" text={initialer(x.user?.name || x.user?.email)} /><div><b>{x.user?.name || x.user?.email}</b><small>{x.user?.email}</small></div></div></td><td>{ROLLNAMN[x.role]}{x.forare_id ? <span className="small muted"> · nr {x.forare_id}</span> : null}</td><td className="small">{x.user?.last_login_at ? String(x.user.last_login_at).slice(0, 10) : 'Aldrig'}</td></tr>)}</tbody></table></div>
+      <div className="ba-stack">
+      {a.tenant.type !== 'sub' && <Godkannande />}
       <Card title="Lägg till användare">
         <div className="ba-stack">
           <TextField label="E-post" type="email" value={f.email} onChange={e => setF({ ...f, email: e.target.value })} />
@@ -86,6 +89,7 @@ function Anvandare() {
           <Button variant="dark" onClick={add}>Lägg till</Button>
         </div>
       </Card>
+      </div>
     </div>
   );
 }
@@ -110,5 +114,28 @@ function Logg() {
   return (
     <div className="ba-table-wrap"><table className="ba-table"><thead><tr><th>Tid</th><th>Händelse</th><th>Vad</th><th>Via support</th></tr></thead>
       <tbody>{q.data.slice(0, 200).map(x => <tr key={x.id}><td className="num small">{String(x.at).slice(0, 16).replace('T', ' ')}</td><td>{x.action}</td><td className="small">{x.target}</td><td>{x.via_support ? <Pill tone="warn">Ja</Pill> : ''}</td></tr>)}</tbody></table></div>
+  );
+}
+
+/** Vem får godkänna och publicera en månad. Ägaren får alltid, läs och förare aldrig. */
+function Godkannande() {
+  const a = useAccount(); const b = useBackend(); const toast = useToast(); const s = useSession(); const qc = useQueryClient();
+  const kan = a.role === 'agare' || a.role === 'admin';
+  const [r, setR] = useState<string[]>(godkannRoller(a.tenant));
+  const set = (k: string, on: boolean) => setR(on ? [...new Set([...r, k])] : r.filter(x => x !== k));
+  const save = async () => {
+    try { await b.updateTenant(a.tenant.id, { settings: { ...a.tenant.settings, godkannande: { roller: r.filter(x => x !== 'agare') } } }); await s.refresh(); qc.invalidateQueries(); toast('Sparat. Gäller nästa gång någon godkänner eller publicerar.'); }
+    catch (e: any) { toast(e.message, { tone: 'bad' }); }
+  };
+  return (
+    <Card title="Godkänna och publicera">
+      <p className="small muted" style={{ marginTop: 0 }}>Vilka roller får godkänna en månad och publicera den till {a.tenant.brand?.akarOrd === 'underleverantör' ? 'underleverantörerna' : 'åkarna'}. Ägaren får alltid.</p>
+      <div className="ba-stack" style={{ gap: 8 }}>
+        <Checkbox label="Ägare" checked disabled />
+        <Checkbox label="Admin" checked={r.includes('admin')} disabled={!kan} onChange={e => set('admin', e.target.checked)} />
+        <Checkbox label="Ekonomi" checked={r.includes('ekonomi')} disabled={!kan} onChange={e => set('ekonomi', e.target.checked)} />
+      </div>
+      {kan && <div style={{ marginTop: 12 }}><Button size="sm" variant="dark" onClick={save}>Spara</Button></div>}
+    </Card>
   );
 }

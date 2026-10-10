@@ -49,15 +49,15 @@ export function MinAvrakning() {
             {p.sammanfattning.map((r: any) => <div key={r.key} onClick={() => setRad(r)} style={{ cursor: 'pointer' }} title="Klicka för att se hur raden räknas"><dt>{r.text}{r.n ? <span className="muted small"> · {r.n} passager</span> : null}</dt><dd>{kr2(r.belopp)} kr</dd></div>)}
             <div className="tot"><dt>{p.riktning === 'betalar' ? 'Att betala' : 'Att få'}</dt><dd>{kr2(p.belopp)} kr</dd></div>
           </dl>
-          <div className="ba-card ba-card--subtle" style={{ padding: 12, marginTop: 14, fontSize: 12 }}><b>Stämmer något inte?</b> Klicka på en rad och välj "Fråga {p.fran}". Frågan hamnar hos ekonomi på centralen.</div>
+          <div className="ba-card ba-card--subtle" style={{ padding: 12, marginTop: 14, fontSize: 12 }}><b>Stämmer något inte?</b> Klicka på en rad och välj "Fråga {p.fran}". Frågan hamnar hos ekonomi på {p.fran}.</div>
         </Card>
         <div className="ba-stack">
-          <Card title="Per bil">
+          <Card title={p.kind === 'logistikavrakning' ? 'Per fordon' : 'Per bil'}>
             <div className="ba-table-wrap" style={{ border: 0 }}>
-              <table className="ba-table"><thead><tr><th>Bil</th><th className="n">Intäkt</th><th className="n">Avdrag</th><th className="n">Netto</th></tr></thead>
-                <tbody>{p.perBil.map((x: any) => <tr key={x.bil}><td className="b num">{x.reg ? x.reg.slice(0, 3) + ' ' + x.reg.slice(3) : x.bil}<div className="small muted">Bil {x.bil}</div></td><td className="n">{kr2(x.intakt)}</td><td className="n">{kr2(x.avdrag)}</td><td className="n strong">{kr2(x.netto)}</td></tr>)}</tbody></table>
+              <table className="ba-table"><thead><tr><th>{p.kind === 'logistikavrakning' ? 'Fordon' : 'Bil'}</th><th className="n">Intäkt</th><th className="n">Avdrag</th><th className="n">Netto</th></tr></thead>
+                <tbody>{p.perBil.map((x: any) => <tr key={x.bil}><td className="b num">{x.reg ? x.reg.slice(0, 3) + ' ' + x.reg.slice(3) : x.bil}{p.kind === 'logistikavrakning' ? <div className="small muted">{x.n} uppdrag</div> : <div className="small muted">Bil {x.bil}</div>}</td><td className="n">{kr2(x.intakt)}</td><td className="n">{kr2(x.avdrag)}</td><td className="n strong">{kr2(x.netto)}</td></tr>)}</tbody></table>
             </div>
-            <p className="small muted" style={{ margin: '8px 0 0' }}>Netto per bil är före centralens avgifter, förskott och moms.</p>
+            <p className="small muted" style={{ margin: '8px 0 0' }}>{p.kind === 'logistikavrakning' ? `Värdet per fordon är före provision, avgifter och moms.` : 'Netto per bil är före centralens avgifter, förskott och moms.'}</p>
           </Card>
           <Card title="Senaste sex månaderna" headExtra={<span className="small muted ba-grow" style={{ textAlign: 'right' }}>att få per månad</span>}>
             <Bars tall values={hist.map(h => h.v)} labels={hist.map(h => kortManad(h.p))} />
@@ -83,11 +83,11 @@ const GRUPP: Record<string, (r: any) => boolean> = {
   sturup: r => r.art === 15, forskott: r => r.art === 59, skuld: r => r.skuld, ovrigt: r => r.art == null && !r.skuld, avrundning: () => false
 };
 function RadDetalj({ p, rad }: { p: any; rad: any }) {
-  const rows = p.rows.filter(GRUPP[rad.key] || (() => false));
+  const rows = (p.rows || []).filter(p.kind === 'logistikavrakning' ? (r: any) => r.grupp === rad.key : GRUPP[rad.key] || (() => false));
   if (rad.key === 'avrundning') return <p className="small">Moms räknas på summan av raderna och beloppet avrundas till hela kronor. Skillnaden mellan raderna och Att få hamnar här.</p>;
   return (
     <>
-      <p className="small muted" style={{ marginTop: 0 }}>Raderna från fakturan, exklusive moms. Negativt belopp betyder att centralen betalar dig.</p>
+      <p className="small muted" style={{ marginTop: 0 }}>Raderna från fakturan, exklusive moms. Negativt belopp betyder att {p.fran} betalar dig.</p>
       <div className="ba-table-wrap"><table className="ba-table"><thead><tr><th>Art</th><th>Benämning</th><th className="n">Antal</th><th className="n">À-pris</th><th className="n">Summa</th></tr></thead>
         <tbody>{rows.map((r: any, i: number) => <tr key={i}><td className="num">{r.art ?? ''}</td><td>{r.text}</td><td className="n">{r.antal}</td><td className="n">{kr2(r.apris)}</td><td className="n">{kr2(r.summa)}</td></tr>)}</tbody></table></div>
       {rad.key === 'bro' && p.passager?.bro?.length > 0 && <p className="small">Passagerna med tid finns i PDF:en och i Åkarkassan under Bro och Sturup.</p>}

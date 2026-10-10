@@ -1,4 +1,5 @@
 import { forwardRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes, useId } from 'react';
+import { LOGO_COLORS, LOGO_H, LOGO_W, SYMBOL, WORDMARK } from './brand/geometry';
 import { Icon } from './icons';
 
 const cx = (...a: (string | false | null | undefined)[]) => a.filter(Boolean).join(' ');
@@ -96,12 +97,14 @@ export function Progress({ value, max = 1, onNavy, label }: { value: number; max
 export function Avatar({ text, accent, color, size = 'md', round }: { text: string; accent?: string; color?: string; size?: 'sm' | 'md' | 'lg'; round?: boolean }) {
   return <span className={cx('ba-av', round && 'ba-av--round', size !== 'md' && 'ba-av--' + size)} style={accent ? { background: accent, color: color || '#fff', borderColor: 'transparent' } : undefined} aria-hidden>{text}</span>;
 }
+/** Loggan ur specifikationen. size är höjden i px. */
 export function Logo({ dark = false, size = 20, text = true }: { dark?: boolean; size?: number; text?: boolean }) {
-  const c = dark ? '#FFFFFF' : '#0E1E35', g = dark ? '#A9C9B6' : '#1F4D3A', s = size / 2 - 1;
+  const [c, g] = dark ? LOGO_COLORS.dark : LOGO_COLORS.light;
+  const w = text ? LOGO_W : LOGO_H;
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: size * 0.4, fontWeight: 700, fontSize: size * 0.95, letterSpacing: '-.02em', color: c }}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden><rect x="0" y="0" width={s} height={s} rx={s * 0.32} fill={c} /><rect x={s + 2} y="0" width={s} height={s} rx={s * 0.32} fill={c} /><rect x="0" y={s + 2} width={s} height={s} rx={s * 0.32} fill={c} /><rect x={s + 2} y={s + 2} width={s} height={s} rx={s * 0.32} fill={g} /></svg>
-      {text && <span>bolagsappar</span>}
-    </span>
+    <svg width={(w / LOGO_H) * size} height={size} viewBox={`0 0 ${w} ${LOGO_H}`} role="img" aria-label="bolagsappar" style={{ display: 'inline-block', verticalAlign: 'middle', flex: 'none' }}>
+      {SYMBOL.map((d, i) => <path key={i} d={d} fill={i === 3 ? g : c} />)}
+      {text && <path d={WORDMARK} fill={c} />}
+    </svg>
   );
 }

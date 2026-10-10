@@ -9,6 +9,7 @@ do $$ begin
       ('00000000-0000-4000-8000-b00000000004', 'forare.a1@akeri-norra.example'),
       ('00000000-0000-4000-8000-b00000000005', 'fia@folieringsfirman.example'),
       ('00000000-0000-4000-8000-b00000000006', 'jens@jetpack.example'),
+      ('00000000-0000-4000-8000-b00000000007', 'ulla@budfirma.example'),
       ('00000000-0000-4000-8000-d00000000002', 'lina@limhamn-trafik.example'),
       ('00000000-0000-4000-8000-d00000000003', 'jonas@soder-taxi.example'),
       ('00000000-0000-4000-8000-d00000000004', 'mira@kust-taxi.example'),
@@ -39,6 +40,7 @@ insert into public.users (id, name, email, last_login_at) values
   ('00000000-0000-4000-8000-b00000000004', 'Förare A1', 'forare.a1@akeri-norra.example', '2026-10-08T08:00:00.000Z'),
   ('00000000-0000-4000-8000-b00000000005', 'Fia Exempel', 'fia@folieringsfirman.example', '2026-10-09T08:00:00.000Z'),
   ('00000000-0000-4000-8000-b00000000006', 'Jens Exempel', 'jens@jetpack.example', '2026-10-07T08:00:00.000Z'),
+  ('00000000-0000-4000-8000-b00000000007', 'Ulla Exempel', 'ulla@budfirma.example', '2026-10-05T08:00:00.000Z'),
   ('00000000-0000-4000-8000-d00000000002', 'Lina Exempel', 'lina@limhamn-trafik.example', '2026-10-09T08:00:00.000Z'),
   ('00000000-0000-4000-8000-d00000000003', 'Jonas Exempel', 'jonas@soder-taxi.example', '2026-10-07T08:00:00.000Z'),
   ('00000000-0000-4000-8000-d00000000004', 'Mira Exempel', 'mira@kust-taxi.example', '2026-09-28T08:00:00.000Z'),
@@ -63,7 +65,7 @@ on conflict do nothing;
 insert into public.tenants (id, parent_id, type, name, slug, org_nr, brand, settings) values
   ('00000000-0000-4000-8000-a00000000001', null, 'platform', 'Bolagsappar', 'admin', null, '{"initialer":"BA","accent":"#0E1E35","text":"#FFFFFF"}'::jsonb, '{}'::jsonb),
   ('00000000-0000-4000-8000-a00000000002', null, 'main', 'Taxi Malmö', 'taxi-malmo', null, '{"initialer":"TM","accent":"#F5B301","text":"#0E1E35","akarOrd":"åkare"}'::jsonb, '{"centralNamn":"Taxi Malmö AB","ort":"Malmö","utbDag":5,"kontakt":"040-911 911"}'::jsonb),
-  ('00000000-0000-4000-8000-a00000000003', null, 'main', 'Jetpack', 'jetpack', null, '{"initialer":"JP","accent":"#7C5CFF","text":"#FFFFFF","akarOrd":"underleverantör"}'::jsonb, '{"status":"bygger","dag":6,"ord":{"korningar":"uppdrag","akare":"underleverantör"}}'::jsonb),
+  ('00000000-0000-4000-8000-a00000000003', null, 'main', 'Jetpack', 'jetpack', null, '{"initialer":"JP","accent":"#7C5CFF","text":"#FFFFFF","akarOrd":"underleverantör"}'::jsonb, '{"status":"bygger","dag":6,"dagar":14,"bransch":"logistik","ord":{"korningar":"uppdrag","akare":"underleverantör"}}'::jsonb),
   ('00000000-0000-4000-8000-a00000000004', null, 'direct', 'Folieringsfirman', 'folieringsfirman', '559xxx-0001', '{"initialer":"FF","accent":"#1F4D3A","text":"#FFFFFF"}'::jsonb, '{}'::jsonb),
   ('00000000-0000-4000-8000-a00000000005', null, 'direct', '[Städfirma]', 'stadfirma', null, '{"initialer":"SF","accent":"#6B7385","text":"#FFFFFF"}'::jsonb, '{"status":"arbetsdag","arbetsdag":"2026-11-14"}'::jsonb),
   ('00000000-0000-4000-8000-c00000000001', '00000000-0000-4000-8000-a00000000002', 'sub', 'Åkeri Norra AB', 'akeri-norra', '556xxx-0101', '{"initialer":"ÅN","accent":"#0E1E35","text":"#FFFFFF"}'::jsonb, '{"bilar":4}'::jsonb),
@@ -89,7 +91,11 @@ insert into public.tenants (id, parent_id, type, name, slug, org_nr, brand, sett
   ('00000000-0000-4000-8000-c00000000021', '00000000-0000-4000-8000-a00000000002', 'sub', 'Kroksbäck Taxi AB', 'kroksback-taxi', '556xxx-0121', '{"initialer":"KT","accent":"#0E1E35","text":"#FFFFFF"}'::jsonb, '{"bilar":2}'::jsonb),
   ('00000000-0000-4000-8000-c00000000022', '00000000-0000-4000-8000-a00000000002', 'sub', 'Västra Hamnen Bil AB', 'vastra-hamnen-bil', '556xxx-0122', '{"initialer":"VH","accent":"#0E1E35","text":"#FFFFFF"}'::jsonb, '{"bilar":3}'::jsonb),
   ('00000000-0000-4000-8000-c00000000023', '00000000-0000-4000-8000-a00000000002', 'sub', 'Toftanäs Trafik AB', 'toftanas-trafik', '556xxx-0123', '{"initialer":"TT","accent":"#0E1E35","text":"#FFFFFF"}'::jsonb, '{"bilar":2}'::jsonb),
-  ('00000000-0000-4000-8000-c00000000024', '00000000-0000-4000-8000-a00000000002', 'sub', 'Klagshamn Taxi AB', 'klagshamn-taxi', '556xxx-0124', '{"initialer":"KT","accent":"#0E1E35","text":"#FFFFFF"}'::jsonb, '{"bilar":1}'::jsonb)
+  ('00000000-0000-4000-8000-c00000000024', '00000000-0000-4000-8000-a00000000002', 'sub', 'Klagshamn Taxi AB', 'klagshamn-taxi', '556xxx-0124', '{"initialer":"KT","accent":"#0E1E35","text":"#FFFFFF"}'::jsonb, '{"bilar":1}'::jsonb),
+  ('00000000-0000-4000-8000-ab0000000001', '00000000-0000-4000-8000-a00000000003', 'sub', 'Kurir Exempel Nord AB', 'kurir-exempel-nord', '559xxx-0201', '{"initialer":"KE","accent":"#7C5CFF","text":"#FFFFFF","akarOrd":"underleverantör"}'::jsonb, '{"fordon":["QJA 11A","QJA 12B"]}'::jsonb),
+  ('00000000-0000-4000-8000-ab0000000002', '00000000-0000-4000-8000-a00000000003', 'sub', 'Budfirma Exempel AB', 'budfirma-exempel', '559xxx-0202', '{"initialer":"BE","accent":"#7C5CFF","text":"#FFFFFF","akarOrd":"underleverantör"}'::jsonb, '{"fordon":["QJB 21C"]}'::jsonb),
+  ('00000000-0000-4000-8000-ab0000000003', '00000000-0000-4000-8000-a00000000003', 'sub', 'Transport Exempel Syd AB', 'transport-exempel-syd', '559xxx-0203', '{"initialer":"TE","accent":"#7C5CFF","text":"#FFFFFF","akarOrd":"underleverantör"}'::jsonb, '{"fordon":["QJC 31D","QJC 32E","QJC 33F"]}'::jsonb),
+  ('00000000-0000-4000-8000-ab0000000004', '00000000-0000-4000-8000-a00000000003', 'sub', 'Leverans Exempel HB', 'leverans-exempel', '559xxx-0204', '{"initialer":"LE","accent":"#7C5CFF","text":"#FFFFFF","akarOrd":"underleverantör"}'::jsonb, '{"fordon":["QJD 41G"]}'::jsonb)
 on conflict do nothing;
 insert into public.memberships (user_id, tenant_id, role, forare_id) values
   ('00000000-0000-4000-8000-b00000000001', '00000000-0000-4000-8000-a00000000001', 'agare', null),
@@ -118,7 +124,8 @@ insert into public.memberships (user_id, tenant_id, role, forare_id) values
   ('00000000-0000-4000-8000-d00000000020', '00000000-0000-4000-8000-c00000000020', 'agare', null),
   ('00000000-0000-4000-8000-d00000000021', '00000000-0000-4000-8000-c00000000021', 'agare', null),
   ('00000000-0000-4000-8000-d00000000022', '00000000-0000-4000-8000-c00000000022', 'agare', null),
-  ('00000000-0000-4000-8000-b00000000004', '00000000-0000-4000-8000-c00000000001', 'forare', '100001')
+  ('00000000-0000-4000-8000-b00000000004', '00000000-0000-4000-8000-c00000000001', 'forare', '100001'),
+  ('00000000-0000-4000-8000-b00000000007', '00000000-0000-4000-8000-ab0000000002', 'agare', null)
 on conflict do nothing;
 insert into public.modules (key, name, version, manifest) values
   ('avrakning', 'Avräkning', '2.0.0', '{"status":"aktiv","icon":"receipt","tone":"green","beskrivning":"Månadsavräkning mellan central och åkare.","variants":["main","sub"]}'::jsonb),
@@ -131,7 +138,7 @@ on conflict do nothing;
 insert into public.licenses (tenant_id, module_key, variant, status, paid_by, price, started_at) values
   ('00000000-0000-4000-8000-a00000000002', 'avrakning', 'main', 'aktiv', '00000000-0000-4000-8000-a00000000002', null, '2026-09-01'),
   ('00000000-0000-4000-8000-a00000000002', 'forarlista', 'main', 'aktiv', '00000000-0000-4000-8000-a00000000002', null, '2026-09-01'),
-  ('00000000-0000-4000-8000-a00000000003', 'avrakning', 'main', 'kommer', '00000000-0000-4000-8000-a00000000003', null, '2026-10-05'),
+  ('00000000-0000-4000-8000-a00000000003', 'avrakning', 'main', 'aktiv', '00000000-0000-4000-8000-a00000000003', null, '2026-10-05'),
   ('00000000-0000-4000-8000-a00000000004', 'verkstad', 'direct', 'aktiv', '00000000-0000-4000-8000-a00000000004', null, '2026-08-01'),
   ('00000000-0000-4000-8000-a00000000004', 'skadeflode', 'direct', 'aktiv', '00000000-0000-4000-8000-a00000000004', null, '2026-08-01'),
   ('00000000-0000-4000-8000-c00000000001', 'avrakning', 'sub', 'aktiv', '00000000-0000-4000-8000-a00000000002', null, '2026-09-01'),
@@ -184,7 +191,11 @@ insert into public.licenses (tenant_id, module_key, variant, status, paid_by, pr
   ('00000000-0000-4000-8000-c00000000021', 'avrakning', 'sub', 'aktiv', '00000000-0000-4000-8000-a00000000002', null, '2026-09-01'),
   ('00000000-0000-4000-8000-c00000000021', 'forarlista', 'sub', 'aktiv', '00000000-0000-4000-8000-a00000000002', null, '2026-09-01'),
   ('00000000-0000-4000-8000-c00000000022', 'avrakning', 'sub', 'aktiv', '00000000-0000-4000-8000-a00000000002', null, '2026-09-01'),
-  ('00000000-0000-4000-8000-c00000000022', 'forarlista', 'sub', 'aktiv', '00000000-0000-4000-8000-a00000000002', null, '2026-09-01')
+  ('00000000-0000-4000-8000-c00000000022', 'forarlista', 'sub', 'aktiv', '00000000-0000-4000-8000-a00000000002', null, '2026-09-01'),
+  ('00000000-0000-4000-8000-ab0000000001', 'avrakning', 'sub', 'aktiv', '00000000-0000-4000-8000-a00000000003', null, '2026-10-05'),
+  ('00000000-0000-4000-8000-ab0000000002', 'avrakning', 'sub', 'aktiv', '00000000-0000-4000-8000-a00000000003', null, '2026-10-05'),
+  ('00000000-0000-4000-8000-ab0000000003', 'avrakning', 'sub', 'aktiv', '00000000-0000-4000-8000-a00000000003', null, '2026-10-05'),
+  ('00000000-0000-4000-8000-ab0000000004', 'avrakning', 'sub', 'aktiv', '00000000-0000-4000-8000-a00000000003', null, '2026-10-05')
 on conflict do nothing;
 insert into public.offers (parent_id, module_key, variant, mode, paid_by, price, auto_enable) values
   ('00000000-0000-4000-8000-a00000000002', 'avrakning', 'sub', 'ingar', 'parent', null, true),

@@ -7,9 +7,28 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "backgroundColor": "#F7F8F9",
-    "ios": { "bundleIdentifier": "se.bolagsappar.app", "supportsTablet": false },
-    "android": { "package": "se.bolagsappar.app" },
-    "web": { "bundler": "metro", "output": "single" },
-    "plugins": []
+    "ios": {
+      "bundleIdentifier": "se.bolagsappar.app",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "se.bolagsappar.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0E1E35"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [],
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F7F8F9"
+    }
   }
 }

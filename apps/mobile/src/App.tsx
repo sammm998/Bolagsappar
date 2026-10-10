@@ -9,6 +9,7 @@ import { seedDemo } from '@bolagsappar/api/demo';
 import { AppCtx, useApp as useAppCtx, type Acc } from './lib/ctx';
 import { C } from './lib/theme';
 import { initialer } from './lib/format';
+import { Logo } from './Logo';
 import { Avatar, Btn, Card, Field, Loading, Screen, T } from './ui';
 import { Hem, Appar, LaddaUpp, Konto, Avrakning, Lonespec, Avtal, Aktivera, AppInfo } from './screens';
 
@@ -60,7 +61,7 @@ function Login() {
   return (
     <Screen>
       <View style={{ alignItems: 'flex-start', gap: 6, marginTop: 24, marginBottom: 8 }}>
-        <Avatar text="BA" size={44} />
+        <Logo size={30} />
         <Text style={{ fontSize: 30, fontWeight: '700', color: C.text, marginTop: 12, letterSpacing: -0.5 }}>Logga in</Text>
         <T muted>Vi skickar en inloggningslänk till din e-post. Inget lösenord, ingen BankID.</T>
       </View>

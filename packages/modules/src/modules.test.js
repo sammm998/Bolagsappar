@@ -17,3 +17,16 @@ describe('modulmanifest', () => {
     expect(variantFor(moduleByKey.skadeflode, 'direct')).toBe('direct');
   });
 });
+
+import { prisFor, prisText, PRISER } from './index.js';
+describe('priser', () => {
+  it('varje erbjuden variant har ett pris eller ingår', () => {
+    for (const m of MODULES) for (const v of Object.keys(m.variants)) if (!m.variants[v].erbjuds) expect(prisFor(m.key, v), m.key + '/' + v).toBeTruthy();
+  });
+  it('texter', () => {
+    expect(prisText('kassan', 'sub')).toBe('495 kr/mån');
+    expect(prisText('avrakning', 'sub')).toBe('Ingår');
+    expect(prisText('avrakning', 'main')).toBe('4 900 kr/mån + 149 kr per åkare');
+    expect(moduleByKey.verkstad.pricing.direct).toBe(PRISER.verkstad.direct);
+  });
+});

@@ -48,6 +48,7 @@ const tenantRoutes = [
   r('hjalp', L(() => import('./routes/konto/Hjalp'), 'Hjalp'), tenant),
   r('sok', L(() => import('./routes/konto/Sok'), 'Sok'), tenant),
   r('avrakning', L(() => import('./routes/avrakning/Layout'), 'AvrakningStart'), tenant),
+  r('avrakning/uppdrag', L(() => import('./routes/avrakning/Logistik'), 'Logistik'), tenant),
   r('avrakning/historik', L(() => import('./routes/avrakning/Historik'), 'Historik'), tenant),
   r('avrakning/installningar', L(() => import('./routes/avrakning/Installningar'), 'AvrInstallningar'), tenant),
   avrPeriod,

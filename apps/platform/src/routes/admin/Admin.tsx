@@ -3,10 +3,11 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Avatar, Banner, Button, Card, EmptyState, Icon, Kpi, Logo, Modal, Pill, Progress, Select, TextField, useToast } from '@bolagsappar/ui';
-import { kundlista, konton, leveranser, modulStatistik, fastnar, guiderAvslutade } from '@bolagsappar/core/admin';
+import { kundlista, konton, leveranser, modulStatistik, fastnar, guiderAvslutade, fakturering, manadsintakt } from '@bolagsappar/core/admin';
+import { prisFor, PRISER_TILLFALLIGA } from '@bolagsappar/modules';
 import { MODULES } from '@bolagsappar/modules';
 import { GUIDES, guideFor } from '@bolagsappar/guides';
-import { initialer } from '@bolagsappar/core/format';
+import { initialer, kr0 } from '@bolagsappar/core/format';
 import { useSession } from '../../lib/session';
 import { useBackend } from '../../lib/backend';
 import { Loading } from '../../shell/Shell';
@@ -88,7 +89,7 @@ export function Oversikt() {
     <>
       <Head title="Översikt" lead="Alla kunder, moduler och leveranser."><Button variant="primary" icon="plus" onClick={() => setNy(true)}>Ny kund</Button></Head>
       <div className="ba-grid ba-grid--4" style={{ marginBottom: 16 }}>
-        <Kpi label="Månadsintäkt" value="[MRR] kr" sub="alla aktiva licenser" />
+        <Kpi label="Månadsintäkt" value={kr0(manadsintakt(A.licenses, A.tenants, prisFor)) + ' kr'} sub={PRISER_TILLFALLIGA ? 'alla aktiva licenser, tillfälliga priser' : 'alla aktiva licenser'} />
         <Kpi label="Konton" value={K.totalt} sub={`${K.main} huvudkunder, ${K.sub} underkunder, ${K.direct} direkt`} />
         <Kpi label="Leveranser" value={L.length} sub={L.map(l => l.status === 'bygger' ? `${l.namn} dag ${l.dag}` : `${l.namn} arbetsdag`).join(', ') || 'inga pågående'} />
         <Kpi label="Guider avslutade" value={pct(done) || 'Ingen data'} sub="av konton som påbörjat en guide" />
@@ -174,16 +175,16 @@ export function Moduler() {
 // ------------------------------------------------ fakturering
 export function Fakturering() {
   const A = useAdmin();
-  const betalare = [...new Set(A.licenses.filter(l => l.status === 'aktiv').map(l => l.paid_by))];
-  const namn = (id: string) => A.tenants.find(t => t.id === id)?.name || id;
+  const F = fakturering(A.licenses, A.tenants, prisFor);
+  const tot = F.reduce((s, x) => s + x.summa, 0);
   return (
     <>
       <Head title="Fakturering" lead="Fast månadspris per licens. Den som betalar för licensen faktureras." />
-      <Banner tone="info">Priserna är inte satta än ([PRIS]). Fakturor skapas när betalleverantören är vald, se öppna frågor.</Banner>
+      {PRISER_TILLFALLIGA && <Banner tone="info">Priserna är tillfälliga tills de är bestämda (packages/modules/src/priser.js). Fakturor skickas när betalleverantören är vald.</Banner>}
       <div className="ba-table-wrap" style={{ marginTop: 14 }}><table className="ba-table">
-        <thead><tr><th>Betalare</th><th>Licenser</th><th className="n">Antal</th><th className="n">Per månad</th></tr></thead>
-        <tbody>{betalare.map(p => { const L = A.licenses.filter(l => l.paid_by === p && l.status === 'aktiv'); const per: Record<string, number> = {}; L.forEach(l => { per[MNAMN(l.module_key)] = (per[MNAMN(l.module_key)] || 0) + 1; });
-          return <tr key={p}><td className="b">{namn(p)}</td><td className="small">{Object.entries(per).map(([k, n]) => `${k} ${n}`).join(', ')}</td><td className="n">{L.length}</td><td className="n">[PRIS]</td></tr>; })}</tbody>
+        <thead><tr><th>Betalare</th><th>Rader</th><th className="n">Per månad, exkl. moms</th></tr></thead>
+        <tbody>{F.map(x => <tr key={x.betalare}><td className="b">{x.namn}</td><td className="small">{x.rader.map((r: any) => `${MNAMN(r.modul)}${r.antal > 1 ? `, ${r.text.toLowerCase()} ${r.antal} × ${kr0(r.apris)}` : ''}`).join(' · ')}</td><td className="n">{kr0(x.summa)}</td></tr>)}</tbody>
+        <tfoot><tr><td colSpan={2}>Summa per månad</td><td className="n">{kr0(tot)}</td></tr></tfoot>
       </table></div>
     </>
   );

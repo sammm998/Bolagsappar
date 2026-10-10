@@ -2,6 +2,8 @@
 import Base from '../layouts/Base.astro';
 import AvrScreen from '../components/AvrScreen.astro';
 import { BRANSCHER } from '../lib/site';
+import { FRAN_PRIS, krManad } from '@bolagsappar/modules';
+const fran = krManad(FRAN_PRIS).replace(' kr per månad', '');
 const FAQ = [
   ['Behöver vi veta vad vi vill ha?', 'Nej. Ni behöver bara visa hur ni jobbar i dag. Vi skriver ner flödet med era ord och bygger efter det.'],
   ['Vad kostar arbetsdagen?', 'Ingenting. Efteråt får ni ett förslag med fast månadspris. Säger ni nej har ni ändå fått en karta över hur ni jobbar.'],
@@ -72,7 +74,7 @@ const FAQ = [
       <div><p class="eyebrow">Pris</p><h2>Ett pris per månad. Inga överraskningar.</h2><p class="lead">Ni betalar inte för timmar. Ni betalar för ett verktyg som fungerar varje månad.</p></div>
       <div class="price-card">
         <div class="small muted">Från</div>
-        <div class="amount">[PRIS]</div>
+        <div class="amount">{fran}</div>
         <div class="small muted">kr per månad, exkl. moms</div>
         <ul class="checks"><li>Arbetsdag och kartläggning</li><li>App byggd för ert flöde</li><li>Inloggning med e-postlänk för alla, signering med pennan</li><li>Drift, säkerhet och säkerhetskopior</li><li>Support på svenska</li><li>Nya funktioner när ni behöver dem</li></ul>
         <div class="btns"><a class="btn btn--primary" href="/boka">Boka en arbetsdag</a></div>

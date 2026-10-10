@@ -32,6 +32,8 @@ Utan Supabase-nycklar körs plattformen och mobilappen mot den lokala backenden 
 | Ahmed Exempel, Åkeri Norra AB | Åkarens portal: Min avräkning, Åkarkassan, Mina förare, appbutiken. Även ekonomi på Taxi Malmö (kontoväljaren) |
 | Förare A1 | Lönespecar och ett anställningsavtal som väntar på signatur med pennan |
 | Fia Exempel, Folieringsfirman | Direktkund med Verkstad och Skadeflöde |
+| Jens Exempel, Jetpack | Logistik (exempel): uppdragsfil, underleverantörer, godkänn och publicera |
+| Ulla Exempel, Budfirma Exempel AB | Underleverantör till Jetpack: Min avräkning |
 | Bo Admin | Adminportalen `/admin` |
 
 All data i repot är påhittad: regnummer börjar på Q, personnummer slutar på 0000, försäkringsbolag och personer heter Exempel.
@@ -77,22 +79,20 @@ CI (`.github/workflows/ci.yml`) kör allt detta, med Postgres som tjänst, och k
 
 ## Öppna frågor till ägaren (sidan 50)
 
-Platshållarna står kvar i koden och texterna tills ägaren svarar.
-
-| Nr | Fråga | Platshållare |
+| Nr | Fråga | Läget |
 | --- | --- | --- |
-| 01 | Priser för huvudkund, per åkare, tillval och direktkund | `[PRIS]`, `[MRR]` |
-| 02 | Stegen för att hämta varje fil (TaxiCaller, Bambora, Øresundsbro, Swedavia, Visma, Handelsbanken, Megtax) | `[Logga in i ...]` i `packages/core/src/filetypes/catalog.js` |
-| 03 | Jetpack: uppdragsfil, avgifter och ord | Jetpack står som "Bygger, dag 6 av 14" |
-| 04 | Avtal om att koden förs över från Taxi Malmö AB till Bolagsappar | |
+| 01 | Priser | **Tillfälliga priser** i `packages/modules/src/priser.js` (ändra bara där): Avräkning för huvudkund 4 900 kr per månad plus 149 kr per ansluten åkare, Förarlista 990 kr, Åkarkassan 495 kr per åkare, Verkstad 1 490 kr, Skadeflöde 990 kr (direkt) eller 395 kr (åkare), Körjournal 195 kr. Allt exkl. moms. Hemsidan visar "från 1 490". Månadsintäkt och fakturering i adminportalen räknas från listan. |
+| 02 | Filhjälpen | **Ifylld** i `packages/core/src/filetypes/catalog.js`, byggd på zip-filens appar (rubriker, felmeddelanden och parsrar). Menynamnen i portalerna är markerade `kontrollera: true` och stäms av första gången någon hämtar filen. |
+| 03 | Jetpack | **Exempel på strukturen**: logistikvariant av Avräkning (`packages/core/src/logistik`), uppdragsfil i CSV, provision 12 %, 15 kr per uppdrag, 495 kr per fordon och månad, orden uppdrag och underleverantör. Fyra påhittade underleverantörer, augusti publicerad och september inläst. Logga in som Jens (Jetpack) eller Ulla (underleverantör). Byts mot Jetpacks riktiga fil och avgifter när de finns. |
+| 04 | Avtal om att koden förs över från Taxi Malmö AB till Bolagsappar | Väntar |
 | 05 | BankID | Ersatt med e-postlänk och penna enligt ägarens beslut |
 | 06 | Arkivering av originalfiler | Av som standard, filerna läses i webbläsaren |
-| 07 | Vem på Taxi Malmö får godkänna och publicera | Rollerna ägare, admin och ekonomi |
+| 07 | Vem får godkänna och publicera | **Ägare, admin och ekonomi** enligt specens rolltabell (sidan 5). Varje konto kan begränsa det under Inställningar, Användare, Godkänna och publicera. Ägaren får alltid, läs och förare aldrig. Spärren finns i databasen (`app.kan_godkanna`), i den lokala backenden och i `packages/core/src/behorighet.js`. |
 | 08 | Tripkassans flikar Bokföring och Bank i Åkarkassan | Ingår |
 | 09 | Hur mejl från skadereglerare kommer in i Skadeflöde | Vidarebefordran till en skadeadress, mejlen ligger som dokument |
 | 10 | Personuppgifter i koden | Åtgärdat i `legacy/apps/akarkassan` |
-| 11 | Logga | Symbolen i specifikationen används som förslag |
-| 12 | Domäner | `bolagsappar.se`, `taxiavrakning.se` till `/taxi`, `akaravrakning.se` till `/akeri` |
+| 11 | Logga | **Loggan ur specifikationen** (sidan 1), uttagen ur PDF:ens vektorer: `packages/ui/src/brand/` (ljus, mörk, symbol). Används i plattformen, på hemsidan, i mobilappen, som favicon och som app-ikon. |
+| 12 | Domäner | `bolagsappar.se` (hemsidan), `app.bolagsappar.se` (plattformen). `taxiavrakning.se` går till `/taxi` och `akaravrakning.se` till `/akeri`, `www` till utan `www` (i `deploy/Caddyfile.static`). Peka alla hemsidans domäner mot hemsidans tjänst. |
 
 ## Läget per fas
 
@@ -106,4 +106,4 @@ Platshållarna står kvar i koden och texterna tills ägaren svarar.
 | 5 Åkarkassan | Automatiska underlag, lön, bro och Sturup, personal med signering med pennan | Klar |
 | 6 Mobil | Hem, appar, ladda upp, lönespec, signering, aktivera | Byggd och provad i webbläsaren. TestFlight och Google Play kräver ägarens konton |
 | 7 Hemsida | Start, branscher, så jobbar vi, kundcase, pris, boka, säkerhet, integritet | Byggd. Lighthouse är inte uppmätt i den här miljön |
-| 8 Övrigt | Admin, Verkstad, Skadeflöde | Byggda. Synk av förarlistan från TaxiCaller varje natt och Jetpacks uppdragsfil väntar på fråga 02 och 03 |
+| 8 Övrigt | Admin, Verkstad, Skadeflöde, Jetpack-konfiguration | Byggda. Jetpack är ett exempel tills deras riktiga fil finns. Den nattliga synken av förarlistan från TaxiCaller är inte byggd än |

@@ -4,8 +4,9 @@ import * as A from '@bolagsappar/core/avrakning';
 import { ENG, packP, lonespec, computeInput, godkannLon, avUpprata, avSignera, fromShare } from '@bolagsappar/core/kassan';
 import { readText } from '@bolagsappar/core/filetypes';
 import { strokesToPng } from '@bolagsappar/core/signatur';
-import { taxiMalmoSettings, genMonth, taxiCallerCsv, appCsv, oresundPages, sturupPages, ldlText, skattetabellText, forarlistaDemo, verkstadDemo, skadeflodeDemo, bankRows } from '@bolagsappar/core/testdata';
-import { T, U, subId } from './seed.js';
+import { parseUppdrag, avraknaLogistik, logistikPayload, LOGISTIK_DEF, LOGISTIK_ORD } from '@bolagsappar/core/logistik';
+import { taxiMalmoSettings, genMonth, taxiCallerCsv, appCsv, oresundPages, sturupPages, ldlText, skattetabellText, forarlistaDemo, verkstadDemo, skadeflodeDemo, bankRows, jetpackUppdragCsv, JETPACK_UL } from '@bolagsappar/core/testdata';
+import { T, U, subId, jetSubId } from './seed.js';
 
 const MANADER = ['2026-04', '2026-05', '2026-06', '2026-07', '2026-08', '2026-09'];
 const PUBLICERAD = { '2026-04': '2026-05-04', '2026-05': '2026-06-03', '2026-06': '2026-07-03', '2026-07': '2026-08-04', '2026-08': '2026-09-03', '2026-09': '2026-10-04' };
@@ -178,6 +179,20 @@ export async function seedDemo(backend) {
     for (const a of SF.arenden) put(T.folie, 'skadeflode', 'arenden/' + a.id, a);
     for (const m of SF.mejl) put(T.folie, 'skadeflode', 'mejl/' + m.id, m);
     put(T.folie, 'skadeflode', 'installningar', { foretag: SF.foretag, signatur: 'Folieringsfirman', epost: 'skador@folieringsfirman.example' });
+  }
+
+  // Jetpack (exempel på logistik): augusti publicerad till underleverantörerna, september inläst och öppen
+  {
+    const UL = JETPACK_UL.map((u, i) => ({ id: jetSubId(i), namn: u.namn }));
+    put(T.jetpack, 'avrakning', 'settings/logistik', { cfg: LOGISTIK_DEF, ord: LOGISTIK_ORD });
+    for (const [period, seed, publicera] of [['2026-08', 3, true], ['2026-09', 7, false]]) {
+      const { rader } = parseUppdrag(jetpackUppdragCsv({ period, seed, antal: 120 + seed * 4, extra: !publicera }));
+      put(T.jetpack, 'avrakning', 'logistik/' + period, { fil: `uppdrag_${period}.csv`, rader, inlast: period === '2026-09' ? '2026-10-06T08:30:00Z' : '2026-09-05T08:30:00Z' });
+      if (!publicera) { db.periods.push({ tenant_id: T.jetpack, module_key: 'avrakning', period, status: 'oppen', version: 1 }); continue; }
+      const R = avraknaLogistik(rader, { period, underleverantorer: UL });
+      db.periods.push({ tenant_id: T.jetpack, module_key: 'avrakning', period, status: 'publicerad', version: 1, published_by: U.jet, published_at: '2026-09-08T10:00:00Z' });
+      for (const x of R.per) db.shares.push({ id: 'jp-' + period + '-' + x.id, from_tenant: T.jetpack, to_tenant: x.id, module_key: 'avrakning', period, kind: 'logistikavrakning', payload: logistikPayload(x, R, { fran: 'Jetpack' }), version: 1, reason: null, created_at: '2026-09-08T10:00:00Z', opened_at: null });
+    }
   }
 
   // Guidestatistik för adminportalen

@@ -12,6 +12,7 @@
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
     "@bolagsappar/ui": "workspace:*",
-    "astro": "^7.3.8"
+    "astro": "^7.3.8",
+    "@bolagsappar/modules": "workspace:*"
   }
 }

@@ -1,6 +1,7 @@
 // Lokal backend i webbläsaren (eller i minnet i testerna). Samma gränssnitt som Supabase-backenden
 // och samma regler som radsäkerheten i supabase/migrations. Används för utveckling, demo och tester.
 // Data sparas i localStorage under en nyckel. Inget lämnar datorn.
+import { godkannRoller } from '@bolagsappar/core/behorighet';
 import { buildSeed, DEMO_LOGINS } from './seed.js';
 
 const KEY = 'bolagsappar:lokal:v1';
@@ -173,7 +174,7 @@ export function createLocalBackend(opts = {}) {
     async getPeriod(t, m, p) { need(canRead(t)); return clone(db.periods.find(x => x.tenant_id === t && x.module_key === m && x.period === p) || null); },
     async listPeriods(t, m) { need(canRead(t)); return db.periods.filter(x => x.tenant_id === t && x.module_key === m).map(clone).sort((a, b) => b.period.localeCompare(a.period)); },
     async approvePeriod(t, m, p) {
-      need(hasRole(t, ['agare', 'admin', 'ekonomi']));
+      need(hasRole(t, godkannRoller(tenant(t))));
       let x = db.periods.find(y => y.tenant_id === t && y.module_key === m && y.period === p);
       if (!x) { x = { tenant_id: t, module_key: m, period: p, status: 'oppen', version: 1 }; db.periods.push(x); }
       if (x.status !== 'publicerad') x.status = 'godkand';
@@ -198,7 +199,7 @@ export function createLocalBackend(opts = {}) {
     },
     /** items: [{ to, kind, payload, title, body, link }] */
     async publish(t, m, p, items, reason = null) {
-      need(hasRole(t, ['agare', 'admin', 'ekonomi']));
+      need(hasRole(t, godkannRoller(tenant(t))));
       const x = db.periods.find(y => y.tenant_id === t && y.module_key === m && y.period === p);
       if (!x || x.status === 'oppen') throw new Error('Månaden måste godkännas innan den publiceras');
       if (x.status === 'publicerad' && !String(reason || '').trim()) throw new Error('Månaden är redan publicerad. En rättelse kräver en orsak.');

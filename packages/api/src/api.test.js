@@ -3,7 +3,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { createLocalBackend } from './local.js';
 import { seedDemo } from './demo.js';
 import { docApi } from './docs.js';
-import { T, U, subId, ownerId } from './seed.js';
+import { T, U, subId, ownerId, jetSubId } from './seed.js';
 
 let b;
 beforeAll(async () => { b = createLocalBackend({ storage: null, now: () => new Date('2026-10-10T08:00:00Z') }); await seedDemo(b); });
@@ -118,5 +118,16 @@ describe('demodata', () => {
     await b.signInAsDemo(U.sara);
     const runs = await b.fileRuns(T.taxi, 'avrakning', '2026-10');
     expect(runs.map(r => r.kind).sort()).toEqual(['app', 'bro', 'resk', 'sturup', 'tc', 'visma']);
+  });
+});
+
+describe('Jetpack (exempel på logistik)', () => {
+  it('underleverantören ser bara sin egen avräkning från Jetpack', async () => {
+    const b = createLocalBackend({ storage: null }); await seedDemo(b);
+    await b.signInAsDemo(U.jetUl);
+    const sh = await b.sharesTo(jetSubId(1), 'avrakning');
+    expect(sh.map(s => s.period)).toEqual(['2026-08']);
+    expect(sh[0].payload.kind).toBe('logistikavrakning');
+    await expect(b.sharesTo(jetSubId(0), 'avrakning')).rejects.toThrow();
   });
 });

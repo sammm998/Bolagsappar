@@ -1,4 +1,5 @@
 import { defineModule } from './define.js';
+import { PRISER } from './priser.js';
 import { filerFor } from '@bolagsappar/core/filetypes';
 export default defineModule({
   key: 'kassan', name: 'Åkarkassan', version: '2.0.0', industry: ['taxi'], icon: 'wallet', tone: 'blue',
@@ -12,5 +13,5 @@ export default defineModule({
   shares: [],
   receives: [{ from: 'avrakning', kind: 'akaravrakning' }],
   config: { engineVariant: 'akarkassan' },
-  pricing: { sub: '[PRIS]' }
+  pricing: { sub: PRISER.kassan.sub }
 });

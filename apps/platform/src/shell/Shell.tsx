@@ -67,7 +67,7 @@ function AccountSwitcher() {
     <div ref={ref}>
       <button className="pf-acct" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(o => !o)}>
         <Avatar text={brand.initialer || initialer(a.tenant.name)} accent={brand.accent} color={brand.text} />
-        <span className="ba-grow" style={{ minWidth: 0 }}><b>{a.tenant.name}</b><small>{a.tenant.type === 'sub' && a.parent ? `Åkare hos ${a.parent.name}` : typText(a)}</small></span>
+        <span className="ba-grow" style={{ minWidth: 0 }}><b>{a.tenant.name}</b><small>{a.tenant.type === 'sub' && a.parent ? `${a.parent.brand?.akarOrd === 'underleverantör' ? 'Underleverantör' : 'Åkare'} hos ${a.parent.name}` : typText(a)}</small></span>
         <Icon name="down" size={15} />
       </button>
       {open && (

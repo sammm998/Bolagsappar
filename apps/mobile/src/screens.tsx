@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Alert, Pressable, Switch, Text, View } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
-import { variantFor } from '@bolagsappar/modules';
+import { variantFor, prisText } from '@bolagsappar/modules';
 import { guideFor } from '@bolagsappar/guides';
 import { recognizeKassan, ingestLdl, ldlTillManad, avHash } from '@bolagsappar/core/kassan';
 import { FILKATALOG } from '@bolagsappar/core/filetypes';
@@ -193,7 +193,7 @@ export function Appar({ go }: { go: Go }) {
           <Card key={m.key}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}><T bold>{m.variants[v]?.name || m.name}</T>{m.status === 'ny' && <Pill tone="info">Ny</Pill>}</View>
             <T muted small style={{ marginTop: 2 }}>{m.variants[v]?.beskrivning || m.beskrivning}</T>
-            <T small bold style={{ marginTop: 6 }}>{o ? `Från ${central}` : 'Från Bolagsappar'} · {ingar ? 'Ingår' : '[PRIS] kr per månad'}</T>
+            <T small bold style={{ marginTop: 6 }}>{o ? `Från ${central}` : 'Från Bolagsappar'} · {ingar ? 'Ingår' : prisText(m.key, v, { kort: false })}</T>
             <View style={{ marginTop: 10, alignItems: 'flex-start' }}>
               {m.status === 'kommer' ? <Pill>Kommer snart</Pill> : aktiv ? <Pill tone={ingar ? 'info' : 'ok'}>{ingar ? `Ingår via ${central || 'avtalet'}` : 'Aktiv'}</Pill> : <Btn small kind="dark" onPress={() => go('aktivera', { key: m.key })}>Aktivera</Btn>}
             </View>
@@ -224,7 +224,7 @@ export function Aktivera({ k, back }: { k: string; back: () => void }) {
   return (
     <Screen title={m.name} sub={m.beskrivning}>
       <Card>
-        <Row label="Pris" value="[PRIS] kr per månad" />
+        <Row label="Pris" value={prisText(k, variantFor(m, a.tenant.type), { kort: false })} />
         <Row last label="Första debitering" value={forsta} />
       </Card>
       <Card>

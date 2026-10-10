@@ -1,4 +1,5 @@
 import { defineModule } from './define.js';
+import { PRISER } from './priser.js';
 import { filerFor } from '@bolagsappar/core/filetypes';
 
 export default defineModule({
@@ -11,5 +12,5 @@ export default defineModule({
   uploads: filerFor('avrakning').filter(f => f.key !== 'bilreg').map(f => ({ key: f.key, label: f.label, required: !!f.kravs, parser: f.parser })),
   guide: { main: 'avrakning/main', sub: 'avrakning/sub' },
   shares: [{ kind: 'akaravrakning', to: 'sub', on: 'publish', matchBy: 'settings/bolag' }],
-  pricing: { main: '[PRIS]', sub: { default: 'ingår' } }
+  pricing: { main: PRISER.avrakning.main, sub: { default: 'ingår' } }
 });

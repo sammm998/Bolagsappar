@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBackend } from './backend';
+import { kanGodkanna } from '@bolagsappar/core/behorighet';
 
 export interface Account { role: string; forare_id: string | null; tenant: any; parent: any | null }
 interface S { user: any | null; accounts: Account[]; loading: boolean; refresh: () => Promise<void>; signOut: () => Promise<void> }
@@ -26,11 +27,11 @@ export const ROLLNAMN: Record<string, string> = { agare: 'Ägare', admin: 'Admin
 export const TYPNAMN: Record<string, string> = { platform: 'Superadmin', main: 'Huvudkund', sub: 'Åkare', direct: 'Direktkund' };
 export const typText = (a: Account) => a.tenant.type === 'sub' ? (a.parent ? `${a.tenant.brand?.akarOrd === 'underleverantör' ? 'Underleverantör' : 'Åkare'} hos ${a.parent.name}` : 'Åkare') : TYPNAMN[a.tenant.type];
 
-export interface AccountCtx extends Account { canWrite: boolean; isDriver: boolean; central: string }
+export interface AccountCtx extends Account { canWrite: boolean; canApprove: boolean; isDriver: boolean; central: string }
 const ACtx = createContext<AccountCtx | null>(null);
 export const AccountProvider = ({ value, children }: { value: AccountCtx; children: ReactNode }) => <ACtx.Provider value={value}>{children}</ACtx.Provider>;
 export function useAccount(): AccountCtx { const a = useContext(ACtx); if (!a) throw new Error('Inget konto'); return a; }
 export function toAccountCtx(a: Account): AccountCtx {
   const central = a.tenant.type === 'main' ? (a.tenant.settings?.centralNamn || a.tenant.name) : a.parent ? (a.parent.name) : a.tenant.name;
-  return { ...a, canWrite: ['agare', 'admin', 'ekonomi'].includes(a.role), isDriver: a.role === 'forare', central };
+  return { ...a, canWrite: ['agare', 'admin', 'ekonomi'].includes(a.role), canApprove: kanGodkanna(a.tenant, a.role), isDriver: a.role === 'forare', central };
 }

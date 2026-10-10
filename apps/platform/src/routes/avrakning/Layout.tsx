@@ -15,6 +15,7 @@ export function AvrakningStart() {
   const a = useAccount();
   const p = useWorkingPeriod(a.tenant.id);
   if (a.tenant.type !== 'main') return <Navigate to="/$tenant/min-avrakning" params={{ tenant: a.tenant.slug }} />;
+  if (a.tenant.settings?.bransch === 'logistik') return <Navigate to="/$tenant/avrakning/uppdrag" params={{ tenant: a.tenant.slug }} />;
   if (!p) return <Loading />;
   return <Navigate to="/$tenant/avrakning/$period/filer" params={{ tenant: a.tenant.slug, period: p }} search={(s: any) => s} />;
 }

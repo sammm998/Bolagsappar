@@ -6,6 +6,7 @@ import verkstad from './verkstad.js';
 import skadeflode from './skadeflode.js';
 import korjournal from './korjournal.js';
 export { defineModule } from './define.js';
+export { PRISER, PRISER_TILLFALLIGA, FRAN_PRIS, ARBETSDAG, prisFor, prisText, krManad } from './priser.js';
 
 export const MODULES = [avrakning, forarlista, kassan, verkstad, skadeflode, korjournal];
 export const moduleByKey = Object.fromEntries(MODULES.map(m => [m.key, m]));

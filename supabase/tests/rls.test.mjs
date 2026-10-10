@@ -152,3 +152,11 @@ test('arbetsdagar: bara plattformen ändrar en bokning', async () => {
   await as(U.admin, `update bookings set status = 'bokad', dag = '2026-11-14'`);
   assert.equal((await db.query(`select count(*)::int n from bookings where status = 'bokad'`)).rows[0].n, 1);
 });
+
+test('godkännande: kontot kan begränsa vem som publicerar', async () => {
+  await db.query(`update tenants set settings = settings || '{"godkannande":{"roller":["admin"]}}' where id = $1`, [T.taxi]);
+  await assert.rejects(as(U.sara, `select approve_period($1, 'avrakning', '2026-11')`, [T.taxi]), /behörighet/);
+  await db.query(`update tenants set settings = settings - 'godkannande' where id = $1`, [T.taxi]);
+  await as(U.sara, `select approve_period($1, 'avrakning', '2026-11')`, [T.taxi]);
+  assert.equal((await db.query(`select status from periods where tenant_id = $1 and period = '2026-11'`, [T.taxi])).rows[0].status, 'godkand');
+});

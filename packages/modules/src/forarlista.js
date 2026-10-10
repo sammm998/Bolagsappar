@@ -1,4 +1,5 @@
 import { defineModule } from './define.js';
+import { PRISER } from './priser.js';
 export default defineModule({
   key: 'forarlista', name: 'Förarlista', version: '1.1.0', industry: ['taxi'], icon: 'users', tone: 'amber',
   beskrivning: 'Förare från TaxiCaller, aktiva och inaktiva, per åkare.',
@@ -9,5 +10,5 @@ export default defineModule({
   uploads: [],
   guide: { main: 'forarlista/main', sub: 'forarlista/sub' },
   shares: [{ kind: 'forare', to: 'sub', on: 'sync', matchBy: 'settings/bilar' }],
-  pricing: { main: '[PRIS]', sub: { default: 'ingår' } }
+  pricing: { main: PRISER.forarlista.main, sub: { default: 'ingår' } }
 });

@@ -29,3 +29,24 @@ describe('admin', () => {
     expect(modulStatistik([{ key: 'kassan', name: 'Åkarkassan', variants: { sub: {}, main: {} } }], licenses)[0]).toMatchObject({ konton: 2, varianter: ['sub'] });
   });
 });
+
+import { fakturering, manadsintakt } from '../src/admin.js';
+describe('fakturering', () => {
+  const P = { avrakning: { main: { manad: 4900, perUnderkund: 149 }, sub: 'ingar' }, kassan: { sub: { manad: 495 } } };
+  const prisFor = (k, v) => P[k]?.[v] ?? null;
+  const L = [
+    { tenant_id: 'm', module_key: 'avrakning', variant: 'main', status: 'aktiv', paid_by: 'm' },
+    { tenant_id: 's1', module_key: 'avrakning', variant: 'sub', status: 'aktiv', paid_by: 'm' },
+    { tenant_id: 's2', module_key: 'avrakning', variant: 'sub', status: 'aktiv', paid_by: 'm' },
+    { tenant_id: 's1', module_key: 'kassan', variant: 'sub', status: 'aktiv', paid_by: 's1' },
+    { tenant_id: 's2', module_key: 'kassan', variant: 'sub', status: 'kommer', paid_by: 's2' }
+  ];
+  it('huvudkunden betalar per åkare, åkaren sina tillval', () => {
+    const F = fakturering(L, tenants, prisFor);
+    expect(F.map(x => [x.betalare, x.summa])).toEqual([['m', 4900 + 2 * 149], ['s1', 495]]);
+    expect(manadsintakt(L, tenants, prisFor)).toBe(4900 + 298 + 495);
+  });
+  it('eget pris på licensen går före prislistan', () => {
+    expect(manadsintakt([{ ...L[3], price: 300 }], tenants, prisFor)).toBe(300);
+  });
+});

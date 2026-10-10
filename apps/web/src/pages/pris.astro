@@ -1,20 +1,28 @@
 ---
 import Base from '../layouts/Base.astro';
+import { FRAN_PRIS, PRISER, prisText, krManad } from '@bolagsappar/modules';
+const fran = krManad(FRAN_PRIS).replace(' kr per månad', '');
+const RADER = [['Avräkning för centralen', prisText('avrakning', 'main')], ['Förarlista', prisText('forarlista', 'main')], ['Åkarkassan (tillval för åkaren)', prisText('kassan', 'sub')], ['Verkstad', prisText('verkstad', 'direct')], ['Skadeflöde', prisText('skadeflode', 'direct')]];
 ---
 <Base title="Pris" description="Fast månadspris. Arbetsdag, bygge, drift och support ingår.">
   <section class="hero">
     <div class="wrap price">
       <div><p class="eyebrow">Pris</p><h1>Ett pris per månad. <em>Inga överraskningar.</em></h1><p class="lead">Ni betalar inte för timmar. Ni betalar för ett verktyg som fungerar varje månad. Arbetsdagen är gratis.</p></div>
       <div class="price-card">
-        <div class="small muted">Från</div><div class="amount">[PRIS]</div><div class="small muted">kr per månad, exkl. moms</div>
+        <div class="small muted">Från</div><div class="amount">{fran}</div><div class="small muted">kr per månad, exkl. moms</div>
         <ul class="checks"><li>Arbetsdag och kartläggning</li><li>App byggd för ert flöde</li><li>Inloggning med e-postlänk för alla, signering med pennan</li><li>Drift, säkerhet och säkerhetskopior</li><li>Support på svenska</li><li>Nya funktioner när ni behöver dem</li></ul>
         <div class="btns"><a class="btn btn--primary" href="/boka">Boka en arbetsdag</a></div>
       </div>
     </div>
   </section>
   <section class="sec sec--white">
+    <div class="wrap">
+      <p class="eyebrow">Apparna</p>
+      <div class="card" style="padding:8px 28px;margin-bottom:20px"><ul class="rows" style="margin:0">{RADER.map(([n, p]) => <li style="grid-template-columns:1fr auto"><span>{n}</span><b class="num">{p}</b></li>)}</ul></div>
+      <p class="small muted" style="margin:0 0 28px">Alla priser exkl. moms. Arbetsdagen är gratis.</p>
+    </div>
     <div class="wrap grid grid--3">
-      <div class="card"><h3>Huvudkunder</h3><p>Ni väljer vilka appar som ingår för era åkare eller underleverantörer och vem som betalar. Pris per ansluten underkund: [PRIS].</p></div>
+      <div class="card"><h3>Huvudkunder</h3><p>Ni väljer vilka appar som ingår för era åkare eller underleverantörer och vem som betalar. Pris per ansluten åkare: {PRISER.avrakning.main.perUnderkund} kr per månad.</p></div>
       <div class="card"><h3>Tillval</h3><p>Underkunder kan själva aktivera tillval, till exempel Åkarkassan. Priset syns innan de aktiverar.</p></div>
       <div class="card"><h3>Ingen bindning</h3><p>Uppsägning [uppsägningstid]. All data följer med i Excel och PDF.</p></div>
     </div>

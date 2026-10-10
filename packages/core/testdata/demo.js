@@ -86,3 +86,33 @@ export function skadeflodeDemo() {
   const exempelAnmalan = 'Hej!\n\nJag backade in i en stolpe i parkeringshuset igår kväll. Bakre stötfångaren är spräckt på höger sida och baklampan höger har en spricka. Bilen är en Exempelbil SUV 2023, regnummer QFG 73L. Jag är försäkrad i Försäkring Exempel A och har skadenummer FA-4412093. Självrisken är 3 000 kr enligt mitt brev.\n\nKan jag få en tid nästa vecka? Jag behöver lånebil eftersom jag pendlar.\n\nMvh\nKund Exempel 8\n070 000 00 08';
   return { arenden, mejl, exempelAnmalan, foretag: 'Folieringsfirman, Exempelgatan 2, 211 00 Malmö. Skadeverkstad och foliering, avtal med alla försäkringsbolag, lånebil vid behov.' };
 }
+
+/** Jetpack (exempel): underleverantörer och en uppdragsfil. Påhittat, bara för att visa strukturen. */
+export const JETPACK_UL = [
+  { namn: 'Kurir Exempel Nord AB', fordon: ['QJA 11A', 'QJA 12B'] },
+  { namn: 'Budfirma Exempel AB', fordon: ['QJB 21C'] },
+  { namn: 'Transport Exempel Syd AB', fordon: ['QJC 31D', 'QJC 32E', 'QJC 33F'] },
+  { namn: 'Leverans Exempel HB', fordon: ['QJD 41G'] }
+];
+const PLATSER = ['Lager Exempel, Malmö', 'Hamnen, Malmö', 'Centrum, Lund', 'Industriområde, Burlöv', 'Terminal, Helsingborg', 'Butik Exempel, Trelleborg'];
+const KUNDER = ['Kund Exempel 1 AB', 'Kund Exempel 2 AB', 'Kund Exempel 3 AB'];
+
+/** Uppdragsfilen som CSV med semikolon (som en export från ett transportsystem). */
+export function jetpackUppdragCsv({ period = '2026-09', antal = 140, seed = 7, ul = JETPACK_UL, extra = true } = {}) {
+  const G = rng(seed), R = G.next, pick = G.pick;
+  const dagar = new Date(Date.UTC(+period.slice(0, 4), +period.slice(5, 7), 0)).getUTCDate();
+  const rows = ['Datum;Uppdrags-ID;Underleverantör;Fordon;Från;Till;Kund;Pris exkl moms;Tillägg'];
+  for (let i = 0; i < antal; i++) {
+    const u = pick(ul), d = 1 + Math.floor(R() * dagar);
+    const pris = (250 + Math.round(R() * 1450)).toFixed(2).replace('.', ',');
+    const till = R() < 0.15 ? (75 + Math.round(R() * 150)).toFixed(2).replace('.', ',') : '';
+    rows.push([`${period}-${String(d).padStart(2, '0')}`, `JP-${period.replace('-', '')}-${String(i + 1).padStart(4, '0')}`, u.namn, pick(u.fordon), pick(PLATSER), pick(PLATSER), pick(KUNDER), pris, till].join(';'));
+  }
+  if (extra) {
+    // Saker som ska fångas i kontrollen: en dubblett, ett uppdrag från fel månad och en okänd underleverantör
+    rows.push(rows[1]);
+    rows.push([`${period.slice(0, 4)}-01-15`, 'JP-FEL-0001', ul[0].namn, ul[0].fordon[0], PLATSER[0], PLATSER[1], KUNDER[0], '500,00', ''].join(';'));
+    rows.push([`${period}-03`, 'JP-OKAND-0001', 'Okänd Åkare Exempel AB', 'QJZ 99Z', PLATSER[2], PLATSER[3], KUNDER[1], '800,00', ''].join(';'));
+  }
+  return rows.join('\n') + '\n';
+}

@@ -66,3 +66,29 @@ export function guiderAvslutade(licenses, progress, checklists) {
   }
   return n ? klara / n : null;
 }
+
+/**
+ * Fakturarader per betalare. prisFor(modul, variant) ger { manad, perUnderkund } eller 'ingar'.
+ * En licens med eget pris (license.price) går före prislistan. Underkunder som ingår betalas av huvudkunden per åkare.
+ */
+export function fakturering(licenses, tenants, prisFor) {
+  const aktiva = licenses.filter(l => l.status === 'aktiv');
+  const namn = id => tenants.find(t => t.id === id)?.name || id;
+  const per = new Map();
+  const add = (betalare, rad) => { if (!per.has(betalare)) per.set(betalare, { betalare, namn: namn(betalare), rader: [], summa: 0 }); const x = per.get(betalare); x.rader.push(rad); x.summa += rad.belopp; };
+  for (const l of aktiva) {
+    const p = l.price != null ? { manad: +l.price } : prisFor(l.module_key, l.variant);
+    if (!p || p === 'ingar') continue;
+    const betalare = l.paid_by || l.tenant_id;
+    add(betalare, { modul: l.module_key, variant: l.variant, text: 'Månadsavgift', antal: 1, apris: p.manad, belopp: p.manad, konto: l.tenant_id });
+    if (p.perUnderkund) {
+      const subs = new Set(tenants.filter(t => t.parent_id === l.tenant_id).map(t => t.id));
+      const n = aktiva.filter(x => subs.has(x.tenant_id) && x.module_key === l.module_key && (x.paid_by === l.tenant_id)).length;
+      if (n) add(betalare, { modul: l.module_key, variant: l.variant, text: 'Per ansluten åkare', antal: n, apris: p.perUnderkund, belopp: n * p.perUnderkund, konto: l.tenant_id });
+    }
+  }
+  return [...per.values()].sort((a, b) => b.summa - a.summa);
+}
+
+/** Månadsintäkt (MRR) från alla aktiva licenser. */
+export const manadsintakt = (licenses, tenants, prisFor) => fakturering(licenses, tenants, prisFor).reduce((s, x) => s + x.summa, 0);

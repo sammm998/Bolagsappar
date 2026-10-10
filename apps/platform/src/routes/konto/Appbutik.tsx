@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { AppIcon, Button, Card, EmptyState, Pill, Segmented, SignaturePad, TextField, Modal, useToast, type SignatureHandle } from '@bolagsappar/ui';
-import { MODULES, variantFor } from '@bolagsappar/modules';
+import { MODULES, variantFor, prisText } from '@bolagsappar/modules';
 import { ymAdd, dagText } from '@bolagsappar/core/format';
 import { useAccount } from '../../lib/session';
 import { useBackend } from '../../lib/backend';
@@ -46,7 +46,7 @@ export function Appbutik() {
                 <span className="small muted" style={{ minHeight: 36 }}>{(SUBTEXT[m.key] || m.beskrivning).replace('{central}', central)}</span>
                 <span className="small" style={{ fontWeight: 600 }}>{o ? `Utvald av ${central}` : 'Från Bolagsappar'}</span>
                 <div className="ba-row" style={{ borderTop: '1px solid var(--line)', paddingTop: 10, marginTop: 4 }}>
-                  <span className="small" style={{ fontWeight: 700 }}>{ingar ? 'Ingår' : '[PRIS] kr/mån'}</span><span className="ba-grow" />
+                  <span className="small" style={{ fontWeight: 700 }}>{ingar ? 'Ingår' : prisText(m.key, v)}</span><span className="ba-grow" />
                   {m.status === 'kommer' ? <Pill dot={false}>Kommer snart</Pill> : aktiv ? (ingar ? <Pill tone="info" dot={false}>Ingår via {central || 'avtalet'}</Pill> : <Pill tone="ok">Aktiv</Pill>) : <Button size="sm" variant="dark" onClick={() => setAkt(m)}>Aktivera</Button>}
                 </div>
               </div>
@@ -59,7 +59,7 @@ export function Appbutik() {
           <div className="ba-row" style={{ flexWrap: 'nowrap' }}>
             <AppIcon icon={m.icon} tone="blue" size="lg" />
             <div className="ba-grow"><div className="ba-row" style={{ gap: 8 }}><b>{m.name}</b><Pill tone="info" dot={false}>Ny</Pill></div><span className="small muted">{m.beskrivning} Exempel på nästa modul. Signeras med pennan, debiteras från nästa månad, syns direkt i menyn och i appen.</span></div>
-            {has(m.key) ? <Pill tone="ok">Aktiv</Pill> : <Button variant="primary" icon="plus" onClick={() => setAkt(m)}>Aktivera för [PRIS] kr/mån</Button>}
+            {has(m.key) ? <Pill tone="ok">Aktiv</Pill> : <Button variant="primary" icon="plus" onClick={() => setAkt(m)}>Aktivera för {prisText(m.key, variantFor(m, a.tenant.type))}</Button>}
           </div>
         </Card>
       ))}
@@ -89,7 +89,7 @@ function Aktivera({ m, onClose }: { m: any; onClose: () => void }) {
     <Modal open onClose={onClose} title={m.name} labelledBy="akt-h" footer={<><Button onClick={onClose}>Avbryt</Button><Button variant="primary" icon="pencil" loading={busy} onClick={go}>Signera och aktivera</Button></>}>
       <div className="ba-stack">
         <span className="small muted">{m.beskrivning}</span>
-        <dl className="pf-kv"><div><dt>Pris</dt><dd>[PRIS] kr per månad</dd></div><div><dt>Första debitering</dt><dd>{dagText(forsta)}</dd></div><div><dt>Från</dt><dd>{m.fran || 'Bolagsappar'}</dd></div></dl>
+        <dl className="pf-kv"><div><dt>Pris</dt><dd>{prisText(m.key, variantFor(m, a.tenant.type), { kort: false })}</dd></div><div><dt>Första debitering</dt><dd>{dagText(forsta)}</dd></div><div><dt>Från</dt><dd>{m.fran || 'Bolagsappar'}</dd></div></dl>
         <SignaturePad label={`Underskrift för ${a.tenant.name}`} handleRef={setSig} />
         <TextField label="Namnförtydligande" value={namn} onChange={e => setNamn(e.target.value)} />
       </div>

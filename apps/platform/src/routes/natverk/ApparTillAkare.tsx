@@ -2,7 +2,8 @@
 import { useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { AppIcon, Card, Icon, Pill, Segmented, Select, useToast } from '@bolagsappar/ui';
-import { MODULES } from '@bolagsappar/modules';
+import { MODULES, PRISER, prisFor } from '@bolagsappar/modules';
+import { kr0 } from '@bolagsappar/core/format';
 import { useAccount } from '../../lib/session';
 import { useBackend } from '../../lib/backend';
 import { useChildLicenses, useNetwork, useOffers } from '../../lib/q';
@@ -57,7 +58,7 @@ export function ApparTillAkare() {
                   <div className="ba-grow" style={{ minWidth: 0 }}>
                     <div className="ba-row" style={{ gap: 8 }}><b style={{ fontSize: 14.5 }}>{SUBNAMN[m.key]}</b>{m.key === 'avrakning' && <Pill tone="ok" dot={false}>Rekommenderas</Pill>}{kommer && <Pill tone="info" dot={false}>Kommer snart</Pill>}</div>
                     <div className="small muted" style={{ margin: '2px 0 6px' }}>{TEXT[m.key]}</div>
-                    <div className="small">{kommer ? `Släpps ${m.slapps}` : m.key === 'forarlista' ? 'Ingår i Min avräkning' : <><b>[PRIS]</b> per {m.key === 'kassan' ? 'åkeri' : 'åkare'} och månad, {o.paid_by === 'parent' && o.mode === 'ingar' ? `faktureras ${a.tenant.name}` : 'betalas av åkaren'}</>}</div>
+                    <div className="small">{kommer ? `Släpps ${m.slapps}` : m.key === 'forarlista' ? 'Ingår i Min avräkning' : <><b>{kr0(m.key === 'avrakning' ? PRISER.avrakning.main.perUnderkund : (prisFor(m.key, 'sub') as any)?.manad || 0)} kr</b> per {m.key === 'kassan' ? 'åkeri' : 'åkare'} och månad, {o.paid_by === 'parent' && o.mode === 'ingar' ? `faktureras ${a.tenant.name}` : 'betalas av åkaren'}</>}</div>
                   </div>
                   <Segmented label={'Läge för ' + SUBNAMN[m.key]} value={o.mode as Mode} onChange={v => (kommer && v !== 'av' ? toast(`${SUBNAMN[m.key]} släpps senare.`) : a.canWrite ? setMode(m.key, v) : toast('Du har bara läsbehörighet.'))} options={[{ value: 'ingar', label: 'Ingår' }, { value: 'tillval', label: 'Tillval' }, { value: 'av', label: 'Av' }]} />
                 </div>
