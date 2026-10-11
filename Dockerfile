@@ -21,5 +21,8 @@ FROM caddy:2.10-alpine
 COPY deploy/Caddyfile.combined /etc/caddy/Caddyfile
 COPY --from=build /app/apps/web/dist /srv/web
 COPY --from=build /app/apps/platform/dist /srv/app
+# Vilken version som körs: öppna /version.txt (Railway skickar commit som byggargument)
+ARG RAILWAY_GIT_COMMIT_SHA=lokal
+RUN echo "${RAILWAY_GIT_COMMIT_SHA}" > /srv/web/version.txt
 ENV PORT=8080
 EXPOSE 8080
