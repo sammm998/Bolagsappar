@@ -37,8 +37,8 @@ jobs:
         run: pnpm typecheck
       - name: Motorer, API, guider och moduler (jämförelsetester mot legacy)
         run: pnpm test
-      - name: seed.sql är uppdaterad
-        run: node scripts/gen-seed-sql.mjs && git diff --exit-code supabase/seed.sql
+      - name: seed.sql, setup.sql och forsta-agare.sql är uppdaterade
+        run: node scripts/gen-seed-sql.mjs && node scripts/gen-setup-sql.mjs && git diff --exit-code supabase/
       - name: RLS mot riktig Postgres
         run: pnpm test:rls
       - name: Bygg

@@ -85,7 +85,7 @@ create table public.invites (
   email text not null,
   modules text[] not null default '{}',
   status text not null default 'skickad' check (status in ('skickad', 'accepterad', 'aterkallad', 'utgangen')),
-  token text not null default encode(gen_random_bytes(18), 'hex'),
+  token text not null default replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', ''),
   expires_at timestamptz not null default now() + interval '30 days',
   created_at timestamptz not null default now()
 );

@@ -52,13 +52,18 @@ CI (`.github/workflows/ci.yml`) kör allt detta, med Postgres som tjänst, och k
 
 ## Supabase
 
-1. Skapa ett projekt i EU-region. Kör migrationerna i `supabase/migrations` och sedan `supabase/seed.sql` (bara för demo).
-2. Auth: e-post med inloggningslänk. Site URL `https://bolagsappar.se/app`. Lägg till `https://bolagsappar.se/app/**` och `bolagsappar://` som redirect.
-3. Edge Functions i `supabase/functions` (`invite`, `publish`, `ai`). Hemligheter:
-   - `APP_URL` (`https://bolagsappar.se/app`)
-   - `RESEND_API_KEY` och `MAIL_FROM` för mejl. Utan nyckel loggas mejlen bara.
-   - `ANTHROPIC_API_KEY` för Skadeflödets utkast. Utan nyckel visar appen utkast utan AI. `AI_MODEL` och `AI_PER_TIMME` är valfria.
-4. Miljövariabler: `apps/platform/.env.example`, `apps/web/.env.example`, `apps/mobile/.env.example`.
+Supabase är databasen, inloggningen med e-postlänk, spärrarna mellan konton och serverfunktionerna. Railway lämnar bara ut sidorna.
+
+1. Skapa ett projekt på supabase.com, region **EU (Stockholm eller Frankfurt)**.
+2. **SQL Editor:** klistra in hela `supabase/setup.sql` och kör. Det skapar tabeller, radsäkerhet, funktioner, moduler och skattesatser (ingen demodata).
+3. **Authentication, Users, Add user, Create new user:** din e-post, bocka i Auto Confirm User.
+4. **SQL Editor:** klistra in `supabase/forsta-agare.sql`, byt `din@epost.se` till din adress och kör. Du blir ägare av Bolagsappar (adminportalen) och Taxi Malmö.
+5. **Authentication, URL Configuration:** Site URL `https://bolagsappar-production.up.railway.app/app` och Redirect URLs `https://bolagsappar-production.up.railway.app/app/**` (byt till `https://bolagsappar.se/app` när domänen är kopplad).
+6. **Project Settings, API:** kopiera Project URL och anon public key. Lägg in dem i Railway som `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `PUBLIC_SUPABASE_URL` och `PUBLIC_SUPABASE_ANON_KEY`, och bygg om.
+7. **E-post till kunder:** Supabases inbyggda e-post skickar bara till projektets egna medlemmar och några få per timme. Lägg in egen SMTP (till exempel Resend) under Authentication, Emails, SMTP Settings innan kunder ska logga in.
+8. **Senare, Edge Functions** (`supabase/functions`: inbjudningar, mejl vid publicering, AI): driftsätts med Supabase CLI. Hemligheter: `APP_URL`, `RESEND_API_KEY`, `MAIL_FROM`, `ANTHROPIC_API_KEY`.
+
+Filerna genereras med `node scripts/gen-setup-sql.mjs` från `supabase/migrations` och grunddatan.
 
 ## Driftsättning (Railway eller annan Docker-värd)
 
