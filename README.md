@@ -5,7 +5,7 @@ Appar för företag som fastnat i Excel och mejl. Byggt enligt *Bolagsappar, byg
 | Yta | Var | Teknik |
 | --- | --- | --- |
 | Hemsidan bolagsappar.se | `apps/web` | Astro, statisk, innehåll i Markdown |
-| Plattformen app.bolagsappar.se (huvudkunder, åkare, direktkunder, `/admin`) | `apps/platform` | React 19, Vite, TanStack Router och Query |
+| Plattformen bolagsappar.se/app (huvudkunder, åkare, direktkunder, `/app/admin`) | `apps/platform` | React 19, Vite, TanStack Router och Query |
 | Mobilappen (iOS och Android) | `apps/mobile` | Expo SDK 57 |
 | Motorerna (all beräkning) | `packages/core` | Ren JS, Vitest, jämförelsetester mot `legacy/` |
 | Designsystemet | `packages/ui` | `tokens.css`, `components.css`, React-komponenter |
@@ -53,19 +53,24 @@ CI (`.github/workflows/ci.yml`) kör allt detta, med Postgres som tjänst, och k
 ## Supabase
 
 1. Skapa ett projekt i EU-region. Kör migrationerna i `supabase/migrations` och sedan `supabase/seed.sql` (bara för demo).
-2. Auth: e-post med inloggningslänk. Lägg till `https://app.bolagsappar.se/**` och `bolagsappar://` som redirect.
+2. Auth: e-post med inloggningslänk. Site URL `https://bolagsappar.se/app`. Lägg till `https://bolagsappar.se/app/**` och `bolagsappar://` som redirect.
 3. Edge Functions i `supabase/functions` (`invite`, `publish`, `ai`). Hemligheter:
-   - `APP_URL` (t.ex. `https://app.bolagsappar.se`)
+   - `APP_URL` (`https://bolagsappar.se/app`)
    - `RESEND_API_KEY` och `MAIL_FROM` för mejl. Utan nyckel loggas mejlen bara.
    - `ANTHROPIC_API_KEY` för Skadeflödets utkast. Utan nyckel visar appen utkast utan AI. `AI_MODEL` och `AI_PER_TIMME` är valfria.
 4. Miljövariabler: `apps/platform/.env.example`, `apps/web/.env.example`, `apps/mobile/.env.example`.
 
 ## Driftsättning (Railway eller annan Docker-värd)
 
-- **En tjänst (standard):** `Dockerfile` i roten. Railway hittar den själv. Hemsidan ligger på `/` och plattformen på `/app` (inloggning på `/app/logga-in`, sedan portalen med alla appar). Sätt `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `PUBLIC_SUPABASE_URL` och `PUBLIC_SUPABASE_ANON_KEY` som variabler (de används när sidorna byggs). Utan dem körs demoläget.
-- **Två tjänster med egna domäner:** hemsidan med `RAILWAY_DOCKERFILE_PATH=deploy/web.Dockerfile` (bolagsappar.se) och plattformen med `RAILWAY_DOCKERFILE_PATH=deploy/platform.Dockerfile` (app.bolagsappar.se).
-- Edge Functions: sätt `APP_URL` till plattformens adress, till exempel `https://bolagsappar.se/app`.
-- Railpack (Railways automatiska byggare) räcker inte för ett pnpm-monorepo utan startkommando, därför Dockerfile.
+Allt ligger på **bolagsappar.se** i en tjänst: hemsidan på `/` och plattformen på `/app` (inloggning `/app/logga-in`, sedan portalen med alla appar, adminportalen på `/app/admin`).
+
+1. `Dockerfile` i roten. Railway hittar den själv.
+2. Variabler på tjänsten (används när sidorna byggs): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`. Utan dem körs demoläget.
+3. Domän: i Railway, Settings, Networking, Custom Domain, lägg till `bolagsappar.se` och `www.bolagsappar.se`. Lägg in posterna Railway visar hos domänleverantören. För `bolagsappar.se` (utan www) behövs CNAME-flattening eller ALIAS, till exempel hos Cloudflare. `www` skickas vidare till `bolagsappar.se`.
+4. Lägg till `taxiavrakning.se` och `akaravrakning.se` på samma tjänst. De skickas vidare till `/taxi` och `/akeri`.
+5. Supabase: Site URL `https://bolagsappar.se/app`, redirect `https://bolagsappar.se/app/**`. Edge Functions: `APP_URL=https://bolagsappar.se/app`.
+
+Vill man senare dela upp i två tjänster finns `deploy/web.Dockerfile` och `deploy/platform.Dockerfile`. Railpack (Railways automatiska byggare) räcker inte för ett pnpm-monorepo utan startkommando, därför Dockerfile.
 
 ## Beslut
 
@@ -93,7 +98,7 @@ CI (`.github/workflows/ci.yml`) kör allt detta, med Postgres som tjänst, och k
 | 09 | Hur mejl från skadereglerare kommer in i Skadeflöde | Vidarebefordran till en skadeadress, mejlen ligger som dokument |
 | 10 | Personuppgifter i koden | Åtgärdat i `legacy/apps/akarkassan` |
 | 11 | Logga | **Loggan ur specifikationen** (sidan 1), uttagen ur PDF:ens vektorer: `packages/ui/src/brand/` (ljus, mörk, symbol). Används i plattformen, på hemsidan, i mobilappen, som favicon och som app-ikon. |
-| 12 | Domäner | `bolagsappar.se` (hemsidan), `app.bolagsappar.se` (plattformen). `taxiavrakning.se` går till `/taxi` och `akaravrakning.se` till `/akeri`, `www` till utan `www` (i `deploy/Caddyfile.static`). Peka alla hemsidans domäner mot hemsidans tjänst. |
+| 12 | Domäner | Allt på `bolagsappar.se`: hemsidan på `/`, plattformen på `/app`. `taxiavrakning.se` går till `/taxi` och `akaravrakning.se` till `/akeri`, `www` till utan `www` (i `deploy/Caddyfile.static`). Peka alla hemsidans domäner mot hemsidans tjänst. |
 
 ## Läget per fas
 

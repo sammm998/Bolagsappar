@@ -3,7 +3,7 @@
 import { adminClient, caller, fail, handler, json, roleIn } from '../_shared/http.ts';
 import { sendMail, manadAr } from '../_shared/mail.ts';
 
-const APP = Deno.env.get('APP_URL') || 'https://app.bolagsappar.se';
+const APP = (Deno.env.get('APP_URL') || 'https://bolagsappar.se/app').replace(/\/$/, '');
 
 Deno.serve(handler(async req => {
   const admin = adminClient();

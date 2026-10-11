@@ -2,7 +2,8 @@
 import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2.45.4';
 
 export const cors = {
-  'Access-Control-Allow-Origin': Deno.env.get('APP_URL') || '*',
+  // Ursprunget är bara schema och värd, aldrig sökvägen (APP_URL kan vara https://bolagsappar.se/app).
+  'Access-Control-Allow-Origin': (() => { try { return new URL(Deno.env.get('APP_URL') || '').origin; } catch { return '*'; } })(),
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS'
 };

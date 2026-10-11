@@ -4,7 +4,7 @@
 import { adminClient, caller, fail, handler, json, roleIn, isPlatform } from '../_shared/http.ts';
 import { sendMail } from '../_shared/mail.ts';
 
-const APP = Deno.env.get('APP_URL') || 'https://app.bolagsappar.se';
+const APP = (Deno.env.get('APP_URL') || 'https://bolagsappar.se/app').replace(/\/$/, '');
 const slug = (s: string) => s.toLowerCase().replace(/å|ä/g, 'a').replace(/ö/g, 'o').replace(/\b(ab|hb|kb)\b/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const ROLES = ['agare', 'admin', 'ekonomi', 'forare', 'las'];
 

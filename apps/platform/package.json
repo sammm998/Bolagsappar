@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "app.bolagsappar.se: alla konton och /admin",
+  "description": "bolagsappar.se/app: alla konton och /app/admin",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b --noEmit && vite build",

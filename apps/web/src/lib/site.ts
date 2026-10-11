@@ -1,5 +1,5 @@
 // Gemensamt innehåll. Branscherna läses från Markdown i src/content/bransch.
-export const APP = import.meta.env.PUBLIC_APP_URL || 'https://app.bolagsappar.se';
+export const APP = import.meta.env.PUBLIC_APP_URL || 'https://bolagsappar.se/app';
 
 type Md = { frontmatter: Record<string, any>; Content: any; file: string };
 const bransch = import.meta.glob<Md>('../content/bransch/*.md', { eager: true });
