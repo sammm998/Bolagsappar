@@ -12,7 +12,7 @@ import { KUNDCASE } from '../../lib/site';
   </section>
   <section class="sec sec--white">
     <div class="wrap grid grid--3">
-      {KUNDCASE.map(k => <a class="card card--link" href={'/kundcase/' + k.slug}><span class="pill pill--ok" style="align-self:flex-start">{k.typ}</span><h3>{k.kund}</h3><p>{k.rubrik}</p><span class="more">Läs kundcaset</span></a>)}
+      {KUNDCASE.map(k => <a class="card card--link" href={'/kundcase/' + k.slug + '/'}><span class="pill pill--ok" style="align-self:flex-start">{k.typ}</span><h3>{k.kund}</h3><p>{k.rubrik}</p><span class="more">Läs kundcaset</span></a>)}
       <div class="card"><h3>Jetpack</h3><p>Logistik, avräkning mot underleverantörer. Bygger just nu.</p></div>
     </div>
   </section>

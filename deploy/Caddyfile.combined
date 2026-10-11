@@ -12,6 +12,13 @@
 	# Sidorna själva sparas aldrig i webbläsaren, så en ny version syns direkt. Filer med hash i namnet sparas länge.
 	@html path / *.html */ /app /app/*
 	header @html Cache-Control "no-cache"
+	# En gång per webbläsare: töm sparade kopior från versionen då plattformen låg på /, så att ingen
+	# gammal flik eller sparad sida skickar vidare till inloggningen. Kakan gör att det bara sker en gång.
+	@forsta {
+		not header Cookie *ba_v=2*
+	}
+	header @forsta Clear-Site-Data "\"cache\""
+	header @forsta Set-Cookie "ba_v=2; Path=/; Max-Age=31536000; SameSite=Lax; Secure"
 
 	# Domäner (öppen fråga 12)
 	@taxi host taxiavrakning.se www.taxiavrakning.se

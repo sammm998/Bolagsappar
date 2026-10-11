@@ -19,7 +19,7 @@ const FAQ = [
         <p class="eyebrow">Appar för företag som fastnat i Excel och mejl</p>
         <h1>Vi lär oss hur ni jobbar på en dag. <em>Appen är klar inom två veckor.</em></h1>
         <p class="lead">Fast månadspris. Ingen IT-avdelning behövs. Vi bygger verktyget som passar ert sätt att jobba, och sköter det åt er.</p>
-        <div class="btns"><a class="btn btn--primary" href="/boka">Boka en arbetsdag</a><a class="btn btn--ghost" href="/kundcase/taxi-malmo">Se hur det gick för Taxi Malmö</a></div>
+        <div class="btns"><a class="btn btn--primary" href="/boka/">Boka en arbetsdag</a><a class="btn btn--ghost" href="/kundcase/taxi-malmo/">Se hur det gick för Taxi Malmö</a></div>
         <ul class="trust"><li>Ingen startavgift</li><li>Data i Sverige och EU</li><li>Inloggning med e-postlänk</li></ul>
       </div>
       <div class="days">
@@ -43,9 +43,9 @@ const FAQ = [
 
   <section class="sec" id="branscher">
     <div class="wrap">
-      <div class="sec-head"><div><p class="eyebrow">Branscher</p><h2>Byggt för riktiga företag</h2></div><a class="btn btn--ghost btn--sm" href="/kundcase">Alla kundcase</a></div>
+      <div class="sec-head"><div><p class="eyebrow">Branscher</p><h2>Byggt för riktiga företag</h2></div><a class="btn btn--ghost btn--sm" href="/kundcase/">Alla kundcase</a></div>
       <div class="grid grid--4">
-        {BRANSCHER.map(b => <a class="card card--link" href={'/' + b.slug}><h3>{b.namn}</h3><p>{b.kort}</p><span class="more">Läs mer</span></a>)}
+        {BRANSCHER.map(b => <a class="card card--link" href={'/' + b.slug + '/'}><h3>{b.namn}</h3><p>{b.kort}</p><span class="more">Läs mer</span></a>)}
       </div>
     </div>
   </section>
@@ -56,7 +56,7 @@ const FAQ = [
         <p class="eyebrow">För huvudkunder</p>
         <h2>Ge era åkare och underleverantörer samma appar.</h2>
         <p class="lead">Ni bestämmer vilka appar som ingår och vem som betalar. Varje åkare får sin egen inloggning, sin egen data och er avräkning direkt i mobilen.</p>
-        <div class="btns"><a class="btn btn--ghost" href="/boka">Prata med oss om huvudkundsavtal</a></div>
+        <div class="btns"><a class="btn btn--ghost" href="/boka/">Prata med oss om huvudkundsavtal</a></div>
       </div>
       <div class="screen" role="img" aria-label="Taxi Malmö och tre av åkarna med sina appar">
         <div class="screen-head"><span class="av">TM</span><b>Taxi Malmö</b><span class="muted small" style="margin-left:auto">Huvudkund · Avräkning, Förarlista</span></div>
@@ -77,7 +77,7 @@ const FAQ = [
         <div class="amount">{fran}</div>
         <div class="small muted">kr per månad, exkl. moms</div>
         <ul class="checks"><li>Arbetsdag och kartläggning</li><li>App byggd för ert flöde</li><li>Inloggning med e-postlänk för alla, signering med pennan</li><li>Drift, säkerhet och säkerhetskopior</li><li>Support på svenska</li><li>Nya funktioner när ni behöver dem</li></ul>
-        <div class="btns"><a class="btn btn--primary" href="/boka">Boka en arbetsdag</a></div>
+        <div class="btns"><a class="btn btn--primary" href="/boka/">Boka en arbetsdag</a></div>
       </div>
     </div>
   </section>

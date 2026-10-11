@@ -45,6 +45,7 @@ export function Login({ pick = false }: { pick?: boolean }) {
                 <TextField label="E-post" type="email" autoComplete="email" placeholder="namn@foretag.se" value={email} onChange={e => setEmail(e.target.value)} required />
                 <Button type="submit" variant="primary" size="lg" icon="mail" loading={busy}>Skicka inloggningslänk</Button>
               </form>
+              {demo.length > 0 && <p className="small muted" style={{ margin: 0 }}>Demoläge: inga mejl skickas härifrån. Välj en demoroll nedan.</p>}
               {demo.length > 0 && (
                 <div style={{ marginTop: 10 }}>
                   <div className="pf-or">demoläge, inga riktiga uppgifter</div>

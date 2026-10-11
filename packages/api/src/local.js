@@ -65,7 +65,8 @@ export function createLocalBackend(opts = {}) {
     async getUser() { const u = db.users.find(x => x.id === uid()); return u ? clone(u) : null; },
     async signInWithEmail(email) {
       const u = db.users.find(x => x.email.toLowerCase() === String(email).trim().toLowerCase());
-      if (!u) return { sent: true, demo: false };
+      // Lokalt (demoläge) finns ingen e-posttjänst. Säg det i stället för att låtsas att ett mejl skickats.
+      if (!u) { const e = new Error('Demoläge: inga mejl skickas. Logga in med en demoroll nedan. För riktig inloggning med e-post kopplas Supabase in.'); e.code = 'demo_ingen_epost'; throw e; }
       // Lokalt öppnas länken direkt
       return api.signInAsDemo(u.id);
     },
