@@ -46,7 +46,7 @@ export function MinAvrakning() {
       <div className="pf-two">
         <Card title="Sammanfattning" headExtra={<Pill tone="ok">{p.riktning === 'betalar' ? 'Betalas senast' : 'Utbetalas'} {p.utbetalas}</Pill>}>
           <dl className="pf-kv">
-            {p.sammanfattning.map((r: any) => <div key={r.key} onClick={() => setRad(r)} style={{ cursor: 'pointer' }} title="Klicka för att se hur raden räknas"><dt>{r.text}{r.n ? <span className="muted small"> · {r.n} passager</span> : null}</dt><dd>{kr2(r.belopp)} kr</dd></div>)}
+            {(p.sammanfattning || []).map((r: any) => <div key={r.key} onClick={() => setRad(r)} style={{ cursor: 'pointer' }} title="Klicka för att se hur raden räknas"><dt>{r.text}{r.n ? <span className="muted small"> · {r.n} passager</span> : null}</dt><dd>{kr2(r.belopp)} kr</dd></div>)}
             <div className="tot"><dt>{p.riktning === 'betalar' ? 'Att betala' : 'Att få'}</dt><dd>{kr2(p.belopp)} kr</dd></div>
           </dl>
           <div className="ba-card ba-card--subtle" style={{ padding: 12, marginTop: 14, fontSize: 12 }}><b>Stämmer något inte?</b> Klicka på en rad och välj "Fråga {p.fran}". Frågan hamnar hos ekonomi på {p.fran}.</div>
@@ -55,7 +55,7 @@ export function MinAvrakning() {
           <Card title={p.kind === 'logistikavrakning' ? 'Per fordon' : 'Per bil'}>
             <div className="ba-table-wrap" style={{ border: 0 }}>
               <table className="ba-table"><thead><tr><th>{p.kind === 'logistikavrakning' ? 'Fordon' : 'Bil'}</th><th className="n">Intäkt</th><th className="n">Avdrag</th><th className="n">Netto</th></tr></thead>
-                <tbody>{p.perBil.map((x: any) => <tr key={x.bil}><td className="b num">{x.reg ? x.reg.slice(0, 3) + ' ' + x.reg.slice(3) : x.bil}{p.kind === 'logistikavrakning' ? <div className="small muted">{x.n} uppdrag</div> : <div className="small muted">Bil {x.bil}</div>}</td><td className="n">{kr2(x.intakt)}</td><td className="n">{kr2(x.avdrag)}</td><td className="n strong">{kr2(x.netto)}</td></tr>)}</tbody></table>
+                <tbody>{(p.perBil || []).map((x: any) => <tr key={x.bil}><td className="b num">{x.reg ? x.reg.slice(0, 3) + ' ' + x.reg.slice(3) : x.bil}{p.kind === 'logistikavrakning' ? <div className="small muted">{x.n} uppdrag</div> : <div className="small muted">Bil {x.bil}</div>}</td><td className="n">{kr2(x.intakt)}</td><td className="n">{kr2(x.avdrag)}</td><td className="n strong">{kr2(x.netto)}</td></tr>)}</tbody></table>
             </div>
             <p className="small muted" style={{ margin: '8px 0 0' }}>{p.kind === 'logistikavrakning' ? `Värdet per fordon är före provision, avgifter och moms.` : 'Netto per bil är före centralens avgifter, förskott och moms.'}</p>
           </Card>

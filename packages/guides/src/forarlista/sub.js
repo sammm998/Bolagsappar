@@ -1,7 +1,7 @@
 export default {
   title: 'Mina förare',
   welcome: [
-    { title: 'Så funkar Mina förare', body: 'Dina förare hämtas från centralens förarlista varje natt. Du ser vem som är aktiv och vems legitimation snart går ut.', art: 'users' },
+    { title: 'Så funkar Mina förare', body: 'Dina förare kommer från centralens förarlista. Du ser vem som är aktiv och vems legitimation snart går ut.', art: 'users' },
     { title: 'Koppla till lönen', body: 'Har du Åkarkassan kopplas förarna till personalen där.', art: 'link' }
   ],
   checklist: [{ key: 'kontroll', title: 'Kontrollera dina förare', sub: 'Saknas någon? Fråga centralen', to: 'mina-forare' }],

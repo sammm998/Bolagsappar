@@ -160,3 +160,32 @@ test('godkännande: kontot kan begränsa vem som publicerar', async () => {
   await as(U.sara, `select approve_period($1, 'avrakning', '2026-11')`, [T.taxi]);
   assert.equal((await db.query(`select status from periods where tenant_id = $1 and period = '2026-11'`, [T.taxi])).rows[0].status, 'godkand');
 });
+
+test('periodlås: godkänna och publicera går bara via funktionerna, rättelse kräver orsak', async () => {
+  await assert.rejects(as(U.sara, `insert into periods(tenant_id, module_key, period, status) values ($1, 'avrakning', '2026-12', 'publicerad')`, [T.taxi]), /godkännandet/);
+  await as(U.sara, `select approve_period($1, 'avrakning', '2026-12')`, [T.taxi]);
+  await as(U.sara, `update periods set status = 'oppen' where tenant_id = $1 and period = '2026-12'`, [T.taxi]);
+  await assert.rejects(as(U.sara, `update periods set status = 'godkand' where tenant_id = $1 and period = '2026-12'`, [T.taxi]), /godkännandet/);
+  await as(U.sara, `select approve_period($1, 'avrakning', '2026-12')`, [T.taxi]);
+  const items = JSON.stringify([{ to: T.norra, kind: 'akaravrakning', payload: {} }]);
+  assert.equal((await as(U.sara, `select publish_period($1, 'avrakning', '2026-12', $2::jsonb) n`, [T.taxi, items]))[0].n, 1);
+  await assert.rejects(as(U.sara, `update periods set version = 5 where tenant_id = $1 and period = '2026-12'`, [T.taxi]), /Versionen/);
+  await as(U.sara, `update periods set status = 'oppen', version = version + 1 where tenant_id = $1 and period = '2026-12'`, [T.taxi]);
+  await as(U.sara, `select approve_period($1, 'avrakning', '2026-12')`, [T.taxi]);
+  await assert.rejects(as(U.sara, `select publish_period($1, 'avrakning', '2026-12', $2::jsonb)`, [T.taxi, items]), /orsak/);
+  await as(U.sara, `select publish_period($1, 'avrakning', '2026-12', $2::jsonb, 'Fel bropris')`, [T.taxi, items]);
+  const v = (await db.query(`select version, status from periods where tenant_id = $1 and period = '2026-12'`, [T.taxi])).rows[0];
+  assert.deepEqual(v, { version: 2, status: 'publicerad' });
+});
+
+test('förarlistan: huvudkunden delar till sina åkare utan godkännande, avräkningar går inte den vägen', async () => {
+  const items = JSON.stringify([{ to: T.norra, payload: { forare: [{ nr: '1', namn: 'Förare A1' }] } }]);
+  await assert.rejects(as(U.sara, `select share_list($1, 'avrakning', 'akaravrakning', $2::jsonb)`, [T.taxi, items]), /godkännandet/);
+  await assert.rejects(as(U.sara, `select share_list($1, 'forarlista', 'forare', $2::jsonb)`, [T.taxi, JSON.stringify([{ to: T.folie, payload: {} }])]), /underkund/);
+  await assert.rejects(as(U.forare, `select share_list($1, 'forarlista', 'forare', '[]'::jsonb)`, [T.norra]), /behörighet/);
+  await as(U.sara, `select share_list($1, 'forarlista', 'forare', $2::jsonb)`, [T.taxi, items]);
+  await as(U.sara, `select share_list($1, 'forarlista', 'forare', $2::jsonb)`, [T.taxi, items]);
+  const r = await as(U.ahmed, `select max(version) v, count(*)::int n from shares where to_tenant = $1 and module_key = 'forarlista'`, [T.norra]);
+  assert.deepEqual(r[0], { v: 2, n: 2 });
+  assert.equal((await as(U.lina, `select id from shares where module_key = 'forarlista'`)).length, 0, 'en annan åkare ser inget');
+});

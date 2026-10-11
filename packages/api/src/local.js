@@ -203,7 +203,7 @@ export function createLocalBackend(opts = {}) {
       need(hasRole(t, godkannRoller(tenant(t))));
       const x = db.periods.find(y => y.tenant_id === t && y.module_key === m && y.period === p);
       if (!x || x.status === 'oppen') throw new Error('Månaden måste godkännas innan den publiceras');
-      if (x.status === 'publicerad' && !String(reason || '').trim()) throw new Error('Månaden är redan publicerad. En rättelse kräver en orsak.');
+      if ((x.status === 'publicerad' || (x.version || 1) > 1) && !String(reason || '').trim()) throw new Error('En rättelse kräver en orsak. Åkarna ser orsaken.');
       const v = x.status === 'publicerad' ? x.version + 1 : x.version;
       for (const it of items) {
         if (parentOf(it.to) !== t) throw new Error('Mottagaren är inte en underkund till kontot');
@@ -213,6 +213,19 @@ export function createLocalBackend(opts = {}) {
       Object.assign(x, { status: 'publicerad', version: v, published_by: uid(), published_at: now().toISOString() });
       audit(t, 'publicera', m + ':' + p, { mottagare: items.length, version: v, orsak: reason });
       save(); emit({ table: 'shares' }); emit({ table: 'periods', tenant_id: t, module_key: m });
+      return items.length;
+    },
+    /** Lista utan månadsgodkännande (förarlistan). Samma regler som share_list i databasen. */
+    async shareList(t, m, kind, items) {
+      if (m !== 'forarlista') throw new Error('Den här appen delas bara via godkännandet');
+      need(canWrite(t));
+      const p = now().toISOString().slice(0, 7);
+      for (const it of items) {
+        if (parentOf(it.to) !== t) throw new Error('Mottagaren är inte en underkund till kontot');
+        const v = Math.max(0, ...db.shares.filter(s => s.from_tenant === t && s.to_tenant === it.to && s.module_key === m && s.period === p && s.kind === kind).map(s => s.version)) + 1;
+        db.shares.push({ id: uuid(), from_tenant: t, to_tenant: it.to, module_key: m, period: p, kind, payload: clone(it.payload), version: v, reason: null, created_at: now().toISOString(), opened_at: null });
+      }
+      audit(t, 'dela', m, { mottagare: items.length }); save(); emit({ table: 'shares' });
       return items.length;
     },
     /** Det som publicerats till kontot (senaste versionen per period och typ). */

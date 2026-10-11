@@ -6,3 +6,4 @@ export * as skatter from './config/skatter.js';
 export * as format from './format.js';
 export * as skadeflode from './skadeflode/index.js';
 export * as logistik from './logistik/index.js';
+export * as forarlista from './forarlista.js';

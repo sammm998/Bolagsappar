@@ -18,7 +18,8 @@
     "./admin": "./src/admin.js",
     "./signatur": "./src/signatur.js",
     "./logistik": "./src/logistik/index.js",
-    "./behorighet": "./src/behorighet.js"
+    "./behorighet": "./src/behorighet.js",
+    "./forarlista": "./src/forarlista.js"
   },
   "scripts": {
     "test": "vitest run"

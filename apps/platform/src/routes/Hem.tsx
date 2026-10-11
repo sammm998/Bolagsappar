@@ -93,7 +93,7 @@ function HemMain() {
             {apps.map(x => (
               <Link key={x.key} className="pf-app" to={'/' + a.tenant.slug + '/' + x.path}>
                 <AppIcon icon={x.icon} tone={x.tone} /><b>{x.name}</b>
-                <small>{x.key === 'avrakning' ? (period ? `${Manad(period)} pågår` : '') : x.key === 'forarlista' ? (fl.data ? 'Uppdaterad ' + (String(fl.data.hamtad).slice(0, 10) === new Date().toISOString().slice(0, 10) ? 'i dag' : String(fl.data.hamtad).slice(0, 10)) : 'Koppla TaxiCaller') : ''}</small>
+                <small>{x.key === 'avrakning' ? (period ? `${Manad(period)} pågår` : '') : x.key === 'forarlista' ? (fl.data ? 'Inläst ' + (String(fl.data.hamtad).slice(0, 10) === new Date().toISOString().slice(0, 10) ? 'i dag' : String(fl.data.hamtad).slice(0, 10)) : 'Läs in förarlistan') : ''}</small>
               </Link>
             ))}
             <Link className="pf-app pf-app--ghost" to="/$tenant/appar-till-akare" params={{ tenant: a.tenant.slug }}><AppIcon icon="wallet" tone="blue" /><b>Åkarkassan</b><small>Erbjuds till {akarOrd}</small></Link>

@@ -50,18 +50,21 @@ pnpm build
 
 CI (`.github/workflows/ci.yml`) kör allt detta, med Postgres som tjänst, och kontrollerar att `supabase/seed.sql` är uppdaterad (`node scripts/gen-seed-sql.mjs`).
 
+`supabase/tests/e2e.mjs` går igenom hela systemet mot en riktig Supabase (inloggning med e-postlänk, inbjudan av åkare, godkännande och publicering, rättelse, förarlistan, Åkarkassan med signering, support, ny direktkund). Se `supabase/tests/README.md`.
+
 ## Supabase
 
 Supabase är databasen, inloggningen med e-postlänk, spärrarna mellan konton och serverfunktionerna. Railway lämnar bara ut sidorna.
 
 1. Skapa ett projekt på supabase.com, region **EU (Stockholm eller Frankfurt)**.
-2. **SQL Editor:** klistra in hela `supabase/setup.sql` och kör. Det skapar tabeller, radsäkerhet, funktioner, moduler och skattesatser (ingen demodata).
+2. **SQL Editor:** klistra in hela `supabase/setup.sql` och kör. Det skapar tabeller, radsäkerhet, funktioner, moduler, skattesatser och live-uppdateringar (ingen demodata). Har du redan kört en äldre `setup.sql`: kör bara de migrationer i `supabase/migrations` som kommit till efter (i namnordning), i dag `20261010000500_rattelse.sql` och `20261010000600_forarlista.sql`.
 3. **Authentication, Users, Add user, Create new user:** din e-post, bocka i Auto Confirm User.
 4. **SQL Editor:** klistra in `supabase/forsta-agare.sql`, byt `din@epost.se` till din adress och kör. Du blir ägare av Bolagsappar (adminportalen) och Taxi Malmö.
 5. **Authentication, URL Configuration:** Site URL `https://bolagsappar-production.up.railway.app/app` och Redirect URLs `https://bolagsappar-production.up.railway.app/app/**` (byt till `https://bolagsappar.se/app` när domänen är kopplad).
 6. **Project Settings, API:** kopiera Project URL och anon public key. Lägg in dem i Railway som `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `PUBLIC_SUPABASE_URL` och `PUBLIC_SUPABASE_ANON_KEY`, och bygg om.
 7. **E-post till kunder:** Supabases inbyggda e-post skickar bara till projektets egna medlemmar och några få per timme. Lägg in egen SMTP (till exempel Resend) under Authentication, Emails, SMTP Settings innan kunder ska logga in.
-8. **Senare, Edge Functions** (`supabase/functions`: inbjudningar, mejl vid publicering, AI): driftsätts med Supabase CLI. Hemligheter: `APP_URL`, `RESEND_API_KEY`, `MAIL_FROM`, `ANTHROPIC_API_KEY`.
+8. **Edge Functions** (`supabase/functions`): behövs för att bjuda in åkare och användare och för att lägga upp nya kunder med ägare. Driftsätt med Supabase CLI: `supabase login`, `supabase link --project-ref <projektets ref>`, `supabase functions deploy invite`, `supabase functions deploy publish`, `supabase functions deploy ai`. Hemligheter (`supabase secrets set`): `APP_URL=https://bolagsappar.se/app` (eller Railway-adressen med `/app`). Valfritt: `RESEND_API_KEY` och `MAIL_FROM` för mejl vid publicering, `ANTHROPIC_API_KEY` för AI-utkast (utan nyckel fungerar allt utom AI). `SUPABASE_SERVICE_ROLE_KEY` finns redan i funktionerna och ska aldrig läggas i Railway.
+9. **Nya kunder:** logga in, välj Bolagsappar, Kunder, Ny kund. Välj typ (huvudkund med bransch taxi eller logistik, eller direktkund), appar och ägarens e-post. Ägaren får en inloggningslänk.
 
 Filerna genereras med `node scripts/gen-setup-sql.mjs` från `supabase/migrations` och grunddatan.
 
@@ -117,4 +120,4 @@ Vill man senare dela upp i två tjänster finns `deploy/web.Dockerfile` och `dep
 | 5 Åkarkassan | Automatiska underlag, lön, bro och Sturup, personal med signering med pennan | Klar |
 | 6 Mobil | Hem, appar, ladda upp, lönespec, signering, aktivera | Byggd och provad i webbläsaren. TestFlight och Google Play kräver ägarens konton |
 | 7 Hemsida | Start, branscher, så jobbar vi, kundcase, pris, boka, säkerhet, integritet | Byggd. Lighthouse är inte uppmätt i den här miljön |
-| 8 Övrigt | Admin, Verkstad, Skadeflöde, Jetpack-konfiguration | Byggda. Jetpack är ett exempel tills deras riktiga fil finns. Den nattliga synken av förarlistan från TaxiCaller är inte byggd än |
+| 8 Övrigt | Admin, Verkstad, Skadeflöde, Jetpack-konfiguration | Byggda. Jetpack är ett exempel tills deras riktiga fil finns. Förarlistan läses in från TaxiCallers förarexport (CSV eller Excel) och varje åkare får sina egna förare. Nattlig hämtning via TaxiCallers API är inte byggd (kräver deras API-nyckel) |

@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Avatar, Banner, Button, Card, EmptyState, Icon, Kpi, Logo, Modal, Pill, Progress, Select, TextField, useToast } from '@bolagsappar/ui';
+import { Avatar, Banner, Button, Card, Checkbox, EmptyState, Icon, Kpi, Logo, Modal, Pill, Progress, Select, TextField, useToast } from '@bolagsappar/ui';
 import { kundlista, konton, leveranser, modulStatistik, fastnar, guiderAvslutade, fakturering, manadsintakt } from '@bolagsappar/core/admin';
 import { prisFor, PRISER_TILLFALLIGA } from '@bolagsappar/modules';
 import { MODULES } from '@bolagsappar/modules';
@@ -126,19 +126,37 @@ function Kundtabell({ A, alla }: { A: any; alla?: boolean }) {
 
 function NyKund({ onClose }: { onClose: () => void }) {
   const b = useBackend(); const qc = useQueryClient(); const toast = useToast();
-  const [f, setF] = useState({ name: '', type: 'main', org_nr: '' });
+  const [f, setF] = useState({ name: '', type: 'main', org_nr: '', epost: '', namn: '', bransch: 'taxi' });
+  const [appar, setAppar] = useState<string[]>([]);
+  const [busy, setBusy] = useState(false);
+  const variant = f.type === 'direct' ? 'direct' : 'main';
+  const valbara = MODULES.filter(m => m.variants[variant]);
+  const epostOk = !f.epost.trim() || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.epost.trim());
   const go = async () => {
-    if (!f.name.trim()) return;
-    try { await b.createTenant({ name: f.name.trim(), type: f.type, org_nr: f.org_nr.trim() || null, slug: f.name.trim().toLowerCase().replace(/å|ä/g, 'a').replace(/ö/g, 'o').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''), settings: { status: 'bygger', dag: 1, dagar: 14 } }); qc.invalidateQueries({ queryKey: ['tenants'] }); toast(`${f.name} är skapad. Leveransen startar på dag 1.`); onClose(); }
-    catch (e: any) { toast(e.message, { tone: 'bad' }); }
+    if (!f.name.trim() || !epostOk) return;
+    setBusy(true);
+    try {
+      const t = await b.createTenant({ name: f.name.trim(), type: f.type, org_nr: f.org_nr.trim() || null, slug: f.name.trim().toLowerCase().replace(/å|ä/g, 'a').replace(/ö/g, 'o').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''), settings: { status: 'bygger', dag: 1, dagar: 14, ...(f.type === 'main' ? { bransch: f.bransch } : {}) } });
+      for (const key of appar.filter(k => valbara.some(m => m.key === k))) await b.setLicense(t.id, key, { variant, status: 'aktiv', paid_by: t.id, started_at: new Date().toISOString().slice(0, 10) });
+      if (f.epost.trim()) await b.addMember(t.id, { email: f.epost.trim().toLowerCase(), name: f.namn.trim(), role: 'agare' });
+      qc.invalidateQueries({ queryKey: ['tenants'] }); qc.invalidateQueries({ queryKey: ['licenses'] });
+      toast(`${f.name} är skapad.${f.epost.trim() ? ` ${f.epost.trim()} är ägare och loggar in med sin e-post.` : ''} Leveransen startar på dag 1.`); onClose();
+    } catch (e: any) { toast(e.message, { tone: 'bad' }); }
+    finally { setBusy(false); }
   };
   return (
-    <Modal open onClose={onClose} title="Ny kund" labelledBy="nk-h" footer={<><Button onClick={onClose}>Avbryt</Button><Button variant="primary" onClick={go}>Skapa</Button></>}>
+    <Modal open onClose={onClose} title="Ny kund" labelledBy="nk-h" footer={<><Button onClick={onClose}>Avbryt</Button><Button variant="primary" loading={busy} disabled={!f.name.trim() || !epostOk} onClick={go}>Skapa</Button></>}>
       <div className="ba-stack">
         <TextField label="Företagsnamn" value={f.name} onChange={e => setF({ ...f, name: e.target.value })} />
         <TextField label="Organisationsnummer" mono value={f.org_nr} onChange={e => setF({ ...f, org_nr: e.target.value })} />
-        <label className="ba-field"><span className="ba-label">Typ</span><Select value={f.type} onChange={e => setF({ ...f, type: e.target.value })}><option value="main">Huvudkund (har underkunder)</option><option value="direct">Direktkund</option></Select></label>
-        <p className="small muted" style={{ margin: 0 }}>Kunden bjuder sedan in sina användare. Underkunder bjuds in av huvudkunden.</p>
+        <label className="ba-field"><span className="ba-label">Typ</span><Select value={f.type} onChange={e => { setF({ ...f, type: e.target.value }); setAppar([]); }}><option value="main">Huvudkund (har underkunder)</option><option value="direct">Direktkund</option></Select></label>
+        {f.type === 'main' && <label className="ba-field"><span className="ba-label">Bransch</span><Select value={f.bransch} onChange={e => setF({ ...f, bransch: e.target.value })}><option value="taxi">Taxi (åkare och körningar)</option><option value="logistik">Logistik (underleverantörer och uppdrag)</option></Select></label>}
+        <fieldset className="ba-field" style={{ border: 0, padding: 0, margin: 0 }}><legend className="ba-label">Appar</legend>
+          <div className="ba-stack" style={{ gap: 6 }}>{valbara.map(m => <Checkbox key={m.key} label={m.variants[variant].name} checked={appar.includes(m.key)} onChange={e => setAppar(e.target.checked ? [...appar, m.key] : appar.filter(k => k !== m.key))} />)}</div>
+        </fieldset>
+        <TextField label="Ägarens e-post" type="email" value={f.epost} onChange={e => setF({ ...f, epost: e.target.value })} error={epostOk ? undefined : 'Skriv en hel e-postadress, till exempel namn@foretag.se.'} />
+        <TextField label="Ägarens namn" value={f.namn} onChange={e => setF({ ...f, namn: e.target.value })} />
+        <p className="small muted" style={{ margin: 0 }}>Ägaren får en inloggningslänk och bjuder sedan in sina användare. Underkunder bjuds in av huvudkunden.</p>
       </div>
     </Modal>
   );

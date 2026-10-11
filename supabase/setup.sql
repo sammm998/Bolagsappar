@@ -607,6 +607,138 @@ begin
   return n;
 end $$;
 
+-- ================================================ 20261010000500_rattelse.sql
+-- Rättelser och periodlås.
+-- 1. En ny version (rättelse) kräver alltid en orsak, även när månaden öppnats igen först.
+-- 2. En månad godkänns och publiceras bara via approve_period och publish_period (som kontrollerar vem som
+--    får godkänna). Direkt ändring får bara öppna månaden igen, och vid rättelse höja versionen med ett.
+
+create or replace function app.periods_guard() returns trigger language plpgsql as $$
+begin
+  if current_setting('app.via_funktion', true) = 'ja' then return new; end if;
+  if tg_op = 'INSERT' then
+    if new.status <> 'oppen' then raise exception 'En månad godkänns och publiceras bara via godkännandet'; end if;
+    return new;
+  end if;
+  if new.status is distinct from old.status and new.status <> 'oppen' then
+    raise exception 'En månad godkänns och publiceras bara via godkännandet';
+  end if;
+  if new.version is distinct from old.version and not (old.status = 'publicerad' and new.status = 'oppen' and new.version = old.version + 1) then
+    raise exception 'Versionen höjs bara när en publicerad månad öppnas för rättelse';
+  end if;
+  if (new.published_at, new.published_by, new.approved_at, new.approved_by) is distinct from (old.published_at, old.published_by, old.approved_at, old.approved_by) then
+    raise exception 'Godkännande och publicering ändras bara via godkännandet';
+  end if;
+  return new;
+end $$;
+
+drop trigger if exists periods_guard on public.periods;
+create trigger periods_guard before insert or update on public.periods for each row execute function app.periods_guard();
+
+create or replace function public.approve_period(tenant uuid, module_key text, period text)
+returns void language plpgsql security definer set search_path = public as $$
+#variable_conflict use_column
+begin
+  perform set_config('app.via_funktion', 'ja', true);
+  if not app.kan_godkanna(approve_period.tenant) then raise exception 'Du har inte behörighet att godkänna'; end if;
+  insert into public.periods as x (tenant_id, module_key, period, status, approved_by, approved_at)
+    values (approve_period.tenant, approve_period.module_key, approve_period.period, 'godkand', auth.uid(), now())
+  on conflict (tenant_id, module_key, period) do update set status = case when x.status = 'publicerad' then 'publicerad' else 'godkand' end, approved_by = auth.uid(), approved_at = now();
+  insert into public.audit_log(tenant_id, actor, action, target) values (approve_period.tenant, auth.uid(), 'godkann', approve_period.module_key || ':' || approve_period.period);
+end $$;
+
+create or replace function public.publish_period(from_tenant uuid, module_key text, period text, items jsonb, reason text default null)
+returns integer language plpgsql security definer set search_path = public as $$
+#variable_conflict use_column
+declare
+  p public.periods;
+  v integer;
+  it jsonb;
+  n integer := 0;
+begin
+  perform set_config('app.via_funktion', 'ja', true);
+  if not app.kan_godkanna(publish_period.from_tenant) then
+    raise exception 'Du har inte behörighet att publicera';
+  end if;
+  select * into p from public.periods x
+    where x.tenant_id = publish_period.from_tenant and x.module_key = publish_period.module_key and x.period = publish_period.period for update;
+  if p is null or p.status = 'oppen' then
+    raise exception 'Månaden måste godkännas innan den publiceras';
+  end if;
+  if (p.status = 'publicerad' or p.version > 1) and coalesce(trim(publish_period.reason), '') = '' then
+    raise exception 'En rättelse kräver en orsak. Åkarna ser orsaken.';
+  end if;
+  v := case when p.status = 'publicerad' then p.version + 1 else p.version end;
+  for it in select * from jsonb_array_elements(publish_period.items) loop
+    if app.parent_of((it->>'to')::uuid) is distinct from publish_period.from_tenant then
+      raise exception 'Mottagaren är inte en underkund till kontot';
+    end if;
+    insert into public.shares(from_tenant, to_tenant, module_key, period, kind, payload, version, reason)
+      values (publish_period.from_tenant, (it->>'to')::uuid, publish_period.module_key, publish_period.period, it->>'kind', it->'payload', v, publish_period.reason);
+    if it ? 'title' then
+      insert into public.notifications(tenant_id, title, body, link) values ((it->>'to')::uuid, it->>'title', it->>'body', it->>'link');
+    end if;
+    n := n + 1;
+  end loop;
+  update public.periods x set status = 'publicerad', version = v, published_by = auth.uid(), published_at = now()
+    where x.tenant_id = publish_period.from_tenant and x.module_key = publish_period.module_key and x.period = publish_period.period;
+  insert into public.audit_log(tenant_id, actor, action, target, detail)
+    values (publish_period.from_tenant, auth.uid(), 'publicera', publish_period.module_key || ':' || publish_period.period, jsonb_build_object('mottagare', n, 'version', v, 'orsak', publish_period.reason));
+  return n;
+end $$;
+
+-- ================================================ 20261010000600_forarlista.sql
+-- Förarlistan delas till åkarna och live-uppdateringar.
+-- 1. share_list: huvudkunden delar en lista (i dag bara förarlistan) till sina åkare. Ingen månad att godkänna,
+--    varje inläsning blir en ny version. Avräkningar går aldrig den här vägen, de kräver godkännande.
+-- 2. Tabellerna som skärmarna lyssnar på läggs i supabase_realtime, så ändringar syns direkt hos andra
+--    inloggade. RLS gäller även här: ingen får en händelse för en rad den inte får läsa.
+
+create or replace function public.share_list(from_tenant uuid, module_key text, kind text, items jsonb)
+returns integer language plpgsql security definer set search_path = public as $$
+#variable_conflict use_column
+declare
+  it jsonb;
+  n integer := 0;
+  per text := to_char(now() at time zone 'Europe/Stockholm', 'YYYY-MM');
+  v integer;
+begin
+  if share_list.module_key not in ('forarlista') then
+    raise exception 'Den här appen delas bara via godkännandet';
+  end if;
+  if not app.can_write(share_list.from_tenant) then
+    raise exception 'Du har inte behörighet att dela';
+  end if;
+  for it in select * from jsonb_array_elements(share_list.items) loop
+    if app.parent_of((it->>'to')::uuid) is distinct from share_list.from_tenant then
+      raise exception 'Mottagaren är inte en underkund till kontot';
+    end if;
+    select coalesce(max(s.version), 0) + 1 into v from public.shares s
+      where s.from_tenant = share_list.from_tenant and s.to_tenant = (it->>'to')::uuid
+        and s.module_key = share_list.module_key and s.period = per and s.kind = share_list.kind;
+    insert into public.shares(from_tenant, to_tenant, module_key, period, kind, payload, version)
+      values (share_list.from_tenant, (it->>'to')::uuid, share_list.module_key, per, share_list.kind, it->'payload', v);
+    n := n + 1;
+  end loop;
+  insert into public.audit_log(tenant_id, actor, action, target, detail)
+    values (share_list.from_tenant, auth.uid(), 'dela', share_list.module_key, jsonb_build_object('mottagare', n));
+  return n;
+end $$;
+revoke all on function public.share_list from public, anon;
+grant execute on function public.share_list to authenticated;
+
+do $$
+declare t text;
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    foreach t in array array['documents', 'periods', 'shares', 'notifications', 'licenses', 'memberships', 'file_runs'] loop
+      if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = t) then
+        execute format('alter publication supabase_realtime add table public.%I', t);
+      end if;
+    end loop;
+  end if;
+end $$;
+
 -- ================================================ grunddata
 insert into public.modules (key, name, version, manifest) values
   ('avrakning', 'Avräkning', '2.0.0', '{"status":"aktiv","icon":"receipt","tone":"green","beskrivning":"Månadsavräkning mellan central och åkare.","variants":["main","sub"]}'::jsonb),

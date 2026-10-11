@@ -88,6 +88,8 @@ export function createSupabaseBackend(cfg) {
       emit({ table: 'shares' }); emit({ table: 'periods', tenant_id: t, module_key: m });
       return n;
     },
+    /** Lista utan månadsgodkännande (förarlistan). items: [{ to, payload }] */
+    async shareList(t, m, kind, items) { const n = one(await sb.rpc('share_list', { from_tenant: t, module_key: m, kind, items })); emit({ table: 'shares' }); return n; },
     async sharesTo(t, m = null) {
       let q = sb.from('shares').select('*').eq('to_tenant', t); if (m) q = q.eq('module_key', m);
       const L = one(await q.order('version', { ascending: false }));
