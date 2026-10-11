@@ -25,7 +25,7 @@ export function createSupabaseBackend(cfg) {
       return data || { id, name: '', email: (await sb.auth.getUser()).data.user?.email };
     },
     async signInWithEmail(email) {
-      one(await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: cfg.redirectTo || (typeof location !== 'undefined' ? location.origin + '/valj-bolag' : undefined), shouldCreateUser: false } }));
+      one(await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: cfg.redirectTo || (typeof location !== 'undefined' ? location.origin + (cfg.basePath || '') + '/valj-bolag' : undefined), shouldCreateUser: false } }));
       return { sent: true, demo: false };
     },
     async signInAsDemo() { throw new Error('Demoinloggning finns bara lokalt'); },

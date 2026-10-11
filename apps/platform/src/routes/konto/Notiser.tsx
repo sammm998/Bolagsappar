@@ -20,7 +20,7 @@ export function Notiser() {
           <Card key={n.id} tone={n.read_at ? undefined : 'subtle'}>
             <div className="ba-row" style={{ flexWrap: 'nowrap' }}>
               <div className="ba-grow"><b>{n.title}</b><div className="small">{n.body}</div><div className="small muted">{String(n.created_at).slice(0, 16).replace('T', ' ')}</div></div>
-              {n.link && <Link className="ba-btn ba-btn--sm" to={'/' + a.tenant.slug + '/' + n.link} onClick={() => read(n.id)}>Öppna</Link>}
+              {n.link && <Link className="ba-btn ba-btn--sm" to={'/' + a.tenant.slug + '/' + String(n.link).replace(/^\/+/, '')} onClick={() => read(n.id)}>Öppna</Link>}
               {!n.read_at && <Button size="sm" variant="link" onClick={() => read(n.id)}>Markera som läst</Button>}
             </div>
           </Card>

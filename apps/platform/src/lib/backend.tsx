@@ -5,7 +5,7 @@ import { createBackend } from '@bolagsappar/api';
 export type Backend = any;
 let promise: Promise<Backend> | null = null;
 export function loadBackend(): Promise<Backend> {
-  return (promise ||= createBackend({ url: import.meta.env.VITE_SUPABASE_URL, anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY }));
+  return (promise ||= createBackend({ url: import.meta.env.VITE_SUPABASE_URL, anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY, basePath: import.meta.env.BASE_URL.replace(/\/$/, '') }));
 }
 const Ctx = createContext<Backend>(null);
 export const BackendProvider = ({ value, children }: { value: Backend; children: ReactNode }) => <Ctx.Provider value={value}>{children}</Ctx.Provider>;

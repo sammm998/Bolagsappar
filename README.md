@@ -62,8 +62,9 @@ CI (`.github/workflows/ci.yml`) kör allt detta, med Postgres som tjänst, och k
 
 ## Driftsättning (Railway eller annan Docker-värd)
 
-- **Plattformen:** `Dockerfile` i roten. Railway hittar den själv. Bygger bara plattformen och de paket den behöver, och serverar den med Caddy på porten i `PORT`. Sätt `VITE_SUPABASE_URL` och `VITE_SUPABASE_ANON_KEY` som variabler på tjänsten (de används när appen byggs). Utan dem körs demoläget.
-- **Hemsidan:** en egen tjänst från samma repo med variabeln `RAILWAY_DOCKERFILE_PATH=deploy/web.Dockerfile`, och `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`, `PUBLIC_APP_URL`.
+- **En tjänst (standard):** `Dockerfile` i roten. Railway hittar den själv. Hemsidan ligger på `/` och plattformen på `/app` (inloggning på `/app/logga-in`, sedan portalen med alla appar). Sätt `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `PUBLIC_SUPABASE_URL` och `PUBLIC_SUPABASE_ANON_KEY` som variabler (de används när sidorna byggs). Utan dem körs demoläget.
+- **Två tjänster med egna domäner:** hemsidan med `RAILWAY_DOCKERFILE_PATH=deploy/web.Dockerfile` (bolagsappar.se) och plattformen med `RAILWAY_DOCKERFILE_PATH=deploy/platform.Dockerfile` (app.bolagsappar.se).
+- Edge Functions: sätt `APP_URL` till plattformens adress, till exempel `https://bolagsappar.se/app`.
 - Railpack (Railways automatiska byggare) räcker inte för ett pnpm-monorepo utan startkommando, därför Dockerfile.
 
 ## Beslut

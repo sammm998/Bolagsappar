@@ -71,4 +71,4 @@ const tenantRoutes = [
 const avrSteps = ['filer', 'kontroll', 'godkann', 'publicera'].map(s => r(s, L(() => import('./routes/avrakning/Steps'), { filer: 'Filer', kontroll: 'Kontroll', godkann: 'Godkann', publicera: 'Publicera' }[s]!), avrPeriod));
 
 const tree = root.addChildren([index, login, pick, invite, admin.addChildren(adminRoutes), tenant.addChildren([...tenantRoutes.filter(x => x !== avrPeriod), avrPeriod.addChildren(avrSteps)])]);
-export const router = createRouter({ routeTree: tree, defaultPreload: 'intent', scrollRestoration: true });
+export const router = createRouter({ routeTree: tree, basepath: import.meta.env.BASE_URL.replace(/\/$/, '') || '/', defaultPreload: 'intent', scrollRestoration: true });

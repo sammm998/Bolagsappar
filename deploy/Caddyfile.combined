@@ -1,0 +1,46 @@
+# Hemsidan på / och plattformen på /app i samma tjänst.
+{
+	admin off
+	auto_https off
+}
+:{$PORT:8080} {
+	encode zstd gzip
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+	}
+
+	# Domäner (öppen fråga 12)
+	@taxi host taxiavrakning.se www.taxiavrakning.se
+	redir @taxi https://bolagsappar.se/taxi/ 301
+	@akeri host akaravrakning.se www.akaravrakning.se
+	redir @akeri https://bolagsappar.se/akeri/ 301
+	@www host www.bolagsappar.se
+	redir @www https://bolagsappar.se{uri} 301
+
+	# Gamla adresser till plattformen (innan hemsidan låg först)
+	redir /logga-in /app/logga-in 302
+	redir /admin /app/admin 302
+	redir /app /app/ 308
+
+	# Plattformen: klientrouting, okända sökvägar går till appen
+	handle /app/* {
+		root * /srv
+		header /app/assets/* Cache-Control "public, max-age=31536000, immutable"
+		header X-Frame-Options DENY
+		try_files {path} /app/index.html
+		file_server
+	}
+
+	# Hemsidan: statiska sidor och 404-sidan
+	handle {
+		root * /srv/web
+		header /_astro/* Cache-Control "public, max-age=31536000, immutable"
+		file_server
+	}
+	handle_errors {
+		root * /srv/web
+		rewrite * /404.html
+		file_server
+	}
+}
